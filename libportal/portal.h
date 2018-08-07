@@ -51,4 +51,20 @@ void       xdp_portal_add_notification    (XdpPortal  *portal,
 void       xdp_portal_remove_notification (XdpPortal  *portal,
                                            const char *id);
 
+/* Email */
+
+void       xdp_portal_compose_email        (XdpPortal            *portal,
+                                            GtkWindow            *parent,
+                                            const char           *address,
+                                            const char           *subject,
+                                            const char           *body,
+                                            const char *const    *attachments,
+                                            GCancellable         *cancellable,
+                                            GAsyncReadyCallback   callback,
+                                            gpointer              data);
+
+gboolean   xdp_portal_compose_email_finish (XdpPortal            *portal,
+                                            GAsyncResult         *result,
+                                            GError              **error);
+
 G_END_DECLS
