@@ -16,7 +16,6 @@
 #include "portal-test-app.h"
 #include "portal-test-win.h"
 #include "screencast-portal.h"
-#include "account-portal.h"
 
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -54,9 +53,6 @@ struct _PortalTestWin
   guint inhibit_cookie;
   GtkApplicationInhibitFlags inhibit_flags;
 
-  XdpAccount *account;
-  char *account_handle;
-  guint account_response_signal_id;
   GtkWidget *username;
   GtkWidget *realname;
   GtkWidget *avatar;
@@ -164,11 +160,6 @@ portal_test_win_init (PortalTestWin *win)
     proxy = g_strjoinv (", ", proxies);
   gtk_label_set_label (GTK_LABEL (win->proxies), proxy);
 
-  win->account = xdp_account_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                                     G_DBUS_PROXY_FLAGS_NONE,
-                                                     "org.freedesktop.portal.Desktop",
-                                                     "/org/freedesktop/portal/desktop",
-                                                     NULL, NULL);
   win->screencast = xdp_screen_cast_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
                                                             G_DBUS_PROXY_FLAGS_NONE,
                                                             "org.freedesktop.portal.Desktop",
@@ -654,38 +645,34 @@ screencast_toggled (GtkToggleButton *button,
 }
 
 static void
-account_response (GDBusConnection *connection,
-                  const char *sender_name,
-                  const char *object_path,
-                  const char *interface_name,
-                  const char *signal_name,
-                  GVariant *parameters,
-                  gpointer user_data)
+account_response (GObject *source,
+                  GAsyncResult *result,
+                  gpointer data)
 {
-  PortalTestWin *win = user_data;
-  guint32 response;
-  GVariant *options;
+  PortalTestWin *win = data;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GError) error = NULL;
 
-  g_variant_get (parameters, "(u@a{sv})", &response, &options);
+  ret = xdp_portal_get_user_information_finish (win->portal, result, &error);
 
-  if (response == 0)
+  if (ret)
     {
-      g_autoptr(GdkPixbuf) pixbuf = NULL;
-      g_autoptr(GError) error = NULL;
       const char *id;
       const char *name;
       const char *uri;
       g_autofree char *path = NULL;
 
-      g_variant_lookup (options, "id", "&s", &id);
-      g_variant_lookup (options, "name", "&s", &name);
-      g_variant_lookup (options, "image", "&s", &uri);
+      g_variant_lookup (ret, "id", "&s", &id);
+      g_variant_lookup (ret, "name", "&s", &name);
+      g_variant_lookup (ret, "image", "&s", &uri);
 
       gtk_label_set_label (GTK_LABEL (win->username), id);
       gtk_label_set_label (GTK_LABEL (win->realname), name);
 
       if (uri && uri[0])
         {
+          g_autoptr(GdkPixbuf) pixbuf = NULL;
+
           path = g_filename_from_uri (uri, NULL, NULL);
           pixbuf = gdk_pixbuf_new_from_file_at_scale (path, 60, 40, TRUE, &error);
           if (error)
@@ -696,13 +683,6 @@ account_response (GDBusConnection *connection,
     }
   else
     g_message ("Account canceled");
-
-  if (win->account_response_signal_id != 0)
-    {
-      g_dbus_connection_signal_unsubscribe (connection,
-                                            win->account_response_signal_id);
-      win->account_response_signal_id = 0;
-    }
 }
 
 static void
@@ -711,40 +691,24 @@ get_user_information_called (GObject *source,
                              gpointer data)
 {
   PortalTestWin *win = data;
-  g_autoptr(GError) error = NULL;
-  g_autofree char *handle = NULL;
 
-  if (!xdp_account_call_get_user_information_finish (win->account, &handle, result, &error))
-    {
-      g_warning ("Account error: %s", error->message);
-      return;
-    }
-
-  win->account_response_signal_id =
-    g_dbus_connection_signal_subscribe (g_dbus_proxy_get_connection (G_DBUS_PROXY (win->account)),
-                                        "org.freedesktop.portal.Desktop",
-                                        "org.freedesktop.portal.Request",
-                                        "Response",
-                                        handle,
-                                        NULL,
-                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                        account_response,
-                                        win, NULL);
+  xdp_portal_get_user_information (win->portal,
+                                   GTK_WINDOW (win),
+                                   "just for fun",
+                                   NULL,
+                                   account_response,
+                                   win);
 }
 
 static void
-get_user_information (GtkWidget *button, PortalTestWin *win)
+get_user_information (PortalTestWin *win)
 {
-  GVariantBuilder options;
-
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_variant_builder_add (&options, "{sv}", "reason", g_variant_new_string ("Allows portal-test to test the Account portal."));
-  xdp_account_call_get_user_information (win->account,
-                                         win->window_handle ? win->window_handle : "",
-                                         g_variant_builder_end (&options),
-                                         NULL,
-                                         get_user_information_called,
-                                         win);
+  xdp_portal_get_user_information (win->portal,
+                                   GTK_WINDOW (win),
+                                   "Allows portal-test to test the Account portal.",
+                                   NULL,
+                                   get_user_information_called,
+                                   win);
 }
 
 static void
