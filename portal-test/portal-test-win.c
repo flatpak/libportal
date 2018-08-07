@@ -834,18 +834,27 @@ compose_email (GtkWidget *button, PortalTestWin *win)
 }
 
 static void
-notify_me (GtkButton *button, PortalTestWin *win)
+notify_me (PortalTestWin *win)
 {
-  GtkApplication *app = gtk_window_get_application (GTK_WINDOW (win));
-  g_autoptr(GNotification) notification = NULL;
+  GVariantBuilder button;
+  GVariantBuilder buttons;
+  GVariantBuilder notification;
 
   gtk_widget_hide (win->ack_image);
 
-  notification = g_notification_new ("Notify me");
-  g_notification_set_body (notification, "Really important information would ordinarily appear here");
-  g_notification_add_button (notification, "Yup", "app.ack");
+  g_variant_builder_init (&button, G_VARIANT_TYPE_VARDICT);
+  g_variant_builder_add (&button, "{sv}", "label", g_variant_new_string ("Yup"));
+  g_variant_builder_add (&button, "{sv}", "action", g_variant_new_string ("app.ack"));
 
-  g_application_send_notification (G_APPLICATION (app), "notification", notification);
+  g_variant_builder_init (&buttons, G_VARIANT_TYPE ("aa{sv}"));
+  g_variant_builder_add (&buttons, "a{sv}", &button);
+
+  g_variant_builder_init (&notification, G_VARIANT_TYPE_VARDICT);
+  g_variant_builder_add (&notification, "{sv}", "title", g_variant_new_string ("Notify me"));
+  g_variant_builder_add (&notification, "{sv}", "body", g_variant_new_string ("Really important information would ordinarily appear here"));
+  g_variant_builder_add (&notification, "{sv}", "buttons", g_variant_builder_end (&buttons));
+
+  xdp_portal_add_notification (win->portal, "notification", g_variant_builder_end (&notification));
 }
 
 void
