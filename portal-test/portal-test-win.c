@@ -1004,7 +1004,6 @@ print_cb (GtkButton *button, PortalTestWin *win)
 static void
 inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
 {
-  GtkApplication *app = gtk_window_get_application (GTK_WINDOW (win));
   GtkApplicationInhibitFlags flags = 0;
 
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->inhibit_logout)))
@@ -1021,7 +1020,7 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
 
   if (win->inhibit_cookie != 0)
     {
-      gtk_application_uninhibit (app, win->inhibit_cookie);
+      xdp_portal_uninhibit (win->portal, "inhibit");
       win->inhibit_cookie = 0;
     }
 
@@ -1029,10 +1028,11 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
 
   if (win->inhibit_flags != 0)
     {
-      win->inhibit_cookie = gtk_application_inhibit (app,
-                                                     GTK_WINDOW (win),
-                                                     win->inhibit_flags,
-                                                     "Portal Testing");
+      xdp_portal_inhibit (win->portal,
+                          GTK_WINDOW (win),
+                          win->inhibit_flags,
+                          "Portal Testing",
+                          "inhibit");
     }
 }
 
