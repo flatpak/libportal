@@ -17,7 +17,6 @@
 #include "portal-test-win.h"
 #include "screencast-portal.h"
 #include "account-portal.h"
-#include "email-portal.h"
 
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -62,9 +61,6 @@ struct _PortalTestWin
   GtkWidget *realname;
   GtkWidget *avatar;
   GtkWidget *save_how;
-
-  XdpEmail *email;
-  guint email_response_signal_id;
 
   XdpScreenCast *screencast;
   char *screencast_session;
@@ -173,11 +169,6 @@ portal_test_win_init (PortalTestWin *win)
                                                      "org.freedesktop.portal.Desktop",
                                                      "/org/freedesktop/portal/desktop",
                                                      NULL, NULL);
-  win->email = xdp_email_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                                 G_DBUS_PROXY_FLAGS_NONE,
-                                                 "org.freedesktop.portal.Desktop",
-                                                 "/org/freedesktop/portal/desktop",
-                                                 NULL, NULL);
   win->screencast = xdp_screen_cast_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
                                                             G_DBUS_PROXY_FLAGS_NONE,
                                                             "org.freedesktop.portal.Desktop",
@@ -757,80 +748,39 @@ get_user_information (GtkWidget *button, PortalTestWin *win)
 }
 
 static void
-email_response (GDBusConnection *connection,
-                const char *sender_name,
-                const char *object_path,
-                const char *interface_name,
-                const char *signal_name,
-                GVariant *parameters,
-                gpointer user_data)
-{
-  PortalTestWin *win = user_data;
-  guint32 response;
-  GVariant *options;
-
-  g_variant_get (parameters, "(u@a{sv})", &response, &options);
-
-  if (response == 0)
-    g_message ("Email success");
-  else
-    g_message ("Email canceled");
-
-  if (win->email_response_signal_id != 0)
-    {
-      g_dbus_connection_signal_unsubscribe (connection,
-                                            win->email_response_signal_id);
-      win->email_response_signal_id = 0;
-    }
-}
-
-static void
 compose_email_called (GObject *source,
                       GAsyncResult *result,
                       gpointer data)
 {
   PortalTestWin *win = data;
   g_autoptr(GError) error = NULL;
-  g_autofree char *handle = NULL;
 
-  if (!xdp_email_call_compose_email_finish (win->email, &handle, result, &error))
+  if (!xdp_portal_compose_email_finish (win->portal, result, &error)) 
     {
       g_warning ("Email error: %s", error->message);
       return;
     }
 
-  win->email_response_signal_id =
-    g_dbus_connection_signal_subscribe (g_dbus_proxy_get_connection (G_DBUS_PROXY (win->email)),
-                                        "org.freedesktop.portal.Desktop",
-                                        "org.freedesktop.portal.Request",
-                                        "Response",
-                                        handle,
-                                        NULL,
-                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                        email_response,
-                                        win, NULL);
+  g_print ("Email sent\n");
 }
 
 static void
-compose_email (GtkWidget *button, PortalTestWin *win)
+compose_email (PortalTestWin *win)
 {
-  GVariantBuilder options;
-  const char *strv[2];
+  const char *attachments[2];
 
-  strv[0] = PKGDATADIR "/test.txt";
-  strv[1] = NULL;
+  attachments[0] = PKGDATADIR "/test.txt";
+  attachments[1] = NULL;
 
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_variant_builder_add (&options, "{sv}", "address", g_variant_new_string ("recipes-list@gnome.org"));
-  g_variant_builder_add (&options, "{sv}", "subject", g_variant_new_string ("Test subject"));
-  g_variant_builder_add (&options, "{sv}", "body", g_variant_new_string ("Test body"));
-  g_variant_builder_add (&options, "{sv}", "attachments", g_variant_new_strv (strv, -1));
-  xdp_email_call_compose_email (win->email,
-                                win->window_handle ? win->window_handle : "",
-                                g_variant_builder_end (&options),
-                                NULL,
-                                compose_email_called,
-                                win);
+  xdp_portal_compose_email (win->portal,
+                            GTK_WINDOW (win),
+                            "recipes-list@gnome.org",
+                            "Test subject",
+                            "Test body",
+                            attachments,
+                            NULL,
+                            compose_email_called,
+                            win);
 }
 
 static void

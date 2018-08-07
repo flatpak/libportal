@@ -13,10 +13,6 @@ account = gnome.gdbus_codegen('account-portal',
                             'org.freedesktop.portal.Account.xml',
                             interface_prefix: 'org.freedesktop.portal.',
                             namespace: 'Xdp')
-email = gnome.gdbus_codegen('email-portal',
-                            'org.freedesktop.portal.Email.xml',
-                            interface_prefix: 'org.freedesktop.portal.',
-                            namespace: 'Xdp')
 
 src = ['main.c',
        'portal-test-app.h',
@@ -25,8 +21,7 @@ src = ['main.c',
        'portal-test-win.c',
        resources,
        screencast,
-       account,
-       email]
+       account]
 
 executable('portal-test',
            src,
