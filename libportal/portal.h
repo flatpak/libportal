@@ -79,4 +79,23 @@ void       xdp_portal_get_user_information        (XdpPortal            *portal,
 GVariant * xdp_portal_get_user_information_finish (XdpPortal            *portal,
                                                    GAsyncResult         *result,
                                                    GError              **error);
+
+/* Inhibit */
+
+typedef enum {
+  XDP_INHIBIT_LOGOUT     = 1,
+  XDP_INHIBIT_USER_SWITH = 2,
+  XDP_INHIBIT_SUSPEND    = 4,
+  XDP_INHIBIT_IDLE       = 8
+} XdpInhibitFlags;
+
+void       xdp_portal_inhibit                     (XdpPortal            *portal,
+                                                   GtkWindow            *parent,
+                                                   XdpInhibitFlags       inhibit,
+                                                   const char           *reason,
+                                                   const char           *id);
+
+void       xdp_portal_uninhibit                   (XdpPortal            *portal,
+                                                   const char           *id);
+
 G_END_DECLS

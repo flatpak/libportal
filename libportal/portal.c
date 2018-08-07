@@ -30,6 +30,9 @@ xdp_portal_finalize (GObject *object)
   g_clear_object (&portal->notification);
   g_clear_object (&portal->email);
   g_clear_object (&portal->account);
+  g_clear_object (&portal->inhibit);
+  if (portal->inhibit_handles)
+    g_hash_table_unref (portal->inhibit_handles);
 
   G_OBJECT_CLASS (xdp_portal_parent_class)->finalize (object);
 }

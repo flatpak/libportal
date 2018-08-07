@@ -27,6 +27,8 @@ struct _XdpPortal {
   _xdpNotification *notification;
   _xdpEmail *email;
   _xdpAccount *account;
+  _xdpInhibit *inhibit;
+  GHashTable *inhibit_handles;
 };
 
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"
