@@ -29,6 +29,8 @@ GType      xdp_portal_get_type               (void) G_GNUC_CONST;
 
 XdpPortal *xdp_portal_new                    (void);
 
+/* Screenshot */
+
 void       xdp_portal_take_screenshot        (XdpPortal           *portal,
                                               GtkWindow           *parent,
                                               gboolean             modal,
@@ -39,5 +41,14 @@ void       xdp_portal_take_screenshot        (XdpPortal           *portal,
 GdkPixbuf *xdp_portal_take_screenshot_finish (XdpPortal           *portal,
                                               GAsyncResult        *result,
                                               GError             **error);
+
+
+/* Notification */
+
+void       xdp_portal_add_notification    (XdpPortal  *portal,
+                                           const char *id,
+                                           GVariant   *notification);
+void       xdp_portal_remove_notification (XdpPortal  *portal,
+                                           const char *id);
 
 G_END_DECLS

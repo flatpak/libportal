@@ -24,6 +24,7 @@ struct _XdpPortal {
   GObject parent_instance;
 
   _xdpScreenshot *screenshot; 
+  _xdpNotification *notification;
 };
 
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"

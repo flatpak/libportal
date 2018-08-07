@@ -27,6 +27,7 @@ xdp_portal_finalize (GObject *object)
   XdpPortal *portal = XDP_PORTAL (object);
 
   g_clear_object (&portal->screenshot);
+  g_clear_object (&portal->notification);
 
   G_OBJECT_CLASS (xdp_portal_parent_class)->finalize (object);
 }
