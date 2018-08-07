@@ -29,6 +29,7 @@ xdp_portal_finalize (GObject *object)
   g_clear_object (&portal->screenshot);
   g_clear_object (&portal->notification);
   g_clear_object (&portal->email);
+  g_clear_object (&portal->account);
 
   G_OBJECT_CLASS (xdp_portal_parent_class)->finalize (object);
 }

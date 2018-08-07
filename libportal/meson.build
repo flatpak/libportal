@@ -2,7 +2,8 @@ dbus_sources = gnome.gdbus_codegen('dbusgenerated',
                                    sources: [
                                      '../data/org.freedesktop.portal.Screenshot.xml',
                                      '../data/org.freedesktop.portal.Notification.xml',
-                                     '../data/org.freedesktop.portal.Email.xml'
+                                     '../data/org.freedesktop.portal.Email.xml',
+                                     '../data/org.freedesktop.portal.Account.xml'
                                    ],
                                    interface_prefix: 'org.freedesktop.portal',
                                    namespace: '_xdp')
@@ -13,6 +14,7 @@ src = [
 	'screenshot.c',
 	'notification.c',
 	'email.c',
+	'account.c',
 	dbus_sources
 ]
 

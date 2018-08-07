@@ -26,6 +26,7 @@ struct _XdpPortal {
   _xdpScreenshot *screenshot; 
   _xdpNotification *notification;
   _xdpEmail *email;
+  _xdpAccount *account;
 };
 
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"

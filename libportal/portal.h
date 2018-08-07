@@ -67,4 +67,16 @@ gboolean   xdp_portal_compose_email_finish (XdpPortal            *portal,
                                             GAsyncResult         *result,
                                             GError              **error);
 
+/* Account */
+
+void       xdp_portal_get_user_information        (XdpPortal            *portal,
+                                                   GtkWindow            *parent,
+                                                   const char           *reason,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+GVariant * xdp_portal_get_user_information_finish (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
 G_END_DECLS
