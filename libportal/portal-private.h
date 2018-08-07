@@ -29,4 +29,5 @@ struct _XdpPortal {
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"
 #define PORTAL_OBJECT_PATH "/org/freedesktop/portal/desktop"
 #define REQUEST_BUS_NAME "org.freedesktop.portal.Request"
+#define REQUEST_INTERFACE "org.freedesktop.portal.Request"
 

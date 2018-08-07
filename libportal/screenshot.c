@@ -214,7 +214,7 @@ do_screenshot (ScreenshotCall *call)
   handle = g_strdup_printf ("/org/freedesktop/portal/desktop/request/%s/%s", sender, token);
   call->response_signal = g_dbus_connection_signal_subscribe (bus,
                                                               PORTAL_BUS_NAME,
-                                                              REQUEST_BUS_NAME,
+                                                              REQUEST_INTERFACE,
                                                               "Response",
                                                               handle,
                                                               NULL,
