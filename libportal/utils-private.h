@@ -17,19 +17,11 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include "portal.h" 
 
 G_BEGIN_DECLS
 
-typedef void (*GtkWindowHandleExported)  (GtkWindow               *window,
-                                          const char              *handle,
-                                          gpointer                 user_data);
-
-gboolean      _gtk_window_export_handle   (GtkWindow               *window,
-                                           GtkWindowHandleExported  callback,
-                                           gpointer                 user_data);
-void          _gtk_window_unexport_handle (GtkWindow               *window);
-
-
+XdpParent *_xdp_parent_copy (XdpParent *source);
+void       _xdp_parent_free (XdpParent *source);
 
 G_END_DECLS

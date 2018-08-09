@@ -17,92 +17,25 @@
 
 #include "config.h"
 
-#include "utils.h"
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-#include <gdk/gdkwayland.h>
+#include "utils-private.h"
 
-#ifdef GDK_WINDOWING_WAYLAND
-typedef struct {
-  GtkWindow *window;
-  GtkWindowHandleExported callback;
-  gpointer user_data;
-} WaylandSurfaceHandleExportedData;
-
-static void
-wayland_surface_handle_exported (GdkWindow  *window,
-                                 const char *wayland_handle_str,
-                                 gpointer    user_data)
+XdpParent *
+_xdp_parent_copy (XdpParent *source)
 {
-  WaylandSurfaceHandleExportedData *data = user_data;
-  char *handle_str;
+  XdpParent *parent;
 
-  handle_str = g_strdup_printf ("wayland:%s", wayland_handle_str);
-  data->callback (data->window, handle_str, data->user_data);
-  g_free (handle_str);
-}
-#endif
+  parent = g_new0 (XdpParent, 1);
 
-gboolean
-_gtk_window_export_handle (GtkWindow               *window,
-                           GtkWindowHandleExported  callback,
-                           gpointer                 user_data)
-{
+  parent->export = source->export;
+  parent->unexport = source->unexport;
+  g_set_object (&parent->object, source->object);
 
-#ifdef GDK_WINDOWING_X11
-  if (GDK_IS_X11_DISPLAY (gtk_widget_get_display (GTK_WIDGET (window))))
-    {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (window));
-      char *handle_str;
-      guint32 xid = (guint32) gdk_x11_window_get_xid (w);
-
-      handle_str = g_strdup_printf ("x11:%x", xid);
-      callback (window, handle_str, user_data);
-
-      return TRUE;
-    }
-#endif
-#ifdef GDK_WINDOWING_WAYLAND
-  if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (window))))
-    {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (window));
-      WaylandSurfaceHandleExportedData *data;
-
-      data = g_new0 (WaylandSurfaceHandleExportedData, 1);
-      data->window = window;
-      data->callback = callback;
-      data->user_data = user_data;
-
-      if (!gdk_wayland_window_export_handle (w,
-                                              wayland_surface_handle_exported,
-                                              data,
-                                              g_free))
-        {
-          g_free (data);
-          return FALSE;
-        }
-      else
-        {
-          return TRUE;
-        }
-    }
-#endif
-
-  g_warning ("Couldn't export handle, unsupported windowing system");
-
-  return FALSE;
+  return parent;
 }
 
 void
-_gtk_window_unexport_handle (GtkWindow *window)
+_xdp_parent_free (XdpParent *parent)
 {
-#ifdef GDK_WINDOWING_WAYLAND
-  if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (window))))
-    {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (window));
-
-      gdk_wayland_window_unexport_handle (w);
-    }
-#endif
+  g_clear_object (&parent->object);
+  g_free (parent);
 }
-

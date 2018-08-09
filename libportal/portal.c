@@ -19,6 +19,18 @@
 
 #include "portal-private.h"
 
+/**
+ * SECTION:portal
+ * @title: XdpPortal
+ * @short_description: context for portal calls
+ *
+ * The XdpPortal object provides the main context object
+ * for the portal operations of libportal.
+ *
+ * Typically, an application will create a single XdpPortal
+ * object with xdp_portal_new() and use it throughout its lifetime.
+ */
+
 G_DEFINE_TYPE (XdpPortal, xdp_portal, G_TYPE_OBJECT)
 
 static void
@@ -26,11 +38,9 @@ xdp_portal_finalize (GObject *object)
 {
   XdpPortal *portal = XDP_PORTAL (object);
 
-  g_clear_object (&portal->screenshot);
-  g_clear_object (&portal->notification);
-  g_clear_object (&portal->email);
-  g_clear_object (&portal->account);
-  g_clear_object (&portal->inhibit);
+  g_clear_object (&portal->bus);
+  g_free (portal->sender);
+
   if (portal->inhibit_handles)
     g_hash_table_unref (portal->inhibit_handles);
 
@@ -48,10 +58,40 @@ xdp_portal_class_init (XdpPortalClass *klass)
 static void
 xdp_portal_init (XdpPortal *portal)
 {
+  int i;
+
+  portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
+  portal->sender = g_strdup (g_dbus_connection_get_unique_name (portal->bus) + 1);
+  for (i = 0; portal->sender[i]; i++)
+    if (portal->sender[i] == '.') 
+      portal->sender[i] = '_';
 }
 
+/**
+ * xdp_portal_new:
+ *
+ * Creates a new #XdpPortal object.
+ *
+ * Returns: a newly created #XdpPortal object
+ */
 XdpPortal *
 xdp_portal_new (void)
 {
   return g_object_new (XDP_TYPE_PORTAL, NULL);
 }
+
+/**
+ * xdp_parent_new_gtk:
+ * @window: a #GtkWindow
+ *
+ * Creates an #XdpParent for @window.
+ *
+ * Returns: a newly created #XdpParent. Free with xdp_parent_free
+ */
+
+/**
+ * xdp_parent_free:
+ * @parent: a #XdpParent
+ *
+ * Frees an #XdpParent.
+ */

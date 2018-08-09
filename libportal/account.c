@@ -18,112 +18,54 @@
 #include "config.h"
 
 #include "portal-private.h"
-#include "utils.h"
+#include "utils-private.h"
 
-G_DECLARE_FINAL_TYPE (AccountCall, account_call, ACCOUNT, CALL, GObject)
+/**
+ * SECTION:account
+ * @title: Accounts
+ * @short_description: basic user information
+ *
+ * These functions let applications query basic information about
+ * the user, such as user ID, name and avatar picture.
+ *
+ * The underlying portal is org.freedesktop.portal.Account.
+ */
 
-struct _AccountCall {
-  GObject parent_instance;
-
+typedef struct {
   XdpPortal *portal;
-  GtkWindow *parent;
+  XdpParent *parent;
   char *parent_handle;
   char *reason;
   GTask *task;
-  guint response_signal;
-};
-
-struct _AccountCallClass {
-  GObjectClass parent_class;
-};
-
-G_DEFINE_TYPE (AccountCall, account_call, G_TYPE_OBJECT)
+  guint signal_id;
+  char *request_path;
+  guint cancelled_id;
+} AccountCall;
 
 static void
-account_call_finalize (GObject *object)
+account_call_free (AccountCall *call)
 {
-  AccountCall *call = ACCOUNT_CALL (object);
+  if (call->parent)
+    {
+      call->parent->unexport (call->parent);
+      _xdp_parent_free (call->parent);
+    }
+  g_free (call->parent_handle);
+
+  if (call->signal_id)
+    g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+
+  if (call->cancelled_id)
+    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+
+  g_free (call->request_path);
+
+  g_object_unref (call->portal);
+  g_object_unref (call->task);
 
   g_free (call->reason);
 
-  if (call->response_signal)
-    {
-      GDBusConnection *bus;
-
-      bus = g_dbus_proxy_get_connection (G_DBUS_PROXY (call->portal->account));
-      g_dbus_connection_signal_unsubscribe (bus, call->response_signal);
-    }
-  g_object_unref (call->portal);
-  if (call->parent)
-    {
-      _gtk_window_unexport_handle (call->parent);
-      g_object_unref (call->parent);
-    }
-  if (call->parent_handle)
-    g_free (call->parent_handle);
-  g_object_unref (call->task);
-
-  G_OBJECT_CLASS (account_call_parent_class)->finalize (object);
-}
-
-static void
-account_call_class_init (AccountCallClass *class)
-{
-  G_OBJECT_CLASS (class)->finalize = account_call_finalize;
-}
-
-static void
-account_call_init (AccountCall *call)
-{
-}
-
-static AccountCall *
-account_call_new (XdpPortal *portal,
-                  GtkWindow *parent,
-                  const char *reason,
-                  GTask *task)
-{
-  AccountCall *call = g_object_new (account_call_get_type (), NULL);
-
-  call->portal = g_object_ref (portal);
-  call->parent = parent ? g_object_ref (parent) : NULL;
-  call->parent_handle = NULL;
-  call->reason = g_strdup (reason);
-  call->task = g_object_ref (task);
-
-  return call;
-}
-
-static void do_account (AccountCall *call);
-
-static void
-got_proxy (GObject *source,
-           GAsyncResult *res,
-           gpointer data)
-{
-  g_autoptr(AccountCall) call = data;
-  g_autoptr(GError) error = NULL;
-
-  call->portal->account = _xdp_account_proxy_new_for_bus_finish (res, &error);
-  if (call->portal->account == NULL)
-    {
-      g_task_return_error (call->task, error);
-      return;
-    }
-
-  do_account (call);
-}
-
-static void
-window_handle_exported (GtkWindow *window,
-                        const char *window_handle,
-                        gpointer data)
-{
-  g_autoptr(AccountCall) call = data;
-
-  call->parent_handle = g_strdup (window_handle);
-
-  do_account (call);
+  g_free (call);
 }
 
 static void
@@ -135,12 +77,15 @@ response_received (GDBusConnection *bus,
                    GVariant *parameters,
                    gpointer data)
 {
-  g_autoptr(AccountCall) call = data;
+  AccountCall *call = data;
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
 
-  g_dbus_connection_signal_unsubscribe (bus, call->response_signal);
-  call->response_signal = 0;
+  if (call->cancelled_id)
+    {
+      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+      call->cancelled_id = 0;
+    }
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
@@ -150,96 +95,149 @@ response_received (GDBusConnection *bus,
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Account canceled");
   else
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Account failed");
+
+  account_call_free (call);
+}
+
+static void get_user_information (AccountCall *call);
+
+static void
+parent_exported (XdpParent *parent,
+                 const char *handle,
+                 gpointer data)
+{
+  AccountCall *call = data;
+  call->parent_handle = g_strdup (handle);
+  get_user_information (call);
 }
 
 static void
-do_account (AccountCall *call)
+cancelled_cb (GCancellable *cancellable,
+              gpointer data)
+{
+  AccountCall *call = data;
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          call->request_path,
+                          REQUEST_INTERFACE,
+                          "Close",
+                          NULL,
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL, NULL, NULL);
+}
+
+static void
+get_user_information (AccountCall *call)
 {
   GVariantBuilder options;
-  GDBusConnection *bus;
   g_autofree char *token = NULL;
-  g_autofree char *sender = NULL;
-  g_autofree char *handle = NULL;
-  int i;
-
-  if (call->portal->account == NULL)
-    {
-       _xdp_account_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                       G_DBUS_PROXY_FLAGS_NONE,
-                                       PORTAL_BUS_NAME,
-                                       PORTAL_OBJECT_PATH,
-                                       g_task_get_cancellable (call->task),
-                                       got_proxy,
-                                       g_object_ref (call));
-       return;
-    }
+  GCancellable *cancellable;
 
   if (call->parent_handle == NULL)
-    {
-      if (call->parent != NULL)
-        {
-          _gtk_window_export_handle (call->parent,
-                                     window_handle_exported,
-                                     g_object_ref (call));
-          return;
-        }
-
-      call->parent_handle = g_strdup ("");
+    {   
+      call->parent->export (call->parent, parent_exported, call);
+      return;
     }
 
-  bus = g_dbus_proxy_get_connection (G_DBUS_PROXY (call->portal->account));
-
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
-  sender = g_strdup (g_dbus_connection_get_unique_name (bus) + 1);
-  for (i = 0; sender[i]; i++)
-    if (sender[i] == '.')
-      sender[i] = '_';
+  call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
+                                                        PORTAL_BUS_NAME,
+                                                        REQUEST_INTERFACE,
+                                                        "Response",
+                                                        call->request_path,
+                                                        NULL,
+                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                                        response_received,
+                                                        call,
+                                                        NULL);
 
-  handle = g_strdup_printf ("/org/freedesktop/portal/desktop/request/%s/%s", sender, token);
-  call->response_signal = g_dbus_connection_signal_subscribe (bus,
-                                                              PORTAL_BUS_NAME,
-                                                              REQUEST_INTERFACE,
-                                                              "Response",
-                                                              handle,
-                                                              NULL,
-                                                              G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                              response_received,
-                                                              g_object_ref (call),
-                                                              NULL);
+  cancellable = g_task_get_cancellable (call->task);
+  if (cancellable)
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (cancelled_cb), call);
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   g_variant_builder_add (&options, "{sv}", "reason", g_variant_new_string (call->reason));
 
-  _xdp_account_call_get_user_information (call->portal->account,
-                                          call->parent_handle,
-                                          g_variant_builder_end (&options),
-                                          g_task_get_cancellable (call->task),
-                                          NULL,
-                                          NULL);
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Account",
+                          "GetUserInformation",
+                          g_variant_new ("(sa{sv})", call->parent_handle, &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          NULL,
+                          NULL);
 }
 
+/**
+ * xdp_portal_get_user_information:
+ * @portal: a #XdpPortal
+ * @parent: (nullable): parent window information
+ * @reason: (nullable) a string that can be shown in the dialog to explain
+ *    why the information is needed
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Gets information about the user.
+ *
+ * When the request is done, @callback will be called. You can then
+ * call xdp_portal_get_user_information_finish() to get the results.
+ */
 void
 xdp_portal_get_user_information (XdpPortal *portal,
-                                 GtkWindow *parent,
+                                 XdpParent *parent,
                                  const char *reason,
                                  GCancellable *cancellable,
                                  GAsyncReadyCallback  callback,
-                                 gpointer callback_data)
+                                 gpointer data)
 {
-  g_autoptr(AccountCall) call = NULL;
-  g_autoptr(GTask) task = NULL;
+  AccountCall *call = NULL;
 
-  task = g_task_new (portal, cancellable, callback, callback_data);
-  call = account_call_new (portal, parent, reason, task);
+  g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  do_account (call);
+  call = g_new0 (AccountCall, 1);
+  call->portal = g_object_ref (portal);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
+  call->reason = g_strdup (reason);
+  call->task = g_task_new (portal, cancellable, callback, data);
+
+  get_user_information (call);
 }
 
+/**
+ * xdp_portal_get_user_information_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes the get-user-information request, and returns
+ * the result in the form of a #GVariant dictionary containing
+ * the following fields:
+ * - id `s`: the user ID
+ * - name `s`: the users real name
+ * - image `s`: the uri of an image file for the users avatar picture
+ *
+ * Returns: (transfer full): a #GVariant dictionary with user information
+ */
 GVariant *
 xdp_portal_get_user_information_finish (XdpPortal *portal,
                                         GAsyncResult *result,
                                         GError **error)
 {
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
+  g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+
   return g_task_propagate_pointer (G_TASK (result), error);
 }

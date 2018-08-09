@@ -18,121 +18,91 @@
 #include "config.h"
 
 #include "portal-private.h"
-#include "utils.h"
 
-typedef struct {
-  XdpPortal *portal;
-  char *id;
-  GVariant *notification;
-  gboolean add;
-} NotificationCall;
+/**
+ * SECTION:notification
+ * @title: Notification
+ * @short_description: send notifications
+ * 
+ * These functions let applications send desktop notifications.
+ *
+ * The underlying portal is org.freedesktop.portal.Notification.
+ */
 
-static void
-notification_call_free (NotificationCall *call)
-{
-  g_object_unref (call->portal);
-  g_free (call->id);
-  if (call->notification)
-    g_variant_unref (call->notification);
-
-  g_free (call);
-}
-
-static void do_notification (NotificationCall *call);
-
-static void
-got_proxy (GObject *source,
-           GAsyncResult *res,
-           gpointer data)
-{
-  NotificationCall *call = data;
-  g_autoptr(GError) error = NULL;
-
-  call->portal->notification = _xdp_notification_proxy_new_for_bus_finish (res, &error);
-  if (call->portal->notification == NULL)
-    {
-      g_warning ("Failed to get notification proxy: %s", error->message);
-      notification_call_free (call);
-      return;
-    }
-  do_notification (call);
-}
-
-static void
-call_done (GObject *source,
-           GAsyncResult *result,
-           gpointer data)
-{
-  NotificationCall *call = data;
-  g_autoptr(GError) error = NULL;
-
-g_print ("call done\n");
-  if (!_xdp_notification_call_add_notification_finish (call->portal->notification, result, &error))
-    g_warning ("%s failed: %s", call->add ? "AddNotification" : "RemoveNotification", error->message);
-
- notification_call_free (call);
-}
-
-static void
-do_notification (NotificationCall *call)
-{
-g_print ("do_notification\n");
-  if (call->portal->notification == NULL)
-    {
-g_print ("getting proxy\n");
-       _xdp_notification_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                            G_DBUS_PROXY_FLAGS_NONE,
-                                            PORTAL_BUS_NAME,
-                                            PORTAL_OBJECT_PATH,
-                                            NULL,
-                                            got_proxy,
-                                            call);
-       return;
-    }
-
-  if (call->add)
-    _xdp_notification_call_add_notification (call->portal->notification,
-                                             call->id,
-                                             call->notification,
-                                             NULL,
-                                             call_done,
-                                             call);
-  else
-    _xdp_notification_call_remove_notification (call->portal->notification,
-                                             call->id,
-                                             NULL,
-                                             call_done,
-                                             call);
-}
-
+/**
+ * xdp_portal_add_notification:
+ * @portal: a #XdpPortal
+ * @id: unique ID for the notification
+ * @notification: a #GVariant dictionary with the content of the notification
+ *
+ * Sends a desktop notification.
+ *
+ * The following keys may be present in @notification:
+ * - title `s`: a user-visible string to display as title
+ * - body `s`: a user-visible string to display as body
+ * - icon `v`: a serialized icon (in the format produced by g_icon_serialize())
+ * - priority `s`: "low", "normal", "high" or "urgent"
+ * - default-action `s`: name of an action that is exported by the application.
+ *     this action will be activated when the user clicks on the notification
+ * - default-action-target `v`: target parameter to send along when activating
+ *     the default action.
+ * - buttons `aa{sv}`: array of serialized buttons
+ *
+ * Each serialized button is a dictionary with the following supported keys:
+ * - label `s`: user-visible lable for the button. Mandatory
+ * - action `s`: name of an action that is exported by the application. The action
+ *     will be activated when the user clicks on the button. Mandatory
+ * - target `v`: target parameter to send along when activating the button
+ *
+ * It is the callers responsibility to ensure that the ID is unique among
+ * all notifications.
+ *
+ * To withdraw a notification, use xdp_portal_remove_notification().
+ */
 void
 xdp_portal_add_notification (XdpPortal  *portal,
                              const char *id,
                              GVariant   *notification)
 {
-  NotificationCall *call;
+  g_return_if_fail (XDP_IS_PORTAL (portal));
 
-g_print ("call add_notification\n");
-  call = g_new (NotificationCall, 1);
-  call->portal = g_object_ref (portal);
-  call->id = g_strdup (id);
-  call->add = TRUE;
-  call->notification = g_variant_ref (notification);
-
-  do_notification (call);
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Notification",
+                          "AddNotification",
+                          g_variant_new ("(s@a{sv})", id, notification),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL,
+                          NULL,
+                          NULL);
 }
 
+/**
+ * xdp_portal_remove_notification:
+ * @portal: a #XdpPortal
+ * @id: the ID of an notification
+ *
+ * Withdraws a desktop notification.
+ */
 void
 xdp_portal_remove_notification (XdpPortal  *portal,
                                 const char *id)
 {
-  NotificationCall *call;
+  g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  call = g_new (NotificationCall, 1);
-  call->portal = g_object_ref (portal);
-  call->id = g_strdup (id);
-  call->add = FALSE;
-  call->notification = NULL;
-
-  do_notification (call);
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Notification",
+                          "RemoveNotification",
+                          g_variant_new ("(s)", id),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL,
+                          NULL,
+                          NULL);
 }

@@ -5,18 +5,13 @@ gst_dep = dependency('gstreamer-audio-1.0')
 resources = gnome.compile_resources('resources',
                                     'portal-test.gresource.xml',
                                     c_name: '_portal_test')
-screencast = gnome.gdbus_codegen('screencast-portal',
-                            'org.freedesktop.portal.ScreenCast.xml',
-                            interface_prefix: 'org.freedesktop.portal.',
-                            namespace: 'Xdp')
 
 src = ['main.c',
        'portal-test-app.h',
        'portal-test-app.c',
        'portal-test-win.h',
        'portal-test-win.c',
-       resources,
-       screencast]
+       resources ]
 
 executable('portal-test',
            src,

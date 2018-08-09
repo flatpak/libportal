@@ -19,17 +19,28 @@
 
 #include "portal.h"
 
-struct _XdpPortal {
+struct _XdpSession {
   GObject parent_instance;
 
-  GDBusConnection *bus;
-  char *sender;
-  GHashTable *inhibit_handles;
+  XdpPortal *portal;
+  char *id;
+  XdpSessionType type;
+  XdpSessionState state;
+  XdpDeviceType devices;
+  GVariant *streams;
+
+  guint signal_id;
 };
 
-#define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"
-#define PORTAL_OBJECT_PATH  "/org/freedesktop/portal/desktop"
-#define REQUEST_PATH_PREFIX "/org/freedesktop/portal/desktop/request/"
-#define SESSION_PATH_PREFIX "/org/freedesktop/portal/desktop/session/"
-#define REQUEST_INTERFACE "org.freedesktop.portal.Request"
-#define SESSION_INTERFACE "org.freedesktop.portal.Session"
+XdpSession * _xdp_session_new (XdpPortal *portal,
+                               const char *id,
+                               XdpSessionType type);
+
+void         _xdp_session_set_session_state (XdpSession *session,
+                                             XdpSessionState state);
+
+void         _xdp_session_set_devices (XdpSession *session,
+                                       XdpDeviceType devices);
+
+void         _xdp_session_set_streams (XdpSession *session,
+                                       GVariant   *streams);

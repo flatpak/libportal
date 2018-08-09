@@ -18,73 +18,49 @@
 #include "config.h"
 
 #include "portal-private.h"
-#include "utils.h"
+#include "utils-private.h"
 
-G_DECLARE_FINAL_TYPE (AccountCall, account_call, ACCOUNT, CALL, GObject)
+/**
+ * SECTION:inhibit
+ * @title: Inhibit
+ * @short_description: prevent session state changes
+ *
+ * These functions let applications inhibit certain session state changes.
+ * A typical use for this functionality is to prevent the session from
+ * locking while a video is playing.
+ *
+ * The underlying portal is org.freedesktop.portal.Inhibit.
+ */
 
 typedef struct {
   XdpPortal *portal;
-  GtkWindow *parent;
+  XdpParent *parent;
   char *parent_handle;
   XdpInhibitFlags inhibit;
   char *reason;
-  guint response_signal; 
   char *id;
-  char *handle;
+  guint signal_id; 
 } InhibitCall;
 
 static void
 inhibit_call_free (InhibitCall *call)
 {
- if (call->response_signal)
-    {
-      GDBusConnection *bus;
-
-      bus = g_dbus_proxy_get_connection (G_DBUS_PROXY (call->portal->account));
-      g_dbus_connection_signal_unsubscribe (bus, call->response_signal);
-    }
-  g_object_unref (call->portal);
   if (call->parent)
-    g_object_unref (call->parent);
-  g_free (call->parent_handle);
+    {
+      call->parent->unexport (call->parent);
+      _xdp_parent_free (call->parent);
+    }
+ g_free (call->parent_handle);
+
+ if (call->signal_id)
+   g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+
+  g_object_unref (call->portal);
+
   g_free (call->reason);
-  g_free (call->handle);
   g_free (call->id);
 
   g_free (call);
-}
-
-static void do_inhibit (InhibitCall *call);
-
-static void
-got_proxy (GObject *source,
-           GAsyncResult *res,
-           gpointer data)
-{
-  InhibitCall *call = data;
-  g_autoptr(GError) error = NULL;
-
-  call->portal->inhibit = _xdp_inhibit_proxy_new_for_bus_finish (res, &error);
-  if (call->portal->inhibit == NULL)
-    {
-      inhibit_call_free (call);
-      return;
-    }
-
-  call->portal->inhibit_handles = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-  do_inhibit (call);
-}
-
-static void
-window_handle_exported (GtkWindow *window,
-                        const char *window_handle,
-                        gpointer data)
-{
-  InhibitCall *call = data;
-
-  call->parent_handle = g_strdup (window_handle);
-
-  do_inhibit (call);
 }
 
 static void
@@ -100,116 +76,118 @@ response_received (GDBusConnection *bus,
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
 
-  g_dbus_connection_signal_unsubscribe (bus, call->response_signal);
-  call->response_signal = 0;
-
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
-  if (response == 0)
-    {
-      g_hash_table_insert (call->portal->inhibit_handles,
-                           g_strdup (call->id),
-                           g_strdup (call->handle));
-    }
-  else if (response == 1)
+  if (response == 1)
     g_warning ("Inhibit canceled");
-  else
+  else if (response == 2)
     g_warning ("Inhibit failed");
 
+  if (response != 0)
+    g_hash_table_remove (call->portal->inhibit_handles, call->id);
+
   inhibit_call_free (call);
+}
+
+static void do_inhibit (InhibitCall *call);
+
+static void
+parent_exported (XdpParent *parent,
+                 const char *handle,
+                 gpointer data)
+{
+  InhibitCall *call = data;
+  call->parent_handle = g_strdup (handle);
+  do_inhibit (call);
 }
 
 static void
 do_inhibit (InhibitCall *call)
 {
   GVariantBuilder options;
-  GDBusConnection *bus;
   g_autofree char *token = NULL;
-  g_autofree char *sender = NULL;
-  int i;
-
-  if (call->portal->inhibit == NULL)
-    {
-       _xdp_inhibit_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                       G_DBUS_PROXY_FLAGS_NONE,
-                                       PORTAL_BUS_NAME,
-                                       PORTAL_OBJECT_PATH,
-                                       NULL,
-                                       got_proxy,
-                                       call);
-       return;
-    }
+  g_autofree char *handle = NULL;
 
   if (call->parent_handle == NULL)
     {
-      if (call->parent != NULL)
-        {
-          _gtk_window_export_handle (call->parent,
-                                     window_handle_exported,
-                                     call);
-          return;
-        }
-
-      call->parent_handle = g_strdup ("");
-    }
-
-  if (g_hash_table_lookup (call->portal->inhibit_handles, call->id))
-    {
-      g_warning ("Duplicate Inhibit id: %s", call->id);
-      inhibit_call_free (call);
+      call->parent->export (call->parent, parent_exported, call);
       return;
     }
 
-  bus = g_dbus_proxy_get_connection (G_DBUS_PROXY (call->portal->inhibit));
-
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
-  sender = g_strdup (g_dbus_connection_get_unique_name (bus) + 1);
-  for (i = 0; sender[i]; i++)
-    if (sender[i] == '.')
-      sender[i] = '_';
-
-  call->handle = g_strdup_printf ("/org/freedesktop/portal/desktop/request/%s/%s", sender, token);
-  call->response_signal = g_dbus_connection_signal_subscribe (bus,
-                                                              PORTAL_BUS_NAME,
-                                                              REQUEST_INTERFACE,
-                                                              "Response",
-                                                              call->handle,
-                                                              NULL,
-                                                              G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                              response_received,
-                                                              call,
-                                                              NULL);
+  handle = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
+                                                        PORTAL_BUS_NAME,
+                                                        REQUEST_INTERFACE,
+                                                        "Response",
+                                                        handle,
+                                                        NULL,
+                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                                        response_received,
+                                                        call,
+                                                        NULL);
 
   g_hash_table_insert (call->portal->inhibit_handles,
                        g_strdup (call->id),
-                       g_strdup (call->handle));
+                       g_strdup (handle));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   g_variant_builder_add (&options, "{sv}", "reason", g_variant_new_string (call->reason));
 
-  _xdp_inhibit_call_inhibit (call->portal->inhibit,
-                             call->parent_handle,
-                             call->inhibit,
-                             g_variant_builder_end (&options),
-                             NULL,
-                             NULL,
-                             NULL);
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Inhibit",
+                          "Inhibit",
+                          g_variant_new ("(sua{sv})", call->parent_handle, call->inhibit, &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL, NULL, NULL);
 }
 
+/**
+ * xdp_portal_inhibit:
+ * @portal: a #XdpPortal
+ * @parent: (nullable): parent window information
+ * @inhibit: information about what to inhibit
+ * @reason: (nullable): user-visible reason for the inhibition
+ * @id: unique ID for this inhibition
+ *
+ * Inhibits various session status changes.
+ *
+ * It is the callers responsibility to ensure that the ID is unique among
+ * all active inhibitors.
+ *
+ * To remove an active inhibitor, call xdp_portal_uninhibit() with the same ID.
+ */
 void
-xdp_portal_inhibit (XdpPortal       *portal,
-                    GtkWindow       *parent,
-                    XdpInhibitFlags  inhibit,
-                    const char      *reason,
-                    const char      *id)
+xdp_portal_inhibit (XdpPortal *portal,
+                    XdpParent *parent,
+                    XdpInhibitFlags inhibit,
+                    const char *reason,
+                    const char *id)
 {
   InhibitCall *call = NULL;
 
-  call = g_new (InhibitCall, 1);
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  if (portal->inhibit_handles == NULL)
+    portal->inhibit_handles = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+  if (g_hash_table_lookup (portal->inhibit_handles, id))
+    {
+      g_warning ("Duplicate Inhibit id: %s", id);
+      return;
+    }
+
+  call = g_new0 (InhibitCall, 1);
   call->portal = g_object_ref (portal);
-  call->parent = parent ? g_object_ref (parent) : NULL;
-  call->parent_handle = NULL;
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
   call->inhibit = inhibit;
   call->reason = g_strdup (reason);  
   call->id = g_strdup (id);
@@ -217,15 +195,24 @@ xdp_portal_inhibit (XdpPortal       *portal,
   do_inhibit (call);
 }
 
+/**
+ * xdp_portal_uninhibit:
+ * @portal: a #XdpPortal
+ * @id: unique ID for an active inhibition
+ *
+ * Removes an inhibitor that was created by a call to xdp_portal_inhibit().
+ */
 void
-xdp_portal_uninhibit (XdpPortal  *portal,
+xdp_portal_uninhibit (XdpPortal *portal,
                       const char *id)
 {
-  GDBusConnection *bus;
   g_autofree char *key = NULL;
   g_autofree char *value = NULL;
 
-  if (!g_hash_table_steal_extended (portal->inhibit_handles,
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  if (portal->inhibit_handles == NULL || 
+      !g_hash_table_steal_extended (portal->inhibit_handles,
                                     id,
                                     (gpointer *)&key,
                                     (gpointer *)&value))
@@ -234,8 +221,7 @@ xdp_portal_uninhibit (XdpPortal  *portal,
       return;
     }
 
-  bus = g_dbus_proxy_get_connection (G_DBUS_PROXY (portal->inhibit));
-  g_dbus_connection_call (bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           value,
                           REQUEST_INTERFACE,
