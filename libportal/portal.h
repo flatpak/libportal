@@ -100,6 +100,24 @@ GVariant * xdp_portal_pick_color_finish      (XdpPortal           *portal,
                                               GError             **error);
 
 
+/* Background */
+
+XDP_PUBLIC
+void      xdp_portal_request_background         (XdpPortal           *portal,
+                                                 XdpParent           *parent,
+                                                 GPtrArray           *commandline,
+                                                 char                *reason,
+                                                 gboolean             autostart,
+                                                 gboolean             dbus_activatable,
+                                                 GCancellable        *cancellable,
+                                                 GAsyncReadyCallback  callback,
+                                                 gpointer             user_data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_request_background_finish (XdpPortal     *portal,
+                                                 GAsyncResult  *result,
+                                                 GError       **error);
+
 /* Notification */
 
 XDP_PUBLIC

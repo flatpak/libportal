@@ -35,6 +35,12 @@ xdp_portal_compose_email_finish
 </SECTION>
 
 <SECTION>
+<FILE>background</FILE>
+xdp_portal_request_background
+xdp_portal_request_background_finish
+</SECTION>
+
+<SECTION>
 <FILE>account</FILE>
 xdp_portal_get_user_information
 xdp_portal_get_user_information_finish
