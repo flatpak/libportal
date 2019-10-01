@@ -36,6 +36,7 @@
     <xi:include href="xml/screenshot.xml" />
     <xi:include href="xml/screencast.xml" />
     <xi:include href="xml/remote.xml" />
+    <xi:include href="xml/background.xml" />
 
   </chapter>
 

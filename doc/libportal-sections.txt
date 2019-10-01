@@ -121,3 +121,9 @@ xdp_session_touch_down
 xdp_session_touch_position
 xdp_session_touch_up
 </SECTION>
+
+<SECTION>
+<FILE>background</FILE>
+xdp_portal_request_background
+xdp_portal_request_background_finish
+</SECTION>
