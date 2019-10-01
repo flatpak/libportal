@@ -12,7 +12,9 @@ src = [
 	'openuri.c',
         'file.c',
         'print.c',
-        'remote.c' ]
+        'remote.c',
+        'background.c',
+]
 
 gio_dep = dependency('gio-2.0')
 gio_unix_dep = dependency('gio-unix-2.0')

@@ -567,6 +567,43 @@ compose_email (PortalTestWin *win)
 }
 
 static void
+request_background_called (GObject *source,
+                           GAsyncResult *result,
+                           gpointer data)
+{
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  gboolean ret = xdp_portal_request_background_finish (win->portal, result, &error);
+  if (!ret)
+    {
+      g_warning ("Background request failed: %s", error ? error->message : "Unknown error");
+      return;
+    }
+
+  g_message ("Background request successful!");
+}
+
+static void
+request_background (PortalTestWin *win)
+{
+  XdpParent *parent;
+  g_autoptr(GPtrArray) commandline = g_ptr_array_new_with_free_func (g_free);
+
+  g_ptr_array_add (commandline, g_strdup ("/bin/true"));
+
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+  xdp_portal_request_background (win->portal,
+                                 parent,
+                                 commandline,
+                                 "Test reason",
+                                 TRUE, FALSE,    
+                                 NULL,
+                                 request_background_called,
+                                 win);
+  xdp_parent_free (parent);
+}
+
+static void
 notify_me (PortalTestWin *win)
 {
   GVariantBuilder button;
@@ -1001,6 +1038,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, play_clicked);
   gtk_widget_class_bind_template_callback (widget_class, get_user_information);
   gtk_widget_class_bind_template_callback (widget_class, compose_email);
+  gtk_widget_class_bind_template_callback (widget_class, request_background);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, sandbox_status);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, network_status);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, monitor_name);
