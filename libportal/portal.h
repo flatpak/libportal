@@ -57,12 +57,6 @@ struct _XdpParent {
   gpointer data;
 };
 
-/**
- * xdp_parent_free:
- * @parent: a #XdpParent
- *
- * Frees an XdpParent when it is no longer needed.
- */
 static inline void xdp_parent_free (XdpParent *parent);
 
 static inline void xdp_parent_free (XdpParent *parent)

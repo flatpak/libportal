@@ -79,19 +79,3 @@ xdp_portal_new (void)
 {
   return g_object_new (XDP_TYPE_PORTAL, NULL);
 }
-
-/**
- * xdp_parent_new_gtk:
- * @window: a #GtkWindow
- *
- * Creates an #XdpParent for @window.
- *
- * Returns: a newly created #XdpParent. Free with xdp_parent_free
- */
-
-/**
- * xdp_parent_free:
- * @parent: a #XdpParent
- *
- * Frees an #XdpParent.
- */

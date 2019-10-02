@@ -77,6 +77,11 @@ static inline void _xdp_parent_unexport_gtk (XdpParent *parent)
 #endif
 }
 
+#if 0
+void       xdp_parent_free    (XdpParent *parent);
+XdpParent *xdp_parent_new_gtk (GtkWindow *window);
+#endif
+
 static inline XdpParent *xdp_parent_new_gtk (GtkWindow *window);
 
 static inline XdpParent *xdp_parent_new_gtk (GtkWindow *window)

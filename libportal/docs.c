@@ -21,7 +21,7 @@
  * xdp_parent_new_gtk:
  * @window: a #GtkWindow
  *
- * Creates an #XdpParent for a #GtkWindow.
+ * Creates a XdpParent for a GtkWindow.
  *
  * Returns: a newly created #XdpParent. Free with xdp_parent_free()
  */
@@ -30,7 +30,7 @@
  * xdp_parent_free:
  * @parent: a #XdpParent
  *
- * Frees an #XdpParent.
+ * Frees an #XdpParent when it is no longer needed.
  */
 
 /**
