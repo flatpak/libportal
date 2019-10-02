@@ -4,6 +4,12 @@ private_headers = [
 	'utils-private.h'
 ]
 
+version_conf = configuration_data()
+version_conf.set('VERSION', meson.project_version())
+configure_file(input: 'version.xml.in',
+               output: 'version.xml',
+               configuration: version_conf)
+
 gnome.gtkdoc('libportal',
              main_xml: 'libportal.xml',
              namespace: 'xdp',

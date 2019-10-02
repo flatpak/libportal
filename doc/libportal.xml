@@ -8,6 +8,7 @@
   <bookinfo>
     <title>libportal Reference Manual</title>
     <releaseinfo>
+      This document is for the libportal library, version &version;.
     </releaseinfo>
   </bookinfo>
 
