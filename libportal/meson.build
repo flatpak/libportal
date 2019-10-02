@@ -15,6 +15,7 @@ src = [
         'print.c',
         'remote.c',
         'background.c',
+        'camera.c',
 ]
 
 gio_dep = dependency('gio-2.0')

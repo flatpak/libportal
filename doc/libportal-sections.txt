@@ -126,3 +126,11 @@ xdp_session_touch_down
 xdp_session_touch_position
 xdp_session_touch_up
 </SECTION>
+
+<SECTION>
+<FILE>camera</FILE>
+xdp_portal_is_camera_present
+xdp_portal_access_camera
+xdp_portal_access_camera_finish
+xdp_portal_open_pipewire_remote_for_camera
+</SECTION>
