@@ -197,7 +197,7 @@ request_background (BackgroundCall *call)
  * xdp_portal_request_background:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
- * @commandline: (element-type utf8) (transfer-container): command line to autostart
+ * @commandline: (element-type utf8) (transfer container): command line to autostart
  * @reason: (nullable): reason to present to user for request
  * @autostart: if autostart permissions should be requested
  * @dbus_activatable: if launched command is dbus activatable.
