@@ -13,7 +13,7 @@
   </bookinfo>
 
   <chapter id="libportal">
-    <title>libportal</title>
+    <title>Portals</title>
     <para>
       libportal is a library that provides GIO-style async API wrappers
       for the D-Bus portal APIs in xdg-desktop-portal.
@@ -24,9 +24,6 @@
       use GtkFileChooserNative instead of xdp_portal_open_file().
     </para>
 
-    <xi:include href="xml/portal.xml" />
-    <xi:include href="xml/parent.xml" />
-    <xi:include href="xml/session.xml" />
     <xi:include href="xml/account.xml" />
     <xi:include href="xml/email.xml" />
     <xi:include href="xml/inhibit.xml" />
@@ -38,6 +35,18 @@
     <xi:include href="xml/screencast.xml" />
     <xi:include href="xml/remote.xml" />
     <xi:include href="xml/background.xml" />
+
+  </chapter>
+
+  <chapter id="aux">
+    <title>Helpers</title>
+    <para>
+      Auxiliary objects that are used in the portal API wrappers.
+    </para>
+
+    <xi:include href="xml/portal.xml" />
+    <xi:include href="xml/parent.xml" />
+    <xi:include href="xml/session.xml" />
 
   </chapter>
 
