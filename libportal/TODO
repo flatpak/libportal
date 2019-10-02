@@ -2,8 +2,4 @@ portal version checks
 non-exported actions in notifications
 
 portals:
-- location
-- network monitor (?)
-- proxy resolver (?)
-- secret (?)
 - settings
