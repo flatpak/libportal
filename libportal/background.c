@@ -28,7 +28,7 @@
  *
  * These functions let the application request background permissions
  * such as enabling autostart.
- * 
+ *
  * The underlying portal is org.freedesktop.portal.Background.
  */
 
@@ -203,10 +203,10 @@ request_background (BackgroundCall *call)
  * @dbus_activatable: if launched command is dbus activatable.
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @user_data: (closure): data to pass to @callback
  *
  * Requests background permissions.
- * 
+ *
  * When the request is done, @callback will be called. You can then
  * call xdp_portal_request_background_finish() to get the results.
  */
