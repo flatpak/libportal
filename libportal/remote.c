@@ -26,7 +26,7 @@
 /**
  * SECTION:screencast
  * @title: Screencast
- * @short_description: create screencst sessions
+ * @short_description: create screencast sessions
  *
  * A screencast session makes the content of a monitor or window
  * available as a pipewire stream.
