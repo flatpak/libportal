@@ -25,9 +25,8 @@
  * @title: XdpSession
  * @short_description: a representation of long-lived portal interactions
  *
- * The XdpSession object is used to represent portal interaction that extend
- * over multiple portal calls. Typical examples are screencast or remote desktop
- * sessions.
+ * The XdpSession object is used to represent portal interactions with the
+ * screencast or remote desktop portals that extend over multiple portal calls.
  *
  * To find out what kind of session an XdpSession object represents and whether
  * it is still active, you can use xdp_session_get_session_type() and
