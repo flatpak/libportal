@@ -231,6 +231,12 @@ GVariant *xdp_portal_save_file_finish             (XdpPortal            *portal,
                                                    GAsyncResult         *result,
                                                    GError              **error);
 
+/* Trash */
+
+XDP_PUBLIC
+void     xdp_portal_trash_file                    (XdpPortal            *portal,
+                                                   const char           *path);
+
 /* Print */
 
 XDP_PUBLIC

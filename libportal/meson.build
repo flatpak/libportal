@@ -11,6 +11,7 @@ src = [
 	'inhibit.c',
 	'openuri.c',
         'file.c',
+        'trash.c',
         'print.c',
         'remote.c',
         'background.c',

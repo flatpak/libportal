@@ -67,6 +67,11 @@ xdp_portal_save_file_finish
 </SECTION>
 
 <SECTION>
+<FILE>trash</FILE>
+xdp_portal_trash_file
+</SECTION>
+
+<SECTION>
 <FILE>print</FILE>
 xdp_portal_prepare_print
 xdp_portal_prepare_print_finish
