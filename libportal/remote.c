@@ -365,10 +365,16 @@ xdp_portal_create_screencast_session_finish (XdpPortal *portal,
                                              GAsyncResult *result,
                                              GError **error)
 {
+  XdpSession *session;
+
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
 
-  return g_object_ref (g_task_propagate_pointer (G_TASK (result), error));
+  session = g_task_propagate_pointer (G_TASK (result), error);
+  if (session)
+    return g_object_ref (session);
+  else
+    return NULL;
 }
 
 /**
@@ -425,10 +431,17 @@ xdp_portal_create_remote_desktop_session_finish (XdpPortal *portal,
                                                  GAsyncResult *result,
                                                  GError **error)
 {
+  XdpSession *session;
+
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
 
-  return g_object_ref (g_task_propagate_pointer (G_TASK (result), error));
+  session = g_task_propagate_pointer (G_TASK (result), error);
+
+  if (session)
+    return g_object_ref (session);
+  else
+    return NULL;
 }
 
 
