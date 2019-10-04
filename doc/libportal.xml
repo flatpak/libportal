@@ -69,6 +69,7 @@
     <xi:include href="xml/remote.xml" />
     <xi:include href="xml/background.xml" />
     <xi:include href="xml/camera.xml" />
+    <xi:include href="xml/location.xml" />
 
   </chapter>
 
@@ -81,6 +82,7 @@
     <xi:include href="xml/portal.xml" />
     <xi:include href="xml/parent.xml" />
     <xi:include href="xml/session.xml" />
+    <xi:include href="xml/locationsession.xml" />
 
   </chapter>
 

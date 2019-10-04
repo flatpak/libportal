@@ -24,6 +24,15 @@
 
 /**
  * SECTION:location
+ * @title: Location
+ * @short_description: access to location information
+ *
+ * A location session makes location information available
+ * via the #XdpLocation::updated signal.
+ */
+
+/**
+ * SECTION:locationsession
  * @title: XdpLocation
  * @short_description: a representation of long-lived location portal interactions
  *
