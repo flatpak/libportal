@@ -32,3 +32,8 @@ libportal = library('portal',
                     c_args: visibility_args,
                     install: true,
                     dependencies: [gio_dep, gio_unix_dep])
+
+libportal_dep = declare_dependency(sources: src,
+                                   include_directories: top_inc,
+                                   dependencies: [gio_dep, gio_unix_dep],
+                                   link_with: libportal)
