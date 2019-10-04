@@ -191,7 +191,16 @@ XDP_PUBLIC
 void       xdp_portal_open_uri                    (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *uri,
-                                                   gboolean              writable);
+                                                   gboolean              writable,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+gboolean  xdp_portal_open_uri_finish              (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
 
 /* Filechooser */
 
