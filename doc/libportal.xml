@@ -23,6 +23,38 @@
       APIs that have portal support. For example, a GTK+ application should
       use GtkFileChooserNative instead of xdp_portal_open_file().
     </para>
+    <para>
+      Some portal interfaces are not covered in libportal, since
+      they already have perfectly adequate APIs in GLib (which
+      libportal depends on anyway).
+    </para>
+
+      <variablelist>
+        <varlistentry>
+          <term>NetworkMonitor</term>
+          <listitem><para>
+            Use GNetworkMonitor
+          </para></listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>ProxyResolver</term>
+          <listitem><para>
+            Use GProxyResolver
+          </para></listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Settings</term>
+          <listitem><para>
+            Use a plain GDBusProxy
+          </para></listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>GameMode</term>
+          <listitem><para>
+            Not currently covered
+          </para></listitem>
+        </varlistentry>
+      </variablelist>
 
     <xi:include href="xml/account.xml" />
     <xi:include href="xml/email.xml" />
