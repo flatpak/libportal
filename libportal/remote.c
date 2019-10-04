@@ -37,7 +37,7 @@
  * @title: Remote desktop
  * @short_description: allow remote control of the session
  *
- * A remote desktop session allows to invents into the input stream.
+ * A remote desktop session allows to inject events into the input stream.
  */
 
 typedef struct {

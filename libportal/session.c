@@ -23,7 +23,7 @@
 /**
  * SECTION:session
  * @title: XdpSession
- * @short_description: a representation of long-lived portal interactions
+ * @short_description: a representation of long-lived screencast portal interactions
  *
  * The XdpSession object is used to represent portal interactions with the
  * screencast or remote desktop portals that extend over multiple portal calls.
@@ -248,5 +248,5 @@ _xdp_session_set_streams (XdpSession *session,
     g_variant_unref (session->streams);
   session->streams = streams;
   if (session->streams)
-    g_variant_ref (session->streams); 
+    g_variant_ref (session->streams);
 }
