@@ -244,7 +244,16 @@ GVariant *xdp_portal_save_file_finish             (XdpPortal            *portal,
 
 XDP_PUBLIC
 void     xdp_portal_trash_file                    (XdpPortal            *portal,
-                                                   const char           *path);
+                                                   const char           *path,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+gboolean  xdp_portal_trash_file_finish            (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
 
 /* Print */
 
