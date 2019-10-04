@@ -187,7 +187,9 @@ do_open (OpenCall *call)
       fd = g_open (path, O_PATH | O_CLOEXEC);
       if (fd == -1)
         {
-          g_warning ("Failed to open '%s'", call->uri);
+          g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Failed to open '%s'", call->uri);
+          open_call_free (call);
+
           return;
         }
 
@@ -285,4 +287,3 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }
-
