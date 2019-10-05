@@ -1,5 +1,12 @@
 headers = files('portal.h', 'portal-gtk.h')
 
+portal_enums = gnome.mkenums('portal-enums',
+                             sources: headers,
+                             c_template: 'portal-enums.c.template',
+                             h_template: 'portal-enums.h.template',
+                             install_dir: 'libportal',
+                             install_header: true)
+
 src = [
 	'portal.c',
         'session.c',
@@ -18,6 +25,7 @@ src = [
         'camera.c',
         'location.c',
         'spawn.c',
+        portal_enums
 ]
 
 gio_dep = dependency('gio-2.0')
