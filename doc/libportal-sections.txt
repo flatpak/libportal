@@ -61,6 +61,7 @@ xdp_portal_session_monitor_query_end_response
 <SECTION>
 <FILE>open</FILE>
 xdp_portal_open_uri
+xdp_portal_open_uri_finish
 </SECTION>
 
 <SECTION>
@@ -74,6 +75,7 @@ xdp_portal_save_file_finish
 <SECTION>
 <FILE>trash</FILE>
 xdp_portal_trash_file
+xdp_portal_trash_file_finish
 </SECTION>
 
 <SECTION>
