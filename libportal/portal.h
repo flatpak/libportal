@@ -156,7 +156,7 @@ GVariant * xdp_portal_get_user_information_finish (XdpPortal            *portal,
                                                    GAsyncResult         *result,
                                                    GError              **error);
 
-/* Inhibit */
+/* Session */
 
 /**
  * XdpInhibitFlags:
@@ -175,15 +175,48 @@ typedef enum {
 } XdpInhibitFlags;
 
 XDP_PUBLIC
-void       xdp_portal_inhibit                     (XdpPortal            *portal,
+void       xdp_portal_session_inhibit             (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    XdpInhibitFlags       inhibit,
                                                    const char           *reason,
                                                    const char           *id);
 
 XDP_PUBLIC
-void       xdp_portal_uninhibit                   (XdpPortal            *portal,
+void       xdp_portal_session_uninhibit           (XdpPortal            *portal,
                                                    const char           *id);
+
+
+/**
+ * XdpLoginSessionState:
+ * @XDP_LOGIN_SESSION_RUNNING: the session is running
+ * @XDP_LOGIN_SESSION_QUERY_END: the session is in the query end phase,
+ *     during which applications can save their state or inhibit the
+ *     session from ending
+ * @XDP_LOGIN_SESSION_ENDING: the session is about to end
+ */
+typedef enum {
+  XDP_LOGIN_SESSION_RUNNING =   1,
+  XDP_LOGIN_SESSION_QUERY_END = 2,
+  XDP_LOGIN_SESSION_ENDING =    3,
+} XdpLoginSessionState;
+
+XDP_PUBLIC
+void       xdp_portal_session_monitor_start              (XdpPortal            *portal,
+                                                          XdpParent            *parent,
+                                                          GCancellable         *cancellable,
+                                                          GAsyncReadyCallback   callback,
+                                                          gpointer              data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_session_monitor_start_finish       (XdpPortal            *portal,
+                                                          GAsyncResult         *result,
+                                                          GError              **error); 
+
+XDP_PUBLIC
+void       xdp_portal_session_monitor_stop               (XdpPortal            *portal);
+
+XDP_PUBLIC
+void       xdp_portal_session_monitor_query_end_response (XdpPortal            *portal);
 
 /* OpenURI */
 

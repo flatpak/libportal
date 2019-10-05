@@ -876,7 +876,7 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
 
   if (win->inhibit_cookie != 0)
     {
-      xdp_portal_uninhibit (win->portal, "inhibit");
+      xdp_portal_session_uninhibit (win->portal, "inhibit");
       win->inhibit_cookie = 0;
     }
 
@@ -887,11 +887,11 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
       XdpParent *parent;
 
       parent = xdp_parent_new_gtk (GTK_WINDOW (win));
-      xdp_portal_inhibit (win->portal,
-                          parent,
-                          win->inhibit_flags,
-                          "Portal Testing",
-                          "inhibit");
+      xdp_portal_session_inhibit (win->portal,
+                                  parent,
+                                  win->inhibit_flags,
+                                  "Portal Testing",
+                                  "inhibit");
       xdp_parent_free (parent);
     }
 }

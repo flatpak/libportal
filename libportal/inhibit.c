@@ -22,12 +22,15 @@
 
 /**
  * SECTION:inhibit
- * @title: Inhibit
- * @short_description: prevent session state changes
+ * @title: Session
+ * @short_description: session state changes
  *
- * These functions let applications inhibit certain session state changes.
- * A typical use for this functionality is to prevent the session from
- * locking while a video is playing.
+ * These functions let applications inhibit certain login session
+ * state changes, and be informed about the impending end of the
+ * session.
+ *
+ * A typical use for this functionality is to prevent the session
+ * from locking while a video is playing.
  *
  * The underlying portal is org.freedesktop.portal.Inhibit.
  */
@@ -39,7 +42,7 @@ typedef struct {
   XdpInhibitFlags inhibit;
   char *reason;
   char *id;
-  guint signal_id; 
+  guint signal_id;
 } InhibitCall;
 
 static void
@@ -64,13 +67,13 @@ inhibit_call_free (InhibitCall *call)
 }
 
 static void
-response_received (GDBusConnection *bus,
-                   const char *sender_name,
-                   const char *object_path,
-                   const char *interface_name,
-                   const char *signal_name,
-                   GVariant *parameters,
-                   gpointer data)
+inhibit_response_received (GDBusConnection *bus,
+                           const char *sender_name,
+                           const char *object_path,
+                           const char *interface_name,
+                           const char *signal_name,
+                           GVariant *parameters,
+                           gpointer data)
 {
   InhibitCall *call = data;
   guint32 response;
@@ -92,9 +95,9 @@ response_received (GDBusConnection *bus,
 static void do_inhibit (InhibitCall *call);
 
 static void
-parent_exported (XdpParent *parent,
-                 const char *handle,
-                 gpointer data)
+inhibit_parent_exported (XdpParent *parent,
+                         const char *handle,
+                         gpointer data)
 {
   InhibitCall *call = data;
   call->parent_handle = g_strdup (handle);
@@ -110,7 +113,7 @@ do_inhibit (InhibitCall *call)
 
   if (call->parent_handle == NULL)
     {
-      call->parent->export (call->parent, parent_exported, call);
+      call->parent->export (call->parent, inhibit_parent_exported, call);
       return;
     }
 
@@ -123,7 +126,7 @@ do_inhibit (InhibitCall *call)
                                                         handle,
                                                         NULL,
                                                         G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                        response_received,
+                                                        inhibit_response_received,
                                                         call,
                                                         NULL);
 
@@ -148,7 +151,7 @@ do_inhibit (InhibitCall *call)
 }
 
 /**
- * xdp_portal_inhibit:
+ * xdp_portal_session_inhibit:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
  * @inhibit: information about what to inhibit
@@ -160,14 +163,15 @@ do_inhibit (InhibitCall *call)
  * It is the callers responsibility to ensure that the ID is unique among
  * all active inhibitors.
  *
- * To remove an active inhibitor, call xdp_portal_uninhibit() with the same ID.
+ * To remove an active inhibitor, call xdp_portal_session_uninhibit()
+ * with the same ID.
  */
 void
-xdp_portal_inhibit (XdpPortal *portal,
-                    XdpParent *parent,
-                    XdpInhibitFlags inhibit,
-                    const char *reason,
-                    const char *id)
+xdp_portal_session_inhibit (XdpPortal *portal,
+                            XdpParent *parent,
+                            XdpInhibitFlags inhibit,
+                            const char *reason,
+                            const char *id)
 {
   InhibitCall *call = NULL;
 
@@ -189,29 +193,30 @@ xdp_portal_inhibit (XdpPortal *portal,
   else
     call->parent_handle = g_strdup ("");
   call->inhibit = inhibit;
-  call->reason = g_strdup (reason);  
+  call->reason = g_strdup (reason);
   call->id = g_strdup (id);
 
   do_inhibit (call);
 }
 
 /**
- * xdp_portal_uninhibit:
+ * xdp_portal_session_uninhibit:
  * @portal: a #XdpPortal
  * @id: unique ID for an active inhibition
  *
- * Removes an inhibitor that was created by a call to xdp_portal_inhibit().
+ * Removes an inhibitor that was created by a call
+ * to xdp_portal_session_inhibit().
  */
 void
-xdp_portal_uninhibit (XdpPortal *portal,
-                      const char *id)
+xdp_portal_session_uninhibit (XdpPortal *portal,
+                              const char *id)
 {
   g_autofree char *key = NULL;
   g_autofree char *value = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  if (portal->inhibit_handles == NULL || 
+  if (portal->inhibit_handles == NULL ||
       !g_hash_table_steal_extended (portal->inhibit_handles,
                                     id,
                                     (gpointer *)&key,
@@ -231,4 +236,335 @@ xdp_portal_uninhibit (XdpPortal *portal,
                           G_DBUS_CALL_FLAGS_NONE,
                           G_MAXINT,
                           NULL, NULL, NULL);
+}
+
+typedef struct {
+  XdpPortal *portal;
+  XdpParent *parent;
+  char *parent_handle;
+  GTask *task;
+  char *request_path;
+  guint signal_id;
+  guint cancelled_id;
+  char *id;
+} CreateMonitorCall;
+
+static void
+create_monitor_call_free (CreateMonitorCall *call)
+{
+  if (call->parent)
+    {
+      call->parent->unexport (call->parent);
+      _xdp_parent_free (call->parent);
+    }
+  g_free (call->parent_handle);
+
+  if (call->signal_id)
+    g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+
+  if (call->cancelled_id)
+    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+
+  g_free (call->request_path);
+  g_free (call->id);
+
+  g_object_unref (call->portal);
+  g_object_unref (call->task);
+
+  g_free (call);
+}
+
+static void
+session_state_changed (GDBusConnection *bus,
+                       const char *sender_name,
+                       const char *object_path,
+                       const char *interface_name,
+                       const char *signal_name,
+                       GVariant *parameters,
+                       gpointer data)
+{
+  XdpPortal *portal = data;
+  const char *handle;
+  g_autoptr(GVariant) state = NULL;
+  gboolean screensaver_active = FALSE;
+  XdpLoginSessionState session_state = XDP_LOGIN_SESSION_RUNNING;
+
+  g_variant_get (parameters, "(&o@a{sv})", &handle, &state);
+  if (g_strcmp0 (handle, portal->session_monitor_handle) != 0)
+    {
+      g_warning ("Session monitor handle mismatch");
+      return;
+    }
+
+  g_variant_lookup (state, "screensaver-active", "b", &screensaver_active);
+  g_variant_lookup (state, "session-state", "u", &session_state);
+
+  g_signal_emit_by_name (portal, "session-state-changed",
+                         screensaver_active,
+                         session_state);
+}
+
+static void
+ensure_state_changed_connection (XdpPortal *portal)
+{
+  if (portal->state_changed_signal == 0)
+    {
+      portal->state_changed_signal =
+         g_dbus_connection_signal_subscribe (portal->bus,
+                                             PORTAL_BUS_NAME,
+                                             "org.freedesktop.portal.Inhibit",
+                                             "StateChanged",
+                                             PORTAL_OBJECT_PATH,
+                                             NULL,
+                                             G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                             session_state_changed,
+                                             portal,
+                                             NULL);
+    }
+}
+
+static void
+create_response_received (GDBusConnection *bus,
+                          const char *sender_name,
+                          const char *object_path,
+                          const char *interface_name,
+                          const char *signal_name,
+                          GVariant *parameters,
+                          gpointer data)
+{
+  CreateMonitorCall *call = data;
+  guint32 response;
+  g_autoptr(GVariant) ret = NULL;
+
+  if (call->cancelled_id)
+    {
+      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+      call->cancelled_id = 0;
+    }
+
+  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
+
+  if (response == 0)
+    {
+      call->portal->session_monitor_handle = g_strdup (call->id);
+      ensure_state_changed_connection (call->portal);
+      g_task_return_boolean (call->task, TRUE);
+    }
+  else if (response == 1)
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "CreateMonitor canceled");
+  else
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateMonitor failed");
+
+  create_monitor_call_free (call);
+}
+
+static void create_monitor (CreateMonitorCall *call);
+
+static void
+create_parent_exported (XdpParent *parent,
+                        const char *handle,
+                        gpointer data)
+{
+  CreateMonitorCall *call = data;
+  call->parent_handle = g_strdup (handle);
+  create_monitor (call);
+}
+
+static void
+cancelled_cb (GCancellable *cancellable,
+              gpointer data)
+{
+  CreateMonitorCall *call = data;
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          call->request_path,
+                          REQUEST_INTERFACE,
+                          "Close",
+                          NULL,
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL, NULL, NULL);
+}
+
+static void
+create_monitor (CreateMonitorCall *call)
+{
+  GVariantBuilder options;
+  g_autofree char *token = NULL;
+  g_autofree char *session_token = NULL;
+  GCancellable *cancellable;
+
+  if (call->portal->session_monitor_handle)
+    {
+      g_task_return_boolean (call->task, TRUE);
+      create_monitor_call_free (call);
+      return;
+    }
+
+  if (call->parent_handle == NULL)
+    {
+      call->parent->export (call->parent, create_parent_exported, call);
+      return;
+    }
+
+  token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
+  call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
+                                                        PORTAL_BUS_NAME,
+                                                        REQUEST_INTERFACE,
+                                                        "Response",
+                                                        call->request_path,
+                                                        NULL,
+                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                                        create_response_received,
+                                                        call,
+                                                        NULL);
+
+  cancellable = g_task_get_cancellable (call->task);
+  if (cancellable)
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (cancelled_cb), call);
+
+  session_token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
+  call->id = g_strconcat (SESSION_PATH_PREFIX, call->portal->sender, "/", session_token, NULL);
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+  g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
+  g_variant_builder_add (&options, "{sv}", "session_handle_token", g_variant_new_string (session_token));
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Inhibit",
+                          "CreateMonitor",
+                          g_variant_new ("(sa{sv})", call->parent_handle, &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          NULL,
+                          NULL);
+
+}
+
+/**
+ * xdp_portal_session_monitor_start:
+ * @portal: a #XdpPortal
+ * @parent: (nullable): a XdpParent, or %NULL
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Makes XdpPortal start monitoring the login session state.
+ *
+ * When the state changes, the #XdpPortal::session-state-changed
+ * signal is emitted.
+ *
+ * Use xdp_portal_session_monitor_stop() to stop monitoring.
+ */
+void
+xdp_portal_session_monitor_start (XdpPortal *portal,
+                                  XdpParent *parent,
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer data)
+
+{
+  CreateMonitorCall *call;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  call = g_new (CreateMonitorCall, 1);
+  call->portal = g_object_ref (portal);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
+  call->task = g_task_new (portal, cancellable, callback, data);
+
+  create_monitor (call);
+}
+
+/*
+ * xdp_portal_session_monitor_start_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes a session-monitor request, and returns
+ * the result in the form of boolean.
+ *
+ * Returns: %TRUE if the request succeeded
+ */
+gboolean
+xdp_portal_session_monitor_start_finish (XdpPortal *portal,
+                                         GAsyncResult *result,
+                                         GError **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+/**
+ * xdp_portal_session_monitor_stop:
+ * portal: a #XdpPortal
+ *
+ * Stops session state monitoring that was started with
+ * xdp_portal_session_monitor_start().
+ */
+void
+xdp_portal_session_monitor_stop (XdpPortal *portal)
+{
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  if (portal->state_changed_signal)
+    {
+      g_dbus_connection_signal_unsubscribe (portal->bus, portal->state_changed_signal);
+      portal->state_changed_signal = 0;
+    }
+
+  if (portal->session_monitor_handle)
+    {
+      g_dbus_connection_call (portal->bus,
+                              PORTAL_BUS_NAME,
+                              portal->session_monitor_handle,
+                              SESSION_INTERFACE,
+                              "Close",
+                              NULL,
+                              NULL, 0, -1, NULL, NULL, NULL);
+      g_clear_pointer (&portal->session_monitor_handle, g_free);
+    }
+}
+
+/**
+ * xdp_portal_session_query_end_response:
+ * @portal: a #XdpPortal
+ *
+ * This method should be called within one second of
+ * receiving a #XdpPortal::session-state-changed signal
+ * with the 'Query End' state, to acknowledge that they
+ * have handled the state change.
+ *
+ * Possible ways to handle the state change are either
+ * to call xdp_portal_inihit() to prevent the session
+ * from ending, or to save your state and get ready
+ * for the session to end.
+ */
+void
+xdp_portal_session_monitor_query_end_response (XdpPortal *portal)
+{
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  if (portal->session_monitor_handle)
+    {
+      g_dbus_connection_call (portal->bus,
+                              PORTAL_BUS_NAME,
+                              PORTAL_OBJECT_PATH,
+                              "org.freedesktop.portal.Inhibit",
+                              "QueryEndResponse",
+                              g_variant_new ("(o)", portal->session_monitor_handle),
+                              NULL, 0, -1, NULL, NULL, NULL);
+    }
 }

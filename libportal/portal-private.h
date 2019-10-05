@@ -26,6 +26,8 @@ struct _XdpPortal {
   char *sender;
   GHashTable *inhibit_handles;
   guint spawn_exited_signal;
+  char *session_monitor_handle;
+  guint state_changed_signal;
 };
 
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"

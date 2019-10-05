@@ -33,6 +33,7 @@
 
 enum {
   SPAWN_EXITED,
+  SESSION_STATE_CHANGED,
   LAST_SIGNAL
 };
 
@@ -47,6 +48,10 @@ xdp_portal_finalize (GObject *object)
 
   if (portal->spawn_exited_signal)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->spawn_exited_signal);
+  if (portal->state_changed_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->state_changed_signal);
+
+  g_free (portal->session_monitor_handle);
 
   g_clear_object (&portal->bus);
   g_free (portal->sender);
@@ -81,6 +86,25 @@ xdp_portal_class_init (XdpPortalClass *klass)
                                         G_TYPE_NONE, 2,
                                         G_TYPE_UINT,
                                         G_TYPE_UINT);
+
+  /**
+   * XdpPortal::session-state-changed:
+   * @screensaver_active: whether the screensaver is active
+   * @session_state: the current state of the login session
+   *
+   * This signal is emitted when session state monitoring is
+   * enabled and the state of the login session changes or
+   * the screensaver is activated or deactivated.
+   */
+  signals[SESSION_STATE_CHANGED] = g_signal_new ("session-state-changed",
+                                                 G_TYPE_FROM_CLASS (object_class),
+                                                 G_SIGNAL_RUN_FIRST,
+                                                 0,
+                                                 NULL, NULL,
+                                                 NULL,
+                                                 G_TYPE_NONE, 2,
+                                                 G_TYPE_BOOLEAN,
+                                                 G_TYPE_INT);
 }
 
 static void

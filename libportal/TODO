@@ -1,7 +1,6 @@
-portal version checks
+portal version checks ?
 non-exported actions in notifications
-inhibit state monitoring
-thread-safety
+thread-safety ?
 
 portals:
 - updates
