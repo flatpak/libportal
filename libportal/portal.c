@@ -18,6 +18,7 @@
 #include "config.h"
 
 #include "portal-private.h"
+#include "portal-enums.h"
 
 /**
  * SECTION:portal
@@ -71,6 +72,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::spawn-exited:
+   * @portal: the #XdpPortal object
    * @pid: the pid of the process
    * @exit_status: the exit status of the process
    *
@@ -89,6 +91,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::session-state-changed:
+   * @portal: the #XdpPortal object
    * @screensaver_active: whether the screensaver is active
    * @session_state: the current state of the login session
    *
@@ -104,7 +107,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
                                                  NULL,
                                                  G_TYPE_NONE, 2,
                                                  G_TYPE_BOOLEAN,
-                                                 G_TYPE_INT);
+                                                 XDP_TYPE_LOGIN_SESSION_STATE);
 }
 
 static void
