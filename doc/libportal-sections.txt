@@ -149,3 +149,11 @@ xdp_location_start
 xdp_location_start_finish
 xdp_location_close
 </SECTION>
+
+<SECTION>
+<FILE>spawn</FILE>
+XdpSpawnFlags
+xdp_portal_spawn
+xdp_portal_spawn_finish
+xdp_portal_spawn_signal
+</SECTION>

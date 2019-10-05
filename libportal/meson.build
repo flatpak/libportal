@@ -17,6 +17,7 @@ src = [
         'background.c',
         'camera.c',
         'location.c',
+        'spawn.c',
 ]
 
 gio_dep = dependency('gio-2.0')

@@ -31,12 +31,22 @@
  * object with xdp_portal_new() and use it throughout its lifetime.
  */
 
+enum {
+  SPAWN_EXITED,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
 G_DEFINE_TYPE (XdpPortal, xdp_portal, G_TYPE_OBJECT)
 
 static void
 xdp_portal_finalize (GObject *object)
 {
   XdpPortal *portal = XDP_PORTAL (object);
+
+  if (portal->spawn_exited_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->spawn_exited_signal);
 
   g_clear_object (&portal->bus);
   g_free (portal->sender);
@@ -53,6 +63,24 @@ xdp_portal_class_init (XdpPortalClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->finalize = xdp_portal_finalize;
+
+  /**
+   * XdpPortal::spawn-exited:
+   * @pid: the pid of the process
+   * @exit_status: the exit status of the process
+   *
+   * This signal is emitted when a process that was spawned
+   * with xdp_portal_spawn() exits.
+   */
+  signals[SPAWN_EXITED] = g_signal_new ("spawn-exited",
+                                        G_TYPE_FROM_CLASS (object_class),
+                                        G_SIGNAL_RUN_FIRST,
+                                        0,
+                                        NULL, NULL,
+                                        NULL,
+                                        G_TYPE_NONE, 2,
+                                        G_TYPE_UINT,
+                                        G_TYPE_UINT);
 }
 
 static void
@@ -63,7 +91,7 @@ xdp_portal_init (XdpPortal *portal)
   portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
   portal->sender = g_strdup (g_dbus_connection_get_unique_name (portal->bus) + 1);
   for (i = 0; portal->sender[i]; i++)
-    if (portal->sender[i] == '.') 
+    if (portal->sender[i] == '.')
       portal->sender[i] = '_';
 }
 

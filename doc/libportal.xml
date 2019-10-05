@@ -70,6 +70,7 @@
     <xi:include href="xml/background.xml" />
     <xi:include href="xml/camera.xml" />
     <xi:include href="xml/location.xml" />
+    <xi:include href="xml/spawn.xml" />
 
   </chapter>
 
