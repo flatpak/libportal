@@ -54,6 +54,12 @@
             Not currently covered
           </para></listitem>
         </varlistentry>
+        <varlistentry>
+          <term>Secrets</term>
+          <listitem><para>
+            Not currently covered
+          </para></listitem>
+        </varlistentry>
       </variablelist>
 
     <xi:include href="xml/account.xml" />
