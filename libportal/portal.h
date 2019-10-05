@@ -553,6 +553,18 @@ G_DECLARE_FINAL_TYPE (XdpLocation, xdp_location, XDP, LOCATION, GObject)
 XDP_PUBLIC
 GType xdp_location_get_type (void) G_GNUC_CONST;
 
+/**
+ * XdpLocationAccuracy:
+ * @XDP_LOCATION_ACCURACY_NONE: No particular accuracy
+ * @XDP_LOCATION_ACCURACY_COUNTRY: Country-level accuracy
+ * @XDP_LOCATION_ACCURACY_CITY: City-level accuracy
+ * @XDP_LOCATION_ACCURACY_NEIGHBORHOOD: Neighborhood-level accuracy
+ * @XDP_LOCATION_ACCURACY_STREET: Street-level accuracy
+ * @XDP_LOCATION_ACCURACY_EXACT: Maximum accuracy
+ *
+ * The values of this enum indicate the desired level
+ * of accuracy for location information.
+ */
 typedef enum {
   XDP_LOCATION_ACCURACY_NONE,
   XDP_LOCATION_ACCURACY_COUNTRY,
