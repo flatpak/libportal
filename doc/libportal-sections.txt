@@ -49,11 +49,12 @@ xdp_portal_get_user_information_finish
 <SECTION>
 <FILE>inhibit</FILE>
 XdpInhibitFlags
+XdpLoginSessionState
 xdp_portal_session_inhibit
 xdp_portal_session_uninhibit
 xdp_portal_session_monitor_start
 xdp_portal_session_monitor_start_finish
-xdp_portal_session_monitor_end
+xdp_portal_session_monitor_stop
 xdp_portal_session_monitor_query_end_response
 </SECTION>
 

@@ -193,6 +193,9 @@ void       xdp_portal_session_uninhibit           (XdpPortal            *portal,
  *     during which applications can save their state or inhibit the
  *     session from ending
  * @XDP_LOGIN_SESSION_ENDING: the session is about to end
+ *
+ * The values of this enum are returned in the #XdpPortal::session-state-changed signal
+ * to indicate the current state of the user session.
  */
 typedef enum {
   XDP_LOGIN_SESSION_RUNNING =   1,
