@@ -25,6 +25,10 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (XdpPortal, xdp_portal, XDP, PORTAL, GObject)
 
+#ifndef XDP_PUBLIC
+#define XDP_PUBLIC extern
+#endif
+
 XDP_PUBLIC
 GType      xdp_portal_get_type               (void) G_GNUC_CONST;
 
