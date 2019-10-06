@@ -4,7 +4,7 @@ portal_enums = gnome.mkenums('portal-enums',
                              sources: headers,
                              c_template: 'portal-enums.c.template',
                              h_template: 'portal-enums.h.template',
-                             install_dir: 'libportal',
+                             install_dir: join_paths (get_option('prefix'), 'include', 'libportal'),
                              install_header: true)
 
 src = [
