@@ -145,16 +145,9 @@ xdp_portal_open_pipewire_remote_for_camera
 <SECTION>
 <FILE>location</FILE>
 XdpLocationAccuracy
-xdp_portal_create_location
-xdp_portal_create_location_finish
-</SECTION>
-
-<SECTION>
-<FILE>locationsession</FILE>
-XdpLocation
-xdp_location_start
-xdp_location_start_finish
-xdp_location_close
+xdp_portal_location_monitor_start
+xdp_portal_location_monitor_start_finish
+xdp_portal_location_monitor_stop
 </SECTION>
 
 <SECTION>

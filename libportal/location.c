@@ -27,189 +27,14 @@
  * @title: Location
  * @short_description: access to location information
  *
- * A location session makes location information available
- * via the #XdpLocation::updated signal.
+ * Location monitoring makes location information available
+ * via the #XdpPortal::location-updated signal.
  */
-
-/**
- * SECTION:locationsession
- * @title: XdpLocation
- * @short_description: a representation of long-lived location portal interactions
- *
- * The XdpLocation object is used to represent an ongoing location portal interaction.
- *
- * All locations start in an initial state.
- * They can be made active by calling xdp_location_start(),
- * and ended by calling xdp_location_close().
- */
-enum {
-  CLOSED,
-  UPDATED,
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL];
-
-G_DEFINE_TYPE (XdpLocation, xdp_location, G_TYPE_OBJECT)
-
-static void
-xdp_location_finalize (GObject *object)
-{
-  XdpLocation *location = XDP_LOCATION (object);
-
-  if (location->signal_id)
-    g_dbus_connection_signal_unsubscribe (location->portal->bus, location->signal_id);
-
-  if (location->updated_id)
-    g_dbus_connection_signal_unsubscribe (location->portal->bus, location->updated_id);
-
-  g_free (location->id);
-  g_clear_object (&location->portal);
-
-  G_OBJECT_CLASS (xdp_location_parent_class)->finalize (object);
-}
-
-static void
-xdp_location_class_init (XdpLocationClass *klass)
-{
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  object_class->finalize = xdp_location_finalize;
-
-  /**
-   * XdpLocation::closed:
-   *
-   * The ::closed signal is emitted when a location is closed externally.
-   */
-  signals[CLOSED] =
-    g_signal_new ("closed",
-                  G_TYPE_FROM_CLASS (object_class),
-                  G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-                  0,
-                  NULL, NULL,
-                  NULL,
-                  G_TYPE_NONE, 0);
-
-  /**
-   * XdpLocation::updated:
-   * @latitude: the latitude, in degrees
-   * @longitude: the longitude, in degrees
-   * @altitude: the altitude, in meters
-   * @accuracy: the accuracy, in meters
-   * @speed: the speed, in meters per second
-   * @heading: the heading, in degrees
-   * @timestamp_s: the timestamp seconds since the Unix epoch
-   * @timestamp_ms: the microseconds fraction of the timestamp
-   *
-   * The ::updated signal is emitted when the location changes.
-   */
-  signals[UPDATED] =
-    g_signal_new ("updated",
-                  G_TYPE_FROM_CLASS (object_class),
-                  G_SIGNAL_RUN_FIRST,
-                  0,
-                  NULL, NULL,
-                  NULL,
-                  G_TYPE_NONE, 8,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT64,
-                  G_TYPE_INT64);
-}
-
-static void
-xdp_location_init (XdpLocation *location)
-{
-}
-
-static void
-location_closed (GDBusConnection *bus,
-                 const char *sender_name,
-                 const char *object_path,
-                 const char *interface_name,
-                 const char *signal_name,
-                 GVariant *parameters,
-                 gpointer data)
-{
-  XdpLocation *location = data;
-
-  if (location->updated_id)
-    {
-      g_dbus_connection_signal_unsubscribe (location->portal->bus, location->updated_id);
-      location->updated_id = 0;
-    }
-
-  _xdp_location_set_session_state (location, XDP_SESSION_CLOSED);
-}
-
-XdpLocation *
-_xdp_location_new (XdpPortal  *portal,
-                   const char *id)
-{
-  XdpLocation *location;
-
-  location = g_object_new (XDP_TYPE_SESSION, NULL);
-  location->portal = g_object_ref (portal);
-  location->id = g_strdup (id);
-  location->state = XDP_SESSION_INITIAL;
-
-  location->signal_id = g_dbus_connection_signal_subscribe (portal->bus,
-                                                            PORTAL_BUS_NAME,
-                                                            SESSION_INTERFACE,
-                                                            "Closed",
-                                                            id,
-                                                            NULL,
-                                                            G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                            location_closed,
-                                                            location,
-                                                            NULL);
-  return location;
-}
-
-/**
- * xdp_location_get_session_state:
- * @location: an #XdpLocation
- *
- * Obtains information about the state of the location that is
- * represented by @location.
- * 
- * Returns: the state of @location
- */
-XdpSessionState
-xdp_location_get_session_state (XdpLocation *location)
-{
-  g_return_val_if_fail (XDP_IS_LOCATION (location), XDP_SESSION_CLOSED);
-
-  return location->state;
-}
-
-void
-_xdp_location_set_session_state (XdpLocation *location,
-                                 XdpSessionState state)
-{
-  location->state = state;
-
-  if (state == XDP_SESSION_INITIAL && location->state != XDP_SESSION_INITIAL)
-    {
-      g_warning ("Can't move a location back to initial state");
-      return;
-    }
-  if (location->state == XDP_SESSION_CLOSED && state != XDP_SESSION_CLOSED)
-    {
-      g_warning ("Can't move a location back from closed state");
-      return;
-    }
-
-  if (state == XDP_SESSION_CLOSED)
-    g_signal_emit (location, signals[CLOSED], 0);
-}
 
 typedef struct {
   XdpPortal *portal;
+  XdpParent *parent;
+  char *parent_handle;
   char *id;
   guint signal_id;
   GTask *task;
@@ -223,6 +48,13 @@ typedef struct {
 static void
 create_call_free (CreateCall *call)
 {
+  if (call->parent)
+    {
+      call->parent->unexport (call->parent);
+      _xdp_parent_free (call->parent);
+    }
+ g_free (call->parent_handle);
+
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
@@ -240,7 +72,7 @@ create_call_free (CreateCall *call)
 }
 
 static void
-session_created (GDBusConnection *bus,
+session_started (GDBusConnection *bus,
                  const char *sender_name,
                  const char *object_path,
                  const char *interface_name,
@@ -255,22 +87,133 @@ session_created (GDBusConnection *bus,
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
   if (response == 0)
+    g_task_return_boolean (call->task, TRUE);
+  else
     {
-      XdpLocation *location;
+      if (call->portal->location_updated_signal != 0)
+        {
+          g_dbus_connection_signal_unsubscribe (call->portal->bus, call->portal->location_updated_signal);
+          call->portal->location_updated_signal = 0;
+        }
+      g_clear_pointer (&call->portal->location_monitor_handle, g_free);
 
-      g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
-      call->signal_id = 0;
-
-      location = _xdp_location_new (call->portal, call->id);
-      g_task_return_pointer (call->task, location, g_object_unref);
+      if (response == 1)
+        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "StartLocation canceled");
+      else if (response == 2)
+        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "StartLocation failed");
     }
-  else if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "CreateSession canceled");
-  else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateSession failed");
+
+  create_call_free (call);
+}
+
+static void
+location_updated (GDBusConnection *bus,
+                  const char *sender_name,
+                  const char *object_path,
+                  const char *interface_name,
+                  const char *signal_name,
+                  GVariant *parameters,
+                  gpointer data)
+{
+  XdpPortal *portal = data;
+  int latitude, longitude, altitude;
+  int accuracy, speed, heading;
+  gint64 timestamp_s, timestamp_ms;
+
+  g_variant_get (parameters, "(ddddddtt)",
+                 &latitude, &longitude, &altitude,
+                 &accuracy, &speed, &heading,
+                 &timestamp_s, &timestamp_ms);
+  g_signal_emit_by_name (portal, "location-updated",
+                         latitude, longitude, altitude,
+                         accuracy, speed, heading,
+                         timestamp_s, timestamp_ms);
+}
+
+static void
+ensure_location_updated_connected (XdpPortal *portal)
+{
+  if (portal->location_updated_signal == 0)
+    portal->location_updated_signal =
+        g_dbus_connection_signal_subscribe (portal->bus,
+                                            PORTAL_BUS_NAME,
+                                            "org.freedesktop.portal.Location",
+                                            "LocationUpdated",
+                                            portal->location_monitor_handle,
+                                            NULL,
+                                            G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                            location_updated,
+                                            portal,
+                                            NULL);
+}
+
+static void
+session_created (GDBusConnection *bus,
+                 const char *sender_name,
+                 const char *object_path,
+                 const char *interface_name,
+                 const char *signal_name,
+                 GVariant *parameters,
+                 gpointer data)
+{
+  CreateCall *call = data;
+  GVariantBuilder options;
+  g_autofree char *token = NULL;
+  GCancellable *cancellable;
+  guint response;
+  g_autoptr(GVariant) ret = NULL;
+
+  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
   if (response != 0)
-    create_call_free (call);
+    {
+      if (response == 1)
+        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "CreateLocation canceled");
+      else if (response == 2)
+        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateLocation failed");
+
+      create_call_free (call);
+      return;
+    }
+
+  g_free (call->request_path);
+  g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+
+  token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
+  call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
+                                                        PORTAL_BUS_NAME,
+                                                        REQUEST_INTERFACE,
+                                                        "Response",
+                                                        call->request_path,
+                                                        NULL,
+                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                                        session_started,
+                                                        call,
+                                                        NULL);
+
+  call->portal->location_monitor_handle = g_strdup (call->id);
+  ensure_location_updated_connected (call->portal);
+
+  cancellable = g_task_get_cancellable (call->task);
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+  g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Location",
+                          "Start",
+                          g_variant_new ("(osa{sv})",
+                                         call->id,
+                                         call->parent_handle,
+                                         &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          NULL,
+                          NULL);
 }
 
 static void
@@ -291,6 +234,18 @@ create_cancelled_cb (GCancellable *cancellable,
                           NULL, NULL, NULL);
 }
 
+static void create_session (CreateCall *call);
+
+static void
+parent_exported (XdpParent *parent,
+                 const char *handle,
+                 gpointer data)
+{
+  CreateCall *call = data;
+  call->parent_handle = g_strdup (handle);
+  create_session (call);
+}
+
 static void
 create_session (CreateCall *call)
 {
@@ -298,6 +253,19 @@ create_session (CreateCall *call)
   g_autofree char *token = NULL;
   g_autofree char *session_token = NULL;
   GCancellable *cancellable;
+
+  if (call->portal->location_monitor_handle)
+    {
+      g_task_return_boolean (call->task, TRUE);
+      create_call_free (call);
+      return;
+    }
+
+  if (call->parent_handle == NULL)
+    {
+      call->parent->export (call->parent, parent_exported, call);
+      return;
+    }
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
@@ -337,14 +305,39 @@ create_session (CreateCall *call)
                           NULL);
 }
 
+/**
+ * xdp_portal_location_monitor_start:
+ * @portal: a #XdpPortal
+ * @parent: (nullable): a #XdpParent, or %NULL
+ * @distance_threshold: distance threshold, in meters
+ * @time_threshold: time threshold, in seconds
+ * @accuracy: desired accuracy
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Makes XdpPortal start monitoring location changes.
+ *
+ * When the location changes, the #XdpPortal::location-updated.
+ * signal is emitted.
+ *
+ * Use xdp_portal_location_monitor_stop() to stop monitoring.
+ *
+ * Note that #XdpPortal only maintains a single location monitor
+ * at a time. If you want to change the @distance_threshold,
+ * @time_threshold or @accuracy of the current monitor, you
+ * first have to call xdp_portal_location_monitor_stop() to
+ * stop monitoring. 
+ */
 void
-xdp_portal_create_location (XdpPortal           *portal,
-                            guint                distance_threshold,
-                            guint                time_threshold,
-                            XdpLocationAccuracy  accuracy,
-                            GCancellable        *cancellable,
-                            GAsyncReadyCallback  callback,
-                            gpointer             data)
+xdp_portal_location_monitor_start (XdpPortal *portal,
+                                   XdpParent *parent,
+                                   guint distance_threshold,
+                                   guint time_threshold,
+                                   XdpLocationAccuracy accuracy,
+                                   GCancellable *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer data)
 {
   CreateCall *call;
 
@@ -352,6 +345,10 @@ xdp_portal_create_location (XdpPortal           *portal,
 
   call = g_new0 (CreateCall, 1);
   call->portal = g_object_ref (portal);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
   call->distance = distance_threshold;
   call->time = time_threshold;
   call->accuracy = accuracy;
@@ -360,249 +357,55 @@ xdp_portal_create_location (XdpPortal           *portal,
   create_session (call);
 }
 
-XdpLocation *
-xdp_portal_create_location_finish (XdpPortal *portal,
-                                   GAsyncResult *result,
-                                   GError **error)
-{
-  g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
-  g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
-
-  return g_object_ref (g_task_propagate_pointer (G_TASK (result), error));
-}
-
-typedef struct {
-  XdpPortal *portal;
-  XdpLocation *location;
-  XdpParent *parent;
-  char *parent_handle;
-  guint signal_id;
-  GTask *task;
-  char *request_path;
-  guint cancelled_id;
-} StartCall;
-
-static void
-start_call_free (StartCall *call)
-{
-  if (call->parent)
-    {
-      call->parent->unexport (call->parent);
-      _xdp_parent_free (call->parent);
-    }
-  g_free (call->parent_handle);
-
-  if (call->signal_id)
-    g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
-
-  if (call->cancelled_id)
-    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
-
-  g_free (call->request_path);
-
-  g_object_unref (call->location);
-  g_object_unref (call->portal);
-  g_object_unref (call->task);
-
-  g_free (call);
-}
-
-static void
-session_started (GDBusConnection *bus,
-                 const char *sender_name,
-                 const char *object_path,
-                 const char *interface_name,
-                 const char *signal_name,
-                 GVariant *parameters,
-                 gpointer data)
-{
-  StartCall *call = data;
-  guint32 response;
-  g_autoptr(GVariant) ret = NULL;
-
-  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
-
-  if (response == 0)
-    g_task_return_boolean (call->task, TRUE);
-  else if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Location canceled");
-  else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Location failed");
-
-  _xdp_location_set_session_state (call->location, response == 0 ? XDP_SESSION_ACTIVE
-                                                               : XDP_SESSION_CLOSED);
-
-  start_call_free (call);
-}
-
-static void start_session (StartCall *call);
-
-static void
-parent_exported (XdpParent *parent,
-                 const char *handle,
-                 gpointer data)
-{
-  StartCall *call = data;
-  call->parent_handle = g_strdup (handle);
-  start_session (call);
-}
-
-static void
-start_cancelled_cb (GCancellable *cancellable,
-                    gpointer data)
-{
-  StartCall *call = data;
-
-  g_dbus_connection_call (call->portal->bus,
-                          PORTAL_BUS_NAME,
-                          call->request_path,
-                          REQUEST_INTERFACE,
-                          "Close",
-                          NULL,
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          NULL, NULL, NULL);
-}
-
-static void
-location_updated (GDBusConnection *bus,
-                  const char *sender_name,
-                  const char *object_path,
-                  const char *interface_name,
-                  const char *signal_name,
-                  GVariant *parameters,
-                  gpointer data)
-{
-  XdpLocation *location = data;
-  int latitude, longitude, altitude;
-  int accuracy, speed, heading;
-  gint64 timestamp_s, timestamp_ms;
-
-  g_variant_get (parameters, "(ddddddtt)",
-                 &latitude, &longitude, &altitude,
-                 &accuracy, &speed, &heading,
-                 &timestamp_s, &timestamp_ms);
-  g_signal_emit (location, signals[UPDATED], 0,
-                 latitude, longitude, altitude,
-                 accuracy, speed, heading,
-                 timestamp_s, timestamp_ms);
-}
-
-static void
-start_session (StartCall *call)
-{
-  GVariantBuilder options;
-  g_autofree char *token = NULL;
-  GCancellable *cancellable;
-
-  if (call->parent_handle == NULL)
-    {
-      call->parent->export (call->parent, parent_exported, call);
-      return;
-    }
-
-  call->location->updated_id = g_dbus_connection_signal_subscribe (call->portal->bus,
-                                                                   PORTAL_BUS_NAME,
-                                                                   "org.freedesktop.portal.Location",
-                                                                   "LocationUpdated",
-                                                                   call->location->id,
-                                                                   NULL,
-                                                                   G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                                   location_updated,
-                                                                   call->location,
-                                                                   NULL);
-
-  token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
-  call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
-  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
-                                                        PORTAL_BUS_NAME,
-                                                        REQUEST_INTERFACE,
-                                                        "Response",
-                                                        call->request_path,
-                                                        NULL,
-                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                        session_started,
-                                                        call,
-                                                        NULL);
-
-  cancellable = g_task_get_cancellable (call->task);
-  if (cancellable)
-    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (start_cancelled_cb), call);
-
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
-  g_dbus_connection_call (call->portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.Location",
-                          "Start",
-                          g_variant_new ("(osa{sv})",
-                                         call->location->id,
-                                         call->parent_handle,
-                                         &options),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          cancellable,
-                          NULL,
-                          NULL);
-}
-
-void
-xdp_location_start (XdpLocation         *location,
-                    XdpParent           *parent,
-                    GCancellable        *cancellable,
-                    GAsyncReadyCallback  callback,
-                    gpointer             data)
-{
-  StartCall *call = NULL;
-
-  g_return_if_fail (XDP_IS_LOCATION (location));
-
-  call = g_new0 (StartCall, 1);
-  call->portal = g_object_ref (location->portal);
-  call->location = g_object_ref (location);
-  if (parent)
-    call->parent = _xdp_parent_copy (parent);
-  else
-    call->parent_handle = g_strdup ("");
-  call->task = g_task_new (location, cancellable, callback, data);
-
-  start_session (call);
-}
-
+/**
+ * xdp_portal_location_monitor_start_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes a location-monitor request, and returns
+ * the result in the form of boolean.
+ *
+ * Returns: %TRUE if the request succeeded
+ */
 gboolean
-xdp_location_start_finish (XdpLocation   *location,
-                           GAsyncResult  *result,
-                           GError       **error)
+xdp_portal_location_monitor_start_finish (XdpPortal *portal,
+                                          GAsyncResult *result,
+                                          GError **error)
 {
-  g_return_val_if_fail (XDP_IS_LOCATION (location), FALSE);
-  g_return_val_if_fail (g_task_is_valid (result, location), FALSE);
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
+/**
+ * xdp_portal_location_monitor_stop:
+ * portal: a #XdpPortal
+ *
+ * Stops location monitoring that was started with
+ * xdp_portal_location_monitor_start().
+ */
 void
-xdp_location_close (XdpLocation *location)
+xdp_portal_location_monitor_stop (XdpPortal *portal)
 {
-  g_return_if_fail (XDP_IS_LOCATION (location));
+  g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  g_dbus_connection_call (location->portal->bus,
-                          PORTAL_BUS_NAME,
-                          location->id,
-                          SESSION_INTERFACE,
-                          "Close",
-                          NULL,
-                          NULL, 0, -1, NULL, NULL, NULL);
-
-  if (location->updated_id)
+  if (portal->location_monitor_handle != NULL)
     {
-      g_dbus_connection_signal_unsubscribe (location->portal->bus, location->updated_id);
-      location->updated_id = 0;
+      g_dbus_connection_call (portal->bus,
+                              PORTAL_BUS_NAME,
+                              portal->location_monitor_handle,
+                              SESSION_INTERFACE,
+                              "Close",
+                              NULL,
+                              NULL, 0, -1, NULL, NULL, NULL);
+      g_clear_pointer (&portal->location_monitor_handle, g_free);
     }
 
-  _xdp_location_set_session_state (location, XDP_SESSION_CLOSED);
-  g_signal_emit_by_name (location, "closed");
+  if (portal->location_updated_signal)
+    {
+      g_dbus_connection_signal_unsubscribe (portal->bus, portal->location_updated_signal);
+      portal->location_updated_signal = 0;
+    }
 }
-

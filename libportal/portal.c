@@ -37,6 +37,7 @@ enum {
   SESSION_STATE_CHANGED,
   UPDATE_AVAILABLE,
   UPDATE_PROGRESS,
+  LOCATION_UPDATED,
   LAST_SIGNAL
 };
 
@@ -67,8 +68,12 @@ xdp_portal_finalize (GObject *object)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->update_available_signal);
   if (portal->update_progress_signal)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->update_progress_signal);
-
   g_free (portal->update_monitor_handle);
+
+  /* location */
+  if (portal->location_updated_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->location_updated_signal);
+  g_free (portal->location_monitor_handle);
 
   g_clear_object (&portal->bus);
   g_free (portal->sender);
@@ -178,6 +183,38 @@ xdp_portal_class_init (XdpPortalClass *klass)
                                            XDP_TYPE_UPDATE_STATUS,
                                            G_TYPE_STRING,
                                            G_TYPE_STRING);
+
+ /**
+   * XdpPortal::location-updated:
+   * @portal: the #XdpPortal
+   * @latitude: the latitude, in degrees
+   * @longitude: the longitude, in degrees
+   * @altitude: the altitude, in meters
+   * @accuracy: the accuracy, in meters
+   * @speed: the speed, in meters per second
+   * @heading: the heading, in degrees
+   * @timestamp_s: the timestamp seconds since the Unix epoch
+   * @timestamp_ms: the microseconds fraction of the timestamp
+   *
+   * The ::location-updated signal is emitted when location
+   * monitoring is enabled and the location changes.
+   */
+  signals[LOCATION_UPDATED] =
+    g_signal_new ("location-updated",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_FIRST,
+                  0,
+                  NULL, NULL,
+                  NULL,
+                  G_TYPE_NONE, 8,
+                  G_TYPE_INT,
+                  G_TYPE_INT,
+                  G_TYPE_INT,
+                  G_TYPE_INT,
+                  G_TYPE_INT,
+                  G_TYPE_INT,
+                  G_TYPE_INT64,
+                  G_TYPE_INT64);
 }
 
 static void

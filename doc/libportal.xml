@@ -90,7 +90,6 @@
     <xi:include href="xml/portal.xml" />
     <xi:include href="xml/parent.xml" />
     <xi:include href="xml/session.xml" />
-    <xi:include href="xml/locationsession.xml" />
 
   </chapter>
 

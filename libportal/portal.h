@@ -582,13 +582,6 @@ int      xdp_portal_open_pipewire_remote_for_camera (XdpPortal *portal);
 
 /* Location */
 
-#define XDP_TYPE_LOCATION (xdp_location_get_type ())
-
-G_DECLARE_FINAL_TYPE (XdpLocation, xdp_location, XDP, LOCATION, GObject)
-
-XDP_PUBLIC
-GType xdp_location_get_type (void) G_GNUC_CONST;
-
 /**
  * XdpLocationAccuracy:
  * @XDP_LOCATION_ACCURACY_NONE: No particular accuracy
@@ -611,33 +604,22 @@ typedef enum {
 } XdpLocationAccuracy;
 
 XDP_PUBLIC
-void         xdp_portal_create_location       (XdpPortal            *portal,
-                                               guint                 distance_threshold,
-                                               guint                 time_threshold,
-                                               XdpLocationAccuracy   accuracy,
-                                               GCancellable         *cancellable,
-                                               GAsyncReadyCallback   callback,
-                                               gpointer              data);
+void     xdp_portal_location_monitor_start        (XdpPortal            *portal,
+                                                   XdpParent            *parent,
+                                                   guint                 distance_threshold,
+                                                   guint                 time_threshold,
+                                                   XdpLocationAccuracy   accuracy,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
 
 XDP_PUBLIC
-XdpLocation *xdp_portal_create_location_finish (XdpPortal           *portal,
-                                                GAsyncResult        *result,
-                                                GError             **error);
+gboolean xdp_portal_location_monitor_start_finish (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
 
 XDP_PUBLIC
-void         xdp_location_start               (XdpLocation          *location,
-                                               XdpParent            *parent,
-                                               GCancellable         *cancellable,
-                                               GAsyncReadyCallback   callback,
-                                               gpointer              data);
-
-XDP_PUBLIC
-gboolean     xdp_location_start_finish        (XdpLocation           *location,
-                                               GAsyncResult         *result,
-                                               GError              **error);
-
-XDP_PUBLIC
-void         xdp_location_close               (XdpLocation          *location);
+void     xdp_portal_location_monitor_stop         (XdpPortal            *portal);
 
 /* Spawning */
 
