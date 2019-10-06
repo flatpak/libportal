@@ -15,9 +15,8 @@ src = ['main.c',
 
 executable('portal-test',
            src,
-           link_with: libportal,
-           include_directories: top_inc,
-           dependencies: [gtk_dep, gst_dep],
+           include_directories: [top_inc, libportal_inc],
+           dependencies: [gtk_dep, gst_dep, libportal_dep],
            install : true)
 
 install_data('org.gnome.PortalTest.desktop', install_dir: 'share/applications')

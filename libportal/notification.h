@@ -19,19 +19,15 @@
 
 #include <gio/gio.h>
 
-#include <portal-helpers.h>
-#include <portal-enums.h>
-#include <account.h>
-#include <background.h>
-#include <camera.h>
-#include <email.h>
-#include <filechooser.h>
-#include <location.h>
-#include <notification.h>
-#include <print.h>
-#include <remote.h>
-#include <screenshot.h>
-#include <session.h>
-#include <spawn.h>
-#include <trash.h>
-#include <updates.h>
+G_BEGIN_DECLS
+
+XDP_PUBLIC
+void       xdp_portal_add_notification    (XdpPortal  *portal,
+                                           const char *id,
+                                           GVariant   *notification);
+
+XDP_PUBLIC
+void       xdp_portal_remove_notification (XdpPortal  *portal,
+                                           const char *id);
+
+G_END_DECLS

@@ -19,19 +19,18 @@
 
 #include <gio/gio.h>
 
-#include <portal-helpers.h>
-#include <portal-enums.h>
-#include <account.h>
-#include <background.h>
-#include <camera.h>
-#include <email.h>
-#include <filechooser.h>
-#include <location.h>
-#include <notification.h>
-#include <print.h>
-#include <remote.h>
-#include <screenshot.h>
-#include <session.h>
-#include <spawn.h>
-#include <trash.h>
-#include <updates.h>
+G_BEGIN_DECLS
+
+XDP_PUBLIC
+void     xdp_portal_trash_file                    (XdpPortal            *portal,
+                                                   const char           *path,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+gboolean  xdp_portal_trash_file_finish            (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
+G_END_DECLS

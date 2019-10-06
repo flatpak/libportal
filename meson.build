@@ -20,6 +20,7 @@ endif
 configure_file(output : 'config.h', configuration : conf)
 
 top_inc = include_directories('.')
+libportal_inc = include_directories('libportal')
 
 subdir('libportal')
 subdir('doc')
