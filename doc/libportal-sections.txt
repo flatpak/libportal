@@ -164,3 +164,13 @@ xdp_portal_spawn
 xdp_portal_spawn_finish
 xdp_portal_spawn_signal
 </SECTION>
+
+<SECTION>
+<FILE>updates</FILE>
+XdpUpdateStatus
+xdp_portal_update_monitor_start
+xdp_portal_update_monitor_start_finish
+xdp_portal_update_monitor_stop
+xdp_portal_update_install
+xdp_portal_update_install_finish
+</SECTION>

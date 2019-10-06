@@ -686,5 +686,52 @@ void        xdp_portal_spawn_signal           (XdpPortal            *portal,
                                                int                   signal,
                                                gboolean              to_process_group);
 
+/* Updates */
+
+/**
+ * XdpUpdateStatus:
+ * @XDP_UPDATE_STATUS_RUNNING: Update in progress
+ * @XDP_UPDATE_STATUS_EMPTY: No update to install
+ * @XDP_UPDATE_STATUS_DONE: Update finished successfully
+ * @XDP_UPDATE_STATUS_FAILED: Update failed
+ *
+ * The values of this enum are returned in the
+ * #XdpPortal::update-progress signal to indicate
+ * the current progress of an update installation.
+ */
+typedef enum {
+  XDP_UPDATE_STATUS_RUNNING,
+  XDP_UPDATE_STATUS_EMPTY,
+  XDP_UPDATE_STATUS_DONE,
+  XDP_UPDATE_STATUS_FAILED
+} XdpUpdateStatus;
+
+XDP_PUBLIC
+void       xdp_portal_update_monitor_start        (XdpPortal            *portal,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_update_monitor_start_finish (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
+XDP_PUBLIC
+void       xdp_portal_update_monitor_stop         (XdpPortal            *portal);
+
+XDP_PUBLIC
+void       xdp_portal_update_install              (XdpPortal            *portal,
+                                                   XdpParent            *parent,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_update_install_finish       (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
+/* OpenURI */
 
 G_END_DECLS

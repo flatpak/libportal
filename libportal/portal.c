@@ -35,6 +35,8 @@
 enum {
   SPAWN_EXITED,
   SESSION_STATE_CHANGED,
+  UPDATE_AVAILABLE,
+  UPDATE_PROGRESS,
   LAST_SIGNAL
 };
 
@@ -47,18 +49,29 @@ xdp_portal_finalize (GObject *object)
 {
   XdpPortal *portal = XDP_PORTAL (object);
 
-  if (portal->spawn_exited_signal)
-    g_dbus_connection_signal_unsubscribe (portal->bus, portal->spawn_exited_signal);
+  /* inhibit */
+  if (portal->inhibit_handles)
+    g_hash_table_unref (portal->inhibit_handles);
+
   if (portal->state_changed_signal)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->state_changed_signal);
 
   g_free (portal->session_monitor_handle);
 
+  /* spawn */
+  if (portal->spawn_exited_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->spawn_exited_signal);
+
+  /* updates */
+  if (portal->update_available_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->update_available_signal);
+  if (portal->update_progress_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->update_progress_signal);
+
+  g_free (portal->update_monitor_handle);
+
   g_clear_object (&portal->bus);
   g_free (portal->sender);
-
-  if (portal->inhibit_handles)
-    g_hash_table_unref (portal->inhibit_handles);
 
   G_OBJECT_CLASS (xdp_portal_parent_class)->finalize (object);
 }
@@ -108,6 +121,63 @@ xdp_portal_class_init (XdpPortalClass *klass)
                                                  G_TYPE_NONE, 2,
                                                  G_TYPE_BOOLEAN,
                                                  XDP_TYPE_LOGIN_SESSION_STATE);
+
+  /**
+   * XdpPortal::update-available:
+   * @portal: the #XdpPortal object
+   * @running_commit: the commit that the sandbox is running with
+   * @local_commit: the commit that is currently deployed. Restarting
+   *     the app will use this commit
+   * @remote_commit: the commit that is available as an update.
+   *     Updating the app will deloy this commit
+   *
+   * This signal is emitted when updates monitoring is enabled
+   * and a new update is available. It is only sent once with
+   * the same information, but it can be sent many times if
+   * new updates appear.
+   */
+  signals[UPDATE_AVAILABLE] = g_signal_new ("update-available",
+                                            G_TYPE_FROM_CLASS (object_class),
+                                            G_SIGNAL_RUN_FIRST,
+                                            0,
+                                            NULL, NULL,
+                                            NULL,
+                                            G_TYPE_NONE, 3,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING);
+
+  /**
+   * XdpPortal::update-progress:
+   * @portal: the #XdpPortal object
+   * @n_ops: the number of operations that the update consists of
+   * @op: the position of the currently active operation
+   * @progress: the progress of the currently active operation, as
+   *   a number between 0 and 100
+   * @status: the overall status of the update
+   * @error: the error name if the status is 'failed'
+   * @error_message: the error message if the status is 'failed'
+   *
+   * This signal gets emitted to indicate progress of an
+   * update installation. It is undefined exactly how often it
+   * is sent, but it will be emitted at least once at the end with
+   * a non-zero @status. For each successful operation in the
+   * update, we're also guaranteed to send exactly one signal
+   * with @progress 100.
+   */
+  signals[UPDATE_PROGRESS] = g_signal_new ("update-progress",
+                                           G_TYPE_FROM_CLASS (object_class),
+                                           G_SIGNAL_RUN_FIRST,
+                                           0,
+                                           NULL, NULL,
+                                           NULL,
+                                           G_TYPE_NONE, 6,
+                                           G_TYPE_UINT,
+                                           G_TYPE_UINT,
+                                           G_TYPE_UINT,
+                                           XDP_TYPE_UPDATE_STATUS,
+                                           G_TYPE_STRING,
+                                           G_TYPE_STRING);
 }
 
 static void

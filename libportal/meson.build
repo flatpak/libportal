@@ -25,6 +25,7 @@ src = [
         'camera.c',
         'location.c',
         'spawn.c',
+        'updates.c',
         portal_enums
 ]
 
