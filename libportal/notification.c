@@ -29,6 +29,44 @@
  * The underlying portal is org.freedesktop.portal.Notification.
  */
 
+static void
+action_invoked (GDBusConnection *bus,
+                const char *sender_name,
+                const char *object_path,
+                const char *interface_name,
+                const char *signal_name,
+                GVariant *parameters,
+                gpointer data)
+{
+  XdpPortal *portal = data;
+  g_autoptr(GVariant) info = NULL;
+  const char *id;
+  const char *action;
+  g_autoptr(GVariant) parameter = NULL;
+
+  g_variant_get (parameters, "(&s&s@av)", &id, &action, &parameter);
+
+  g_signal_emit_by_name (portal, "notification-action-invoked",
+                         id, action, parameter);
+}
+
+static void
+ensure_action_invoked_connection (XdpPortal *portal)
+{
+  if (portal->action_invoked_signal == 0)
+    portal->action_invoked_signal =
+       g_dbus_connection_signal_subscribe (portal->bus,
+                                           PORTAL_BUS_NAME,
+                                           "org.freedesktop.portal.Notification",
+                                           "ActionInvoked",
+                                           PORTAL_OBJECT_PATH,
+                                           NULL,
+                                           G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                           action_invoked,
+                                           portal,
+                                           NULL);
+}
+
 /**
  * xdp_portal_add_notification:
  * @portal: a #XdpPortal
@@ -42,20 +80,26 @@
  * - body `s`: a user-visible string to display as body
  * - icon `v`: a serialized icon (in the format produced by g_icon_serialize())
  * - priority `s`: "low", "normal", "high" or "urgent"
- * - default-action `s`: name of an action that is exported by the application.
- *     this action will be activated when the user clicks on the notification
- * - default-action-target `v`: target parameter to send along when activating
- *     the default action.
+ * - default-action `s`: name of an action that
+ *     will be activated when the user clicks on the notification
+ * - default-action-target `v`: target parameter to send along when
+ *     activating the default action.
  * - buttons `aa{sv}`: array of serialized buttons
  *
  * Each serialized button is a dictionary with the following supported keys:
  * - label `s`: user-visible lable for the button. Mandatory
- * - action `s`: name of an action that is exported by the application. The action
- *     will be activated when the user clicks on the button. Mandatory
- * - target `v`: target parameter to send along when activating the button
+ * - action `s`: name of an action that will be activated when
+ *     the user clicks on the button. Mandatory
+ * - target `v`: target parameter to send along when activating
+ *     the button
  *
- * It is the callers responsibility to ensure that the ID is unique among
- * all notifications.
+ * Actions with a prefix of "app." are assumed to be exported by the
+ * application and will be activated via the org.freedesktop.Application
+ * interface, others are activated by emitting the
+ * #XdpPortal::notification-action-invoked signal.
+ *
+ * It is the callers responsibility to ensure that the ID is unique
+ * among all notifications.
  *
  * To withdraw a notification, use xdp_portal_remove_notification().
  */
@@ -65,6 +109,8 @@ xdp_portal_add_notification (XdpPortal  *portal,
                              GVariant   *notification)
 {
   g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  ensure_action_invoked_connection (portal);
 
   g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,

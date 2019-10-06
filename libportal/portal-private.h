@@ -41,6 +41,9 @@ struct _XdpPortal {
   /* location */
   char *location_monitor_handle;
   guint location_updated_signal;
+
+  /* notification */
+  guint action_invoked_signal;
 };
 
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"

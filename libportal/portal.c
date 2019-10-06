@@ -38,6 +38,7 @@ enum {
   UPDATE_AVAILABLE,
   UPDATE_PROGRESS,
   LOCATION_UPDATED,
+  NOTIFICATION_ACTION_INVOKED,
   LAST_SIGNAL
 };
 
@@ -74,6 +75,10 @@ xdp_portal_finalize (GObject *object)
   if (portal->location_updated_signal)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->location_updated_signal);
   g_free (portal->location_monitor_handle);
+
+  /* notification */
+  if (portal->action_invoked_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus, portal->action_invoked_signal);
 
   g_clear_object (&portal->bus);
   g_free (portal->sender);
@@ -215,6 +220,28 @@ xdp_portal_class_init (XdpPortalClass *klass)
                   G_TYPE_INT,
                   G_TYPE_INT64,
                   G_TYPE_INT64);
+
+  /**
+   * XdpPortal::notification-action-invoked:
+   * @portal: the #XdpPortal
+   * @id: the notification ID
+   * @action: the action name
+   * @parameter: (nullable): the target parameter for the action
+   *
+   * The ::notification-action-invoked signal is emitted when
+   * a non-exported action is activated on a notification.
+   */
+  signals[NOTIFICATION_ACTION_INVOKED] =
+    g_signal_new ("notification-action-invoked",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_FIRST,
+                  0,
+                  NULL, NULL,
+                  NULL,
+                  G_TYPE_NONE, 3,
+                  G_TYPE_STRING,
+                  G_TYPE_STRING,
+                  G_TYPE_VARIANT);
 }
 
 static void
