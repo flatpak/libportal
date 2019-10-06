@@ -268,7 +268,7 @@ xdp_portal_update_monitor_start_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_update_monitor_stop:
- * portal: a #XdpPortal
+ * @portal: a #XdpPortal
  *
  * Stops update monitoring that was started with
  * xdp_portal_update_monitor_start().

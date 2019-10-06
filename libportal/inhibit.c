@@ -483,7 +483,7 @@ xdp_portal_session_monitor_start (XdpPortal *portal,
   create_monitor (call);
 }
 
-/*
+/**
  * xdp_portal_session_monitor_start_finish:
  * @portal: a #XdpPortal
  * @result: a #GAsyncResult
@@ -507,7 +507,7 @@ xdp_portal_session_monitor_start_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_session_monitor_stop:
- * portal: a #XdpPortal
+ * @portal: a #XdpPortal
  *
  * Stops session state monitoring that was started with
  * xdp_portal_session_monitor_start().
@@ -537,7 +537,7 @@ xdp_portal_session_monitor_stop (XdpPortal *portal)
 }
 
 /**
- * xdp_portal_session_query_end_response:
+ * xdp_portal_session_monitor_query_end_response:
  * @portal: a #XdpPortal
  *
  * This method should be called within one second of
