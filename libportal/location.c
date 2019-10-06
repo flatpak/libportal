@@ -17,7 +17,6 @@
 
 #include "config.h"
 
-#include "location-private.h"
 #include "portal-private.h"
 #include "utils-private.h"
 
@@ -381,7 +380,7 @@ xdp_portal_location_monitor_start_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_location_monitor_stop:
- * portal: a #XdpPortal
+ * @portal: a #XdpPortal
  *
  * Stops location monitoring that was started with
  * xdp_portal_location_monitor_start().

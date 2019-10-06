@@ -1,7 +1,6 @@
 private_headers = [
 	'portal-private.h',
 	'session-private.h',
-        'location-private.h',
 	'utils-private.h'
 ]
 
