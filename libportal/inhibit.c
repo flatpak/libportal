@@ -305,22 +305,20 @@ session_state_changed (GDBusConnection *bus,
 }
 
 static void
-ensure_state_changed_connection (XdpPortal *portal)
+ensure_session_monitor_connection (XdpPortal *portal)
 {
   if (portal->state_changed_signal == 0)
-    {
-      portal->state_changed_signal =
-         g_dbus_connection_signal_subscribe (portal->bus,
-                                             PORTAL_BUS_NAME,
-                                             "org.freedesktop.portal.Inhibit",
-                                             "StateChanged",
-                                             PORTAL_OBJECT_PATH,
-                                             NULL,
-                                             G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                             session_state_changed,
-                                             portal,
-                                             NULL);
-    }
+    portal->state_changed_signal =
+       g_dbus_connection_signal_subscribe (portal->bus,
+                                           PORTAL_BUS_NAME,
+                                           "org.freedesktop.portal.Inhibit",
+                                           "StateChanged",
+                                           PORTAL_OBJECT_PATH,
+                                           NULL,
+                                           G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                           session_state_changed,
+                                           portal,
+                                           NULL);
 }
 
 static void
@@ -347,7 +345,7 @@ create_response_received (GDBusConnection *bus,
   if (response == 0)
     {
       call->portal->session_monitor_handle = g_strdup (call->id);
-      ensure_state_changed_connection (call->portal);
+      ensure_session_monitor_connection (call->portal);
       g_task_return_boolean (call->task, TRUE);
     }
   else if (response == 1)
@@ -548,23 +546,21 @@ xdp_portal_session_monitor_stop (XdpPortal *portal)
  * have handled the state change.
  *
  * Possible ways to handle the state change are either
- * to call xdp_portal_inihit() to prevent the session
- * from ending, or to save your state and get ready
- * for the session to end.
+ * to call xdp_portal_session_inhibit() to prevent the
+ * session from ending, or to save your state and get
+ * ready for the session to end.
  */
 void
 xdp_portal_session_monitor_query_end_response (XdpPortal *portal)
 {
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  if (portal->session_monitor_handle)
-    {
-      g_dbus_connection_call (portal->bus,
-                              PORTAL_BUS_NAME,
-                              PORTAL_OBJECT_PATH,
-                              "org.freedesktop.portal.Inhibit",
-                              "QueryEndResponse",
-                              g_variant_new ("(o)", portal->session_monitor_handle),
-                              NULL, 0, -1, NULL, NULL, NULL);
-    }
+  if (portal->session_monitor_handle != NULL)
+    g_dbus_connection_call (portal->bus,
+                            PORTAL_BUS_NAME,
+                            PORTAL_OBJECT_PATH,
+                            "org.freedesktop.portal.Inhibit",
+                            "QueryEndResponse",
+                            g_variant_new ("(o)", portal->session_monitor_handle),
+                            NULL, 0, -1, NULL, NULL, NULL);
 }
