@@ -17,6 +17,7 @@
 
 #include "config.h"
 
+#include "print.h"
 #include "portal-private.h"
 #include "utils-private.h"
 

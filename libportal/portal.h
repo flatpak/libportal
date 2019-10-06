@@ -17,21 +17,18 @@
 
 #pragma once
 
-#include <gio/gio.h>
-
-#include <portal-helpers.h>
 #include <portal-enums.h>
 #include <account.h>
 #include <background.h>
 #include <camera.h>
 #include <email.h>
 #include <filechooser.h>
+#include <inhibit.h>
 #include <location.h>
 #include <notification.h>
 #include <print.h>
 #include <remote.h>
 #include <screenshot.h>
-#include <session.h>
 #include <spawn.h>
 #include <trash.h>
 #include <updates.h>

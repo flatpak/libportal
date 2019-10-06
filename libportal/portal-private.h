@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include "portal.h"
-
 struct _XdpPortal {
   GObject parent_instance;
 

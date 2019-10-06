@@ -17,6 +17,8 @@
 
 #include "config.h"
 
+#include "trash.h"
+
 #define GNU_SOURCE 1
 
 #include <sys/types.h>

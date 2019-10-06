@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <libportal/portal.h>
+#include <portal.h>
 #include <gtk/gtk.h>
 
 #ifdef GDK_WINDOWING_X11

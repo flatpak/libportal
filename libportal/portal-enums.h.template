@@ -1,7 +1,8 @@
 /*** BEGIN file-header ***/
 #pragma once
 
-#include <portal.h>
+#include <gio/gio.h>
+#include <portal-helpers.h>
 
 G_BEGIN_DECLS
 /*** END file-header ***/

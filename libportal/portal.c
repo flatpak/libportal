@@ -17,6 +17,7 @@
 
 #include "config.h"
 
+#include "portal-helpers.h"
 #include "portal-private.h"
 #include "portal-enums.h"
 

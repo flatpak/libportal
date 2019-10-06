@@ -17,6 +17,7 @@
 
 #include "config.h"
 
+#include "location.h"
 #include "portal-private.h"
 #include "utils-private.h"
 

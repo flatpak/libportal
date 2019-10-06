@@ -18,7 +18,7 @@
 #include "config.h"
 
 #include <gio/gunixfdlist.h>
-
+#include "camera.h"
 #include "session-private.h"
 #include "portal-private.h"
 

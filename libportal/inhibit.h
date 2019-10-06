@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <gio/gio.h>
+#include <portal-helpers.h>
 
 G_BEGIN_DECLS
 

@@ -17,6 +17,7 @@
 
 #include "config.h"
 
+#include "inhibit.h"
 #include "portal-private.h"
 #include "utils-private.h"
 

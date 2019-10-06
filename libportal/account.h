@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <portal-helpers.h>
+
 G_BEGIN_DECLS
 
 XDP_PUBLIC
