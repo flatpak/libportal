@@ -66,7 +66,7 @@ file_trashed (GObject      *bus,
               GAsyncResult *result,
               gpointer      data)
 {
-  g_autoptr(GError) error = NULL;
+  GError *error = NULL;
   g_autoptr(GVariant) ret = NULL;
   TrashCall *call = data;
 
