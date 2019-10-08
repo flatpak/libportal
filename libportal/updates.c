@@ -159,19 +159,19 @@ monitor_created (GObject *object,
                  gpointer data)
 {
   CreateMonitorCall *call = data;
-  g_autoptr(GError) error = NULL;
+  GError *error = NULL;
   g_autoptr(GVariant) ret = NULL;
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
-  if (ret)
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+    }
+  else
     {
       call->portal->update_monitor_handle = g_strdup (call->id);
       ensure_update_monitor_connection (call->portal);
       g_task_return_boolean (call->task, TRUE);
-    }
-  else
-    {
-      g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateUpdateMonitor failed");
     }
 
   create_monitor_call_free (call);
