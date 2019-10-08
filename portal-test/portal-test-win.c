@@ -490,26 +490,10 @@ account_response (GObject *source,
             gtk_image_set_from_pixbuf (GTK_IMAGE (win->avatar), pixbuf);
        }
     }
+  else if (error)
+    g_message ("Account error: %s", error->message);
   else
     g_message ("Account canceled");
-}
-
-static void
-get_user_information_called (GObject *source,
-                             GAsyncResult *result,
-                             gpointer data)
-{
-  PortalTestWin *win = data;
-  XdpParent *parent;
-
-  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
-  xdp_portal_get_user_information (win->portal,
-                                   parent,
-                                   "just for fun",
-                                   NULL,
-                                   account_response,
-                                   win);
-  xdp_parent_free (parent);
 }
 
 static void
@@ -522,7 +506,7 @@ get_user_information (PortalTestWin *win)
                                    parent,
                                    "Allows portal-test to test the Account portal.",
                                    NULL,
-                                   get_user_information_called,
+                                   account_response,
                                    win);
   xdp_parent_free (parent);
 }
