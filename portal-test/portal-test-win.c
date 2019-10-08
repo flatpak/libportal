@@ -38,8 +38,6 @@ struct _PortalTestWin
   XdpPortal *portal;
   XdpSession *session;
 
-  char *window_handle;
-
   GNetworkMonitor *monitor;
   GProxyResolver *resolver;
 
@@ -967,47 +965,9 @@ play_clicked (GtkButton *button, PortalTestWin *win)
 }
 
 static void
-handle_obtained (GdkWindow *window,
-                 const char *handle,
-                 gpointer user_data)
-{
-  PortalTestWin *win = user_data;
-
-  win->window_handle = g_strdup_printf ("wayland:%s", handle);
-}
-
-static gboolean
-obtain_handle (gpointer data)
-{
-  PortalTestWin *win = PORTAL_TEST_WIN (data);
-  GdkWindow *window;
-
-  window = gtk_widget_get_window (GTK_WIDGET (win));
-
-  if (GDK_IS_WAYLAND_WINDOW (window))
-    gdk_wayland_window_export_handle (window, handle_obtained, win, NULL);
-  else if (GDK_IS_X11_WINDOW (window))
-    win->window_handle = g_strdup_printf ("x11:%x", (guint32)gdk_x11_window_get_xid (window));
-
-  return G_SOURCE_REMOVE;
-}
-
-static void
-test_win_realize (GtkWidget *widget)
-{
-  PortalTestWin *win = PORTAL_TEST_WIN (widget);
-
-  GTK_WIDGET_CLASS (portal_test_win_parent_class)->realize (widget);
-
-  g_idle_add (obtain_handle, win);
-}
-
-static void
 portal_test_win_class_init (PortalTestWinClass *class)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (class);
-
-  widget_class->realize = test_win_realize;
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/org/gtk/portal-test/portal-test-win.ui");
