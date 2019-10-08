@@ -88,6 +88,7 @@ response_received (GDBusConnection *bus,
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
 
+g_print ("response received\n");
   if (call->cancelled_id)
     {
       g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
@@ -141,6 +142,23 @@ cancelled_cb (GCancellable *cancellable,
 }
 
 static void
+call_returned (GObject *object,
+               GAsyncResult *result,
+               gpointer data)
+{
+  BackgroundCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      background_call_free (call);
+    }
+}
+
+static void
 request_background (BackgroundCall *call)
 {
   GVariantBuilder options;
@@ -180,6 +198,7 @@ request_background (BackgroundCall *call)
   if (call->commandline)
     g_variant_builder_add (&options, "{sv}", "commandline", g_variant_new_strv ((const char* const*)call->commandline->pdata, call->commandline->len));
 
+g_print ("calling background\n");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
@@ -190,8 +209,8 @@ request_background (BackgroundCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           cancellable,
-                          NULL,
-                          NULL);
+                          call_returned,
+                          call);
 }
 
 /**
