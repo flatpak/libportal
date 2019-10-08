@@ -159,6 +159,26 @@ cancelled_cb (GCancellable *cancellable,
 }
 
 static void
+call_returned (GObject *object,
+               GAsyncResult *result,
+               gpointer data)
+{
+  PrintCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  if (call->is_prepare)
+    ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  else
+    ret = g_dbus_connection_call_with_unix_fd_list_finish (G_DBUS_CONNECTION (object), NULL, result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      print_call_free (call);
+    }
+}
+
+static void
 do_print (PrintCall *call)
 {
   GVariantBuilder options;
@@ -210,7 +230,8 @@ do_print (PrintCall *call)
                             G_DBUS_CALL_FLAGS_NONE,
                             -1,
                             cancellable,
-                            NULL, NULL);
+                            call_returned,
+                            call);
   else
     {
       g_autoptr(GUnixFDList) fd_list = NULL;
@@ -242,7 +263,8 @@ do_print (PrintCall *call)
                                                 -1,
                                                 fd_list,
                                                 cancellable,
-                                                NULL, NULL);
+                                                call_returned,
+                                                call);
     }
 }
 
