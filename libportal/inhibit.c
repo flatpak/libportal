@@ -106,6 +106,23 @@ inhibit_parent_exported (XdpParent *parent,
 }
 
 static void
+call_returned (GObject *object,
+               GAsyncResult *result,
+               gpointer data)
+{
+  InhibitCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_warning ("Inhibit call failed");
+      inhibit_call_free (call);
+    }
+}
+
+static void
 do_inhibit (InhibitCall *call)
 {
   GVariantBuilder options;
@@ -148,7 +165,9 @@ do_inhibit (InhibitCall *call)
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          NULL, NULL, NULL);
+                          NULL,
+                          call_returned,
+                          call);
 }
 
 /**
@@ -388,6 +407,23 @@ cancelled_cb (GCancellable *cancellable,
 }
 
 static void
+create_returned (GObject *object,
+                 GAsyncResult *result,
+                 gpointer data)
+{
+  CreateMonitorCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      create_monitor_call_free (call);
+    }
+}
+
+static void
 create_monitor (CreateMonitorCall *call)
 {
   GVariantBuilder options;
@@ -441,8 +477,8 @@ create_monitor (CreateMonitorCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           cancellable,
-                          NULL,
-                          NULL);
+                          create_returned,
+                          call);
 
 }
 
