@@ -85,7 +85,6 @@ spawned (GObject      *bus,
 
   ret = g_dbus_connection_call_with_unix_fd_list_finish (G_DBUS_CONNECTION (bus), NULL, result, &error);
 
-  /* fixme SpawnExited signal */
   if (error)
     g_task_return_error (call->task, error);
   else
