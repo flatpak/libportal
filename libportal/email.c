@@ -150,6 +150,23 @@ cancelled_cb (GCancellable *cancellable,
 }
 
 static void
+call_returned (GObject *object,
+               GAsyncResult *result,
+               gpointer data)
+{
+  EmailCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      email_call_free (call);
+    }
+}
+
+static void
 compose_email (EmailCall *call)
 {
   GVariantBuilder options;
@@ -231,8 +248,8 @@ compose_email (EmailCall *call)
                                             -1,
                                             fd_list,
                                             cancellable,
-                                            NULL,
-                                            NULL);
+                                            call_returned,
+                                            call);
 }
 
 /**
