@@ -108,6 +108,23 @@ sources_selected (GDBusConnection *bus,
 }
 
 static void
+call_returned (GObject *object,
+               GAsyncResult *result,
+               gpointer data)
+{
+  CreateCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      create_call_free (call);
+    }
+}
+
+static void
 select_sources (CreateCall *call)
 {
   GVariantBuilder options;
@@ -141,8 +158,8 @@ select_sources (CreateCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           g_task_get_cancellable (call->task),
-                          NULL,
-                          NULL);
+                          call_returned,
+                          call);
 }
 
 static void
@@ -215,8 +232,8 @@ select_devices (CreateCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           g_task_get_cancellable (call->task),
-                          NULL,
-                          NULL);
+                          call_returned,
+                          call);
 }
 
 static void
@@ -314,8 +331,8 @@ create_session (CreateCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           cancellable,
-                          NULL,
-                          NULL);
+                          call_returned,
+                          call);
 }
 
 /**
