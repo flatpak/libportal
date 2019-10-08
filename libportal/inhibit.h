@@ -76,7 +76,7 @@ void       xdp_portal_session_monitor_start              (XdpPortal            *
 XDP_PUBLIC
 gboolean   xdp_portal_session_monitor_start_finish       (XdpPortal            *portal,
                                                           GAsyncResult         *result,
-                                                          GError              **error); 
+                                                          GError              **error);
 
 XDP_PUBLIC
 void       xdp_portal_session_monitor_stop               (XdpPortal            *portal);
