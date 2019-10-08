@@ -137,6 +137,29 @@ cancelled_cb (GCancellable *cancellable,
                           NULL, NULL, NULL);
 }
 
+static void
+call_returned (GObject *object,
+               GAsyncResult *result,
+               gpointer data)
+{
+  OpenCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GFile) file = NULL;
+
+  file = g_file_new_for_uri (call->uri);
+  if (g_file_is_native (file))
+    ret = g_dbus_connection_call_with_unix_fd_list_finish (G_DBUS_CONNECTION (object), NULL, result, &error);
+  else
+    ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      open_call_free (call);
+    }
+}
+
 #ifndef O_PATH
 #define O_PATH 0
 #endif
@@ -210,8 +233,8 @@ do_open (OpenCall *call)
                                                 -1,
                                                 fd_list,
                                                 cancellable,
-                                                NULL,
-                                                NULL);
+                                                call_returned,
+                                                call);
     }
   else
     {
@@ -225,8 +248,8 @@ do_open (OpenCall *call)
                               G_DBUS_CALL_FLAGS_NONE,
                               -1,
                               cancellable,
-                              NULL,
-                              NULL);
+                              call_returned,
+                              call);
     }
 }
 
