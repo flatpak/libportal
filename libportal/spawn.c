@@ -80,7 +80,7 @@ spawned (GObject      *bus,
          gpointer      data)
 {
   SpawnCall *call = data;
-  g_autoptr(GError) error = NULL;
+  GError *error = NULL;
   g_autoptr(GVariant) ret = NULL;
 
   ret = g_dbus_connection_call_with_unix_fd_list_finish (G_DBUS_CONNECTION (bus), NULL, result, &error);
