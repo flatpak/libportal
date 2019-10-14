@@ -94,9 +94,9 @@ response_received (GDBusConnection *bus,
   if (response == 0)
     g_task_return_pointer (call->task, g_variant_ref (ret), (GDestroyNotify)g_variant_unref);
   else if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Account canceled");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Account call canceled user");
   else
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Account failed");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Account call failed");
 
   account_call_free (call);
 }
@@ -119,7 +119,6 @@ cancelled_cb (GCancellable *cancellable,
 {
   AccountCall *call = data;
 
-  g_debug ("cancelled");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           call->request_path,
@@ -131,24 +130,9 @@ cancelled_cb (GCancellable *cancellable,
                           -1,
                           NULL, NULL, NULL);
 
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Account call canceled by caller");
+
   account_call_free (call);
-}
-
-static void
-call_returned (GObject *object,
-               GAsyncResult *result,
-               gpointer data)
-{
-  AccountCall *call = data;
-  GError *error = NULL;
-  g_autoptr(GVariant) ret = NULL;
-
-  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
-  if (error)
-    {
-      g_task_return_error (call->task, error);
-      account_call_free (call);
-    }
 }
 
 static void
@@ -194,9 +178,9 @@ get_user_information (AccountCall *call)
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          cancellable,
-                          call_returned,
-                          call);
+                          NULL,
+                          NULL,
+                          NULL);
 }
 
 /**
