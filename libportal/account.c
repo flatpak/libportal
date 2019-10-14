@@ -46,6 +46,7 @@ typedef struct {
 static void
 account_call_free (AccountCall *call)
 {
+  g_debug ("freeing AccountCall");
   if (call->parent)
     {
       call->parent->unexport (call->parent);
@@ -118,6 +119,7 @@ cancelled_cb (GCancellable *cancellable,
 {
   AccountCall *call = data;
 
+  g_debug ("cancelled");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           call->request_path,
@@ -128,6 +130,8 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  account_call_free (call);
 }
 
 static void
