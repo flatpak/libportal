@@ -28,6 +28,7 @@
 
 #include "portal-private.h"
 #include "utils-private.h"
+#include "email.h"
 
 /**
  * SECTION:email
@@ -147,6 +148,8 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  email_call_free (call);
 }
 
 static void
