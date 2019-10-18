@@ -89,6 +89,7 @@ email_call_free (EmailCall *call)
   g_free (call);
 }
 
+
 static void
 response_received (GDBusConnection *bus,
                    const char *sender_name,
@@ -138,6 +139,7 @@ cancelled_cb (GCancellable *cancellable,
 {
   EmailCall *call = data;
 
+  g_debug ("calling Close");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           call->request_path,
@@ -149,6 +151,8 @@ cancelled_cb (GCancellable *cancellable,
                           -1,
                           NULL, NULL, NULL);
 
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "ComposeEmail call canceled by caller");
+
   email_call_free (call);
 }
 
@@ -157,11 +161,12 @@ call_returned (GObject *object,
                GAsyncResult *result,
                gpointer data)
 {
+  GDBusConnection *bus = G_DBUS_CONNECTION (object);
   EmailCall *call = data;
   GError *error = NULL;
   g_autoptr(GVariant) ret = NULL;
 
-  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  ret = g_dbus_connection_call_with_unix_fd_list_finish (bus, NULL, result, &error);
   if (error)
     {
       g_task_return_error (call->task, error);
@@ -250,7 +255,7 @@ compose_email (EmailCall *call)
                                             G_DBUS_CALL_FLAGS_NONE,
                                             -1,
                                             fd_list,
-                                            cancellable,
+                                            NULL,
                                             call_returned,
                                             call);
 }
