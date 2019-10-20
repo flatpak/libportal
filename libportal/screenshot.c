@@ -269,7 +269,7 @@ xdp_portal_take_screenshot (XdpPortal *portal,
  * Finishes a screenshot request, and returns
  * the result in the form of a URI pointing to an image file.
  *
- * Returns: (transfer full): URI pointing to an image file
+ * Returns: (transfer full) (nullable): URI pointing to an image file
  */
 char *
 xdp_portal_take_screenshot_finish (XdpPortal *portal,
