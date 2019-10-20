@@ -146,6 +146,10 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Screenshot portal call canceled by caller");
+
+  screenshot_call_free (call);
 }
 
 static void
@@ -212,7 +216,7 @@ take_screenshot (ScreenshotCall *call)
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          cancellable,
+                          NULL,
                           call_returned,
                           call);
 }
