@@ -304,6 +304,7 @@ xdp_portal_compose_email (XdpPortal *portal,
   call->body = g_strdup (body);
   call->attachments = g_strdupv ((char **)attachments);
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_compose_email);
 
   compose_email (call);
 }
@@ -325,6 +326,7 @@ xdp_portal_compose_email_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_compose_email, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }

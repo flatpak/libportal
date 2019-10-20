@@ -236,6 +236,7 @@ xdp_portal_get_user_information (XdpPortal *portal,
     call->parent_handle = g_strdup ("");
   call->reason = g_strdup (reason);
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_get_user_information);
 
   get_user_information (call);
 }
@@ -262,6 +263,7 @@ xdp_portal_get_user_information_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_get_user_information, NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }

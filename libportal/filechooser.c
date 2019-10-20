@@ -292,6 +292,7 @@ xdp_portal_open_file (XdpPortal *portal,
   call->filters = filters ? g_variant_ref (filters) : NULL;
   call->choices = choices ? g_variant_ref (choices) : NULL;
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_open_file);
 
   open_file (call);
 }
@@ -319,6 +320,7 @@ xdp_portal_open_file_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_open_file, NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -377,6 +379,7 @@ xdp_portal_save_file (XdpPortal *portal,
   call->filters = filters ? g_variant_ref (filters) : NULL;
   call->choices = choices ? g_variant_ref (choices) : NULL;
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_save_file);
 
   open_file (call);
 }
@@ -404,6 +407,7 @@ xdp_portal_save_file_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_save_file, NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }

@@ -250,6 +250,7 @@ xdp_portal_spawn (XdpPortal            *portal,
   call->sandbox_expose = g_strdupv ((char **)sandbox_expose);
   call->sandbox_expose_ro = g_strdupv ((char **)sandbox_expose_ro);
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_spawn);
 
   do_spawn (call);
 }
@@ -273,6 +274,7 @@ xdp_portal_spawn_finish (XdpPortal     *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), 0);
   g_return_val_if_fail (g_task_is_valid (result, portal), 0);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_spawn, 0);
 
   return (pid_t) g_task_propagate_int (G_TASK (result), error);
 }

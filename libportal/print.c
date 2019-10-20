@@ -312,6 +312,7 @@ xdp_portal_prepare_print (XdpPortal *portal,
   call->settings = settings ? g_variant_ref (settings) : NULL;
   call->page_setup = page_setup ? g_variant_ref (page_setup) : NULL;
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_prepare_print);
 
   do_print (call);
 }
@@ -338,6 +339,7 @@ xdp_portal_prepare_print_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_prepare_print, NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -390,6 +392,7 @@ xdp_portal_print_file (XdpPortal *portal,
   call->token = token;
   call->file = g_strdup (file);
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_print_file);
 
   do_print (call);
 }
@@ -411,6 +414,7 @@ xdp_portal_print_file_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_print_file, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }

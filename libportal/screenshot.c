@@ -255,6 +255,7 @@ xdp_portal_take_screenshot (XdpPortal *portal,
   call->modal = modal;
   call->interactive = interactive;
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_take_screenshot);
 
   take_screenshot (call);
 }
@@ -277,6 +278,7 @@ xdp_portal_take_screenshot_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_take_screenshot, NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -313,6 +315,7 @@ xdp_portal_pick_color (XdpPortal *portal,
   else
     call->parent_handle = g_strdup ("");
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_pick_color);
 
   take_screenshot (call);
 }
@@ -338,6 +341,7 @@ xdp_portal_pick_color_finish (XdpPortal *portal,
 
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_pick_color, NULL);
 
   ret = (GVariant *) g_task_propagate_pointer (G_TASK (result), error);
   return ret ? g_variant_ref (ret) : NULL; 

@@ -146,6 +146,7 @@ xdp_portal_trash_file (XdpPortal           *portal,
   call->portal = g_object_ref (portal);
   call->path = g_strdup (path);
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_trash_file);
 
   trash_file (call);
 }
@@ -168,6 +169,7 @@ xdp_portal_trash_file_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_trash_file, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }

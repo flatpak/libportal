@@ -370,6 +370,7 @@ xdp_portal_location_monitor_start (XdpPortal *portal,
   call->time = time_threshold;
   call->accuracy = accuracy;
   call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_location_monitor_start);
 
   create_session (call);
 }
@@ -392,6 +393,7 @@ xdp_portal_location_monitor_start_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_location_monitor_start, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }
