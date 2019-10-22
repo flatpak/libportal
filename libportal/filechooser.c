@@ -147,6 +147,10 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "OpenFile call canceled by caller");
+
+  file_call_free (call);
 }
 
 static void
@@ -221,7 +225,7 @@ open_file (FileCall *call)
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          cancellable,
+                          NULL,
                           call_returned,
                           call);
 }
