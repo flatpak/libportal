@@ -77,7 +77,16 @@ file_trashed (GObject      *bus,
   if (error)
     g_task_return_error (call->task, error);
   else
-    g_task_return_boolean (call->task, TRUE);
+    {
+      guint retval;
+
+      g_variant_get (ret, "(u)", &retval);
+
+      if (retval == 1)
+        g_task_return_boolean (call->task, TRUE);
+      else
+        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Failed to trash");
+    }
 
   trash_call_free (call);
 }
