@@ -48,6 +48,7 @@ typedef struct {
   char *current_folder;
   char *current_file;
   GVariant *filters;
+  GVariant *current_filter;
   GVariant *choices;
   guint signal_id;
   GTask *task;
@@ -82,6 +83,8 @@ file_call_free (FileCall *call)
   g_free (call->current_file);
   if (call->filters)
     g_variant_unref (call->filters);
+  if (call->current_filter)
+    g_variant_unref (call->current_filter);
   if (call->choices)
     g_variant_unref (call->choices);
 
@@ -207,6 +210,8 @@ open_file (FileCall *call)
     g_variant_builder_add (&options, "{sv}", "multiple", g_variant_new_boolean (call->multiple));
   if (call->filters)
     g_variant_builder_add (&options, "{sv}", "filters", call->filters);
+  if (call->current_filter)
+    g_variant_builder_add (&options, "{sv}", "current_filter", call->current_filter);
   if (call->choices)
     g_variant_builder_add (&options, "{sv}", "choices", call->choices);
   if (call->current_name)
@@ -238,6 +243,7 @@ open_file (FileCall *call)
  * @modal: whether the dialog should be modal
  * @multiple: whether multiple files can be selected or not
  * @filters: (nullable): a #GVariant describing file filters
+ * @current_filter: (nullable): a #GVariant describing the current file filter
  * @choices: (nullable): a #GVariant describing extra widgets
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
@@ -277,6 +283,7 @@ xdp_portal_open_file (XdpPortal *portal,
                       gboolean modal,
                       gboolean multiple,
                       GVariant *filters,
+                      GVariant *current_filter,
                       GVariant *choices,
                       GCancellable *cancellable,
                       GAsyncReadyCallback  callback,
@@ -296,6 +303,7 @@ xdp_portal_open_file (XdpPortal *portal,
   call->modal = modal;
   call->multiple = multiple;
   call->filters = filters ? g_variant_ref (filters) : NULL;
+  call->current_filter = current_filter ? g_variant_ref (current_filter) : NULL;
   call->choices = choices ? g_variant_ref (choices) : NULL;
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_open_file);
@@ -344,6 +352,7 @@ xdp_portal_open_file_finish (XdpPortal *portal,
  * @current_folder: (nullable): suggested folder to save the file in
  * @current_file: (nullable): the current file (when saving an existing file)
  * @filters: (nullable): a #GVariant describing file filters
+ * @current_filter: (nullable): a #GVariant describing the current file filter
  * @choices: (nullable): a #GVariant describing extra widgets
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
@@ -367,6 +376,7 @@ xdp_portal_save_file (XdpPortal *portal,
                       const char *current_folder,
                       const char *current_file,
                       GVariant *filters,
+                      GVariant *current_filter,
                       GVariant *choices,
                       GCancellable *cancellable,
                       GAsyncReadyCallback  callback,
@@ -389,6 +399,7 @@ xdp_portal_save_file (XdpPortal *portal,
   call->current_folder = g_strdup (current_folder);
   call->current_file = g_strdup (current_file);
   call->filters = filters ? g_variant_ref (filters) : NULL;
+  call->current_filter = current_filter ? g_variant_ref (current_filter) : NULL;
   call->choices = choices ? g_variant_ref (choices) : NULL;
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_save_file);
