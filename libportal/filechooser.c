@@ -378,7 +378,10 @@ xdp_portal_save_file (XdpPortal *portal,
 
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
-  call->parent = _xdp_parent_copy (parent);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
   call->save_mode = TRUE;
   call->title = g_strdup (title);
   call->modal = modal;
