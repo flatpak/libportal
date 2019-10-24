@@ -156,6 +156,10 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Print call canceled by caller");
+
+  print_call_free (call);
 }
 
 static void
@@ -223,13 +227,13 @@ do_print (PrintCall *call)
                             g_variant_new ("(ss@a{sv}@a{sv}a{sv})",
                                            call->parent_handle,
                                            call->title,
-                                           call->settings,
-                                           call->page_setup,
+                                           call->settings ? call->settings : g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0),
+                                           call->page_setup ? call->page_setup : g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0),
                                            &options),
                             NULL,
                             G_DBUS_CALL_FLAGS_NONE,
                             -1,
-                            cancellable,
+                            NULL,
                             call_returned,
                             call);
   else
