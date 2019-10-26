@@ -42,12 +42,18 @@ void       xdp_portal_session_inhibit             (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    XdpInhibitFlags       inhibit,
                                                    const char           *reason,
-                                                   const char           *id);
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+int        xdp_portal_session_inhibit_finish      (XdpPortal           *portal,
+                                                   GAsyncResult        *result,
+                                                   GError             **error);
 
 XDP_PUBLIC
 void       xdp_portal_session_uninhibit           (XdpPortal            *portal,
-                                                   const char           *id);
-
+                                                   int                   id);
 
 /**
  * XdpLoginSessionState:

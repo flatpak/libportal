@@ -24,6 +24,7 @@ struct _XdpPortal {
   char *sender;
 
   /* inhibit */
+  int next_inhibit_id;
   GHashTable *inhibit_handles;
   char *session_monitor_handle;
   guint state_changed_signal;

@@ -42,7 +42,8 @@ typedef struct {
   char *parent_handle;
   XdpInhibitFlags inhibit;
   char *reason;
-  char *id;
+  GTask *task;
+  int id;
 } InhibitCall;
 
 static void
@@ -56,9 +57,9 @@ inhibit_call_free (InhibitCall *call)
  g_free (call->parent_handle);
 
   g_object_unref (call->portal);
+  g_object_unref (call->task);
 
   g_free (call->reason);
-  g_free (call->id);
 
   g_free (call);
 }
@@ -86,7 +87,15 @@ call_returned (GObject *object,
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
   if (error)
-    g_warning ("Inhibit call failed");
+    {
+      g_hash_table_remove (call->portal->inhibit_handles, GINT_TO_POINTER (call->id));
+      g_task_return_error (call->task, error);
+    }
+  else
+    {
+      g_task_return_int (call->task, call->id);
+    }
+
   inhibit_call_free (call);
 }
 
@@ -106,7 +115,7 @@ do_inhibit (InhibitCall *call)
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   handle = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
 
-  g_hash_table_insert (call->portal->inhibit_handles, g_strdup (call->id), g_strdup (handle));
+  g_hash_table_insert (call->portal->inhibit_handles, GINT_TO_POINTER (call->id), g_strdup (handle));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
@@ -132,7 +141,9 @@ do_inhibit (InhibitCall *call)
  * @parent: (nullable): parent window information
  * @inhibit: information about what to inhibit
  * @reason: (nullable): user-visible reason for the inhibition
- * @id: unique ID for this inhibition
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
  *
  * Inhibits various session status changes.
  *
@@ -143,24 +154,24 @@ do_inhibit (InhibitCall *call)
  * with the same ID.
  */
 void
-xdp_portal_session_inhibit (XdpPortal *portal,
-                            XdpParent *parent,
-                            XdpInhibitFlags inhibit,
-                            const char *reason,
-                            const char *id)
+xdp_portal_session_inhibit (XdpPortal            *portal,
+                            XdpParent            *parent,
+                            XdpInhibitFlags       inhibit,
+                            const char           *reason,
+                            GCancellable         *cancellable,
+                            GAsyncReadyCallback   callback,
+                            gpointer              data)
 {
   InhibitCall *call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
   if (portal->inhibit_handles == NULL)
-    portal->inhibit_handles = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+    portal->inhibit_handles = g_hash_table_new_full (NULL, NULL, g_free, g_free);
 
-  if (g_hash_table_lookup (portal->inhibit_handles, id))
-    {
-      g_warning ("Duplicate Inhibit id: %s", id);
-      return;
-    }
+  portal->next_inhibit_id++;
+  if (portal->next_inhibit_id == 0)
+    portal->next_inhibit_id = 1;
 
   call = g_new0 (InhibitCall, 1);
   call->portal = g_object_ref (portal);
@@ -169,10 +180,36 @@ xdp_portal_session_inhibit (XdpPortal *portal,
   else
     call->parent_handle = g_strdup ("");
   call->inhibit = inhibit;
+  call->id = portal->next_inhibit_id;
   call->reason = g_strdup (reason);
-  call->id = g_strdup (id);
+  call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_session_inhibit);
 
   do_inhibit (call);
+}
+
+/**
+ * xdp_portal_session_inhibit_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes the inhbit request, and returns the ID of the
+ * inhibition as an integer. The ID can be passed to
+ * xdg_portal_session_uninhibit() to undo the inhibition.
+ *
+ * Returns: the ID of the inhibition, or 0 if there was an error
+ */
+int
+xdp_portal_session_inhibit_finish (XdpPortal *portal,
+                                   GAsyncResult *result,
+                                   GError **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), 0);
+  g_return_val_if_fail (g_task_is_valid (result, portal), 0);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_session_inhibit, 0);
+
+  return g_task_propagate_int (G_TASK (result), error);
 }
 
 /**
@@ -185,16 +222,16 @@ xdp_portal_session_inhibit (XdpPortal *portal,
  */
 void
 xdp_portal_session_uninhibit (XdpPortal *portal,
-                              const char *id)
+                              int        id)
 {
-  g_autofree char *key = NULL;
+  gpointer key;
   g_autofree char *value = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
   if (portal->inhibit_handles == NULL ||
       !g_hash_table_steal_extended (portal->inhibit_handles,
-                                    id,
+                                    GINT_TO_POINTER (id),
                                     (gpointer *)&key,
                                     (gpointer *)&value))
     {
