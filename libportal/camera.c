@@ -75,6 +75,7 @@ xdp_portal_is_camera_present (XdpPortal *portal)
 typedef struct {
   XdpPortal *portal;
   guint signal_id;
+  GCancellable *cancellable;
   GTask *task;
   char *request_path;
   guint cancelled_id;
@@ -87,10 +88,12 @@ access_camera_call_free (AccessCameraCall *call)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
   if (call->cancelled_id)
-    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+    g_signal_handler_disconnect (call->cancellable, call->cancelled_id);
 
   g_free (call->request_path);
 
+  if (call->cancellable)
+    g_object_unref (call->cancellable);
   g_object_unref (call->portal);
   g_object_unref (call->task);
 
@@ -112,7 +115,7 @@ response_received (GDBusConnection *bus,
 
   if (call->cancelled_id)
     {
-      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+      g_signal_handler_disconnect (call->cancellable, call->cancelled_id);
       call->cancelled_id = 0;
     }
 
@@ -134,6 +137,7 @@ cancelled_cb (GCancellable *cancellable,
 {
   AccessCameraCall *call = data;
 
+g_debug ("Calling Close");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           call->request_path,
@@ -144,6 +148,8 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "AccessCamera call canceled by caller");
 
   access_camera_call_free (call);
 }
@@ -170,7 +176,6 @@ access_camera (AccessCameraCall *call)
 {
   GVariantBuilder options;
   g_autofree char *token = NULL;
-  GCancellable *cancellable;
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
@@ -185,13 +190,13 @@ access_camera (AccessCameraCall *call)
                                                         call,
                                                         NULL);
 
-  cancellable = g_task_get_cancellable (call->task);
-  if (cancellable)
-    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (cancelled_cb), call);
+  if (call->cancellable)
+    call->cancelled_id = g_signal_connect (call->cancellable, "cancelled", G_CALLBACK (cancelled_cb), call);
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
 
+g_debug ("Calling AccessCamera");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
@@ -201,7 +206,7 @@ access_camera (AccessCameraCall *call)
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          cancellable,
+                          NULL,
                           call_returned,
                           call);
 }
@@ -233,7 +238,9 @@ xdp_portal_access_camera (XdpPortal           *portal,
 
   call = g_new0 (AccessCameraCall, 1);
   call->portal = g_object_ref (portal);
-  call->task = g_task_new (portal, cancellable, callback, data);
+  if (cancellable)
+    call->cancellable = g_object_ref (cancellable);
+  call->task = g_task_new (portal, NULL, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_access_camera);
 
   access_camera (call);
