@@ -43,7 +43,6 @@ typedef struct {
   XdpInhibitFlags inhibit;
   char *reason;
   char *id;
-  guint signal_id;
 } InhibitCall;
 
 static void
@@ -56,41 +55,12 @@ inhibit_call_free (InhibitCall *call)
     }
  g_free (call->parent_handle);
 
- if (call->signal_id)
-   g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
-
   g_object_unref (call->portal);
 
   g_free (call->reason);
   g_free (call->id);
 
   g_free (call);
-}
-
-static void
-inhibit_response_received (GDBusConnection *bus,
-                           const char *sender_name,
-                           const char *object_path,
-                           const char *interface_name,
-                           const char *signal_name,
-                           GVariant *parameters,
-                           gpointer data)
-{
-  InhibitCall *call = data;
-  guint32 response;
-  g_autoptr(GVariant) ret = NULL;
-
-  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
-
-  if (response == 1)
-    g_warning ("Inhibit canceled");
-  else if (response == 2)
-    g_warning ("Inhibit failed");
-
-  if (response != 0)
-    g_hash_table_remove (call->portal->inhibit_handles, call->id);
-
-  inhibit_call_free (call);
 }
 
 static void do_inhibit (InhibitCall *call);
@@ -116,10 +86,8 @@ call_returned (GObject *object,
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
   if (error)
-    {
-      g_warning ("Inhibit call failed");
-      inhibit_call_free (call);
-    }
+    g_warning ("Inhibit call failed");
+  inhibit_call_free (call);
 }
 
 static void
@@ -137,20 +105,8 @@ do_inhibit (InhibitCall *call)
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   handle = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
-  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
-                                                        PORTAL_BUS_NAME,
-                                                        REQUEST_INTERFACE,
-                                                        "Response",
-                                                        handle,
-                                                        NULL,
-                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                        inhibit_response_received,
-                                                        call,
-                                                        NULL);
 
-  g_hash_table_insert (call->portal->inhibit_handles,
-                       g_strdup (call->id),
-                       g_strdup (handle));
+  g_hash_table_insert (call->portal->inhibit_handles, g_strdup (call->id), g_strdup (handle));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
@@ -246,6 +202,7 @@ xdp_portal_session_uninhibit (XdpPortal *portal,
       return;
     }
 
+  g_debug ("Calling Close on the inhibit request");
   g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           value,
