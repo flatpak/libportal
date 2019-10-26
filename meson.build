@@ -7,9 +7,9 @@ cc = meson.get_compiler('c')
 gnome = import('gnome')
 
 conf = configuration_data()
-conf.set_quoted('G_LOG_DOMAIN', 'PortalTest')
-conf.set_quoted('PACKAGE_NAME', 'portal-test')
-conf.set_quoted('PKGDATADIR', join_paths(get_option('prefix'), get_option('datadir'), 'portal-test'))
+conf.set_quoted('G_LOG_DOMAIN', 'libportal')
+conf.set_quoted('PACKAGE_NAME', 'libportal')
+conf.set_quoted('PKGDATADIR', join_paths(get_option('prefix'), get_option('datadir'), 'libportal'))
 
 visibility_arg = []
 if cc.has_argument('-fvisibility=hidden')
