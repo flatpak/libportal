@@ -242,7 +242,7 @@ do_open (OpenCall *call)
                               PORTAL_BUS_NAME,
                               PORTAL_OBJECT_PATH,
                               "org.freedesktop.portal.OpenURI",
-                              "OpenUri",
+                              "OpenURI",
                               g_variant_new ("(ssa{sv})", call->parent_handle, call->uri, &options),
                               NULL,
                               G_DBUS_CALL_FLAGS_NONE,
