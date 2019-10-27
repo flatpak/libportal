@@ -62,6 +62,8 @@ xdp_portal_session_monitor_query_end_response
 <FILE>open</FILE>
 xdp_portal_open_uri
 xdp_portal_open_uri_finish
+xdp_portal_open_directory
+xdp_portal_open_directory_finish
 </SECTION>
 
 <SECTION>

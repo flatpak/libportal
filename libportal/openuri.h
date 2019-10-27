@@ -35,4 +35,17 @@ gboolean  xdp_portal_open_uri_finish              (XdpPortal            *portal,
                                                    GAsyncResult         *result,
                                                    GError              **error);
 
+XDP_PUBLIC
+void       xdp_portal_open_directory              (XdpPortal            *portal,
+                                                   XdpParent            *parent,
+                                                   const char           *uri,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+gboolean  xdp_portal_open_directory_finish        (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
 G_END_DECLS

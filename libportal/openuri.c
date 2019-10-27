@@ -48,6 +48,7 @@ typedef struct {
   char *parent_handle;
   char *uri;
   gboolean writable;
+  gboolean open_dir;
   guint signal_id;
   GTask *task;
   char *request_path;
@@ -227,7 +228,7 @@ do_open (OpenCall *call)
                                                 PORTAL_BUS_NAME,
                                                 PORTAL_OBJECT_PATH,
                                                 "org.freedesktop.portal.OpenURI",
-                                                "OpenFile",
+                                                call->open_dir ? "OpenDirectory" : "OpenFile",
                                                 g_variant_new ("(sha{sv})", call->parent_handle, fd_in, &options),
                                                 NULL,
                                                 G_DBUS_CALL_FLAGS_NONE,
@@ -287,6 +288,7 @@ xdp_portal_open_uri (XdpPortal           *portal,
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);
   call->writable = writable;
+  call->open_dir = FALSE;
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_open_uri);
 
@@ -312,6 +314,70 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_open_uri, FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+/**
+ * xdp_portal_open_directory:
+ * @portal: a #XdpPortal
+ * @parent: parent window information
+ * @uri: the URI to open
+ * @writable: whether to make the file writable
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Opens the directory containing the file specified by the @uri. which
+ * must be a file: uri pointing to a file that the application has access
+ * to.
+ */
+void
+xdp_portal_open_directory (XdpPortal           *portal,
+                           XdpParent           *parent,
+                           const char          *uri,
+                           GCancellable        *cancellable,
+                           GAsyncReadyCallback  callback,
+                           gpointer             data)
+{
+  OpenCall *call = NULL;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  call = g_new0 (OpenCall, 1);
+  call->portal = g_object_ref (portal);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
+  call->uri = g_strdup (uri);
+  call->writable = FALSE;
+  call->open_dir = TRUE;
+  call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_open_directory);
+
+  do_open (call);
+}
+
+/**
+ * xdp_portal_open_directory_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes the open-directory request, and returns
+ * the result in the form of a boolean.
+ *
+ * Returns: %TRUE if the call succeeded
+ */
+gboolean
+xdp_portal_open_directory_finish (XdpPortal     *portal,
+                                  GAsyncResult  *result,
+                                  GError       **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_open_directory, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }
