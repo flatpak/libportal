@@ -41,6 +41,9 @@ typedef struct {
   XdpParent *parent;
   char *parent_handle;
   XdpInhibitFlags inhibit;
+  guint signal_id;
+  guint cancelled_id;
+  char *request_path;
   char *reason;
   GTask *task;
   int id;
@@ -56,10 +59,17 @@ inhibit_call_free (InhibitCall *call)
     }
  g_free (call->parent_handle);
 
+  if (call->signal_id)
+    g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+
+  if (call->cancelled_id)
+    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+
   g_object_unref (call->portal);
   g_object_unref (call->task);
 
   g_free (call->reason);
+  g_free (call->request_path);
 
   g_free (call);
 }
@@ -90,11 +100,61 @@ call_returned (GObject *object,
     {
       g_hash_table_remove (call->portal->inhibit_handles, GINT_TO_POINTER (call->id));
       g_task_return_error (call->task, error);
+      inhibit_call_free (call);
+    }
+}
+
+static void
+response_received (GDBusConnection *bus,
+                   const char *sender_name,
+                   const char *object_path,
+                   const char *interface_name,
+                   const char *signal_name,
+                   GVariant *parameters,
+                   gpointer data)
+{
+  InhibitCall *call = data;
+  guint32 response;
+  g_autoptr(GVariant) ret = NULL;
+
+  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
+
+  if (response == 0)
+    g_task_return_int (call->task, call->id);
+  else if (response == 1)
+    {
+      g_hash_table_remove (call->portal->inhibit_handles, GINT_TO_POINTER (call->id));
+      g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Account call canceled user");
     }
   else
     {
-      g_task_return_int (call->task, call->id);
+      g_hash_table_remove (call->portal->inhibit_handles, GINT_TO_POINTER (call->id));
+      g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Account call failed");
     }
+
+  inhibit_call_free (call);
+}
+
+static void
+inhibit_cancelled_cb (GCancellable *cancellable,
+                      gpointer data)
+{
+  InhibitCall *call = data;
+
+g_debug ("inhibit cancelled, calling Close");
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          call->request_path,
+                          REQUEST_INTERFACE,
+                          "Close",
+                          NULL,
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL, NULL, NULL);
+
+  g_hash_table_remove (call->portal->inhibit_handles, GINT_TO_POINTER (call->id));
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Inhibit call canceled by caller");
 
   inhibit_call_free (call);
 }
@@ -104,7 +164,7 @@ do_inhibit (InhibitCall *call)
 {
   GVariantBuilder options;
   g_autofree char *token = NULL;
-  g_autofree char *handle = NULL;
+  GCancellable *cancellable;
 
   if (call->parent_handle == NULL)
     {
@@ -113,9 +173,23 @@ do_inhibit (InhibitCall *call)
     }
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
-  handle = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
+                                                        PORTAL_BUS_NAME,
+                                                        REQUEST_INTERFACE,
+                                                        "Response",
+                                                        call->request_path,
+                                                        NULL,
+                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                                        response_received,
+                                                        call,
+                                                        NULL);
 
-  g_hash_table_insert (call->portal->inhibit_handles, GINT_TO_POINTER (call->id), g_strdup (handle));
+  g_hash_table_insert (call->portal->inhibit_handles, GINT_TO_POINTER (call->id), g_strdup (call->request_path));
+
+  cancellable = g_task_get_cancellable (call->task);
+  if (cancellable)
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (inhibit_cancelled_cb), call);
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
@@ -147,8 +221,8 @@ do_inhibit (InhibitCall *call)
  *
  * Inhibits various session status changes.
  *
- * It is the callers responsibility to ensure that the ID is unique among
- * all active inhibitors.
+ * To obtain an ID that can be used to undo the inhibition, use
+ * xdp_portal_session_inhibit_finish() in the callback.
  *
  * To remove an active inhibitor, call xdp_portal_session_uninhibit()
  * with the same ID.
@@ -167,10 +241,10 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
   if (portal->inhibit_handles == NULL)
-    portal->inhibit_handles = g_hash_table_new_full (NULL, NULL, g_free, g_free);
+    portal->inhibit_handles = g_hash_table_new_full (NULL, NULL, NULL, g_free);
 
   portal->next_inhibit_id++;
-  if (portal->next_inhibit_id == 0)
+  if (portal->next_inhibit_id < 0)
     portal->next_inhibit_id = 1;
 
   call = g_new0 (InhibitCall, 1);
@@ -195,19 +269,19 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
  * @error: return location for an error
  *
  * Finishes the inhbit request, and returns the ID of the
- * inhibition as an integer. The ID can be passed to
+ * inhibition as a positive integer. The ID can be passed to
  * xdg_portal_session_uninhibit() to undo the inhibition.
  *
- * Returns: the ID of the inhibition, or 0 if there was an error
+ * Returns: the ID of the inhibition, or -1 if there was an error
  */
 int
 xdp_portal_session_inhibit_finish (XdpPortal *portal,
                                    GAsyncResult *result,
                                    GError **error)
 {
-  g_return_val_if_fail (XDP_IS_PORTAL (portal), 0);
-  g_return_val_if_fail (g_task_is_valid (result, portal), 0);
-  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_session_inhibit, 0);
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), -1);
+  g_return_val_if_fail (g_task_is_valid (result, portal), -1);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_session_inhibit, -1);
 
   return g_task_propagate_int (G_TASK (result), error);
 }
@@ -228,6 +302,7 @@ xdp_portal_session_uninhibit (XdpPortal *portal,
   g_autofree char *value = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (id > 0);
 
   if (portal->inhibit_handles == NULL ||
       !g_hash_table_steal_extended (portal->inhibit_handles,
@@ -239,7 +314,6 @@ xdp_portal_session_uninhibit (XdpPortal *portal,
       return;
     }
 
-  g_debug ("Calling Close on the inhibit request");
   g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           value,
@@ -383,8 +457,8 @@ create_parent_exported (XdpParent *parent,
 }
 
 static void
-cancelled_cb (GCancellable *cancellable,
-              gpointer data)
+create_cancelled_cb (GCancellable *cancellable,
+                     gpointer data)
 {
   CreateMonitorCall *call = data;
 
@@ -453,7 +527,7 @@ create_monitor (CreateMonitorCall *call)
 
   cancellable = g_task_get_cancellable (call->task);
   if (cancellable)
-    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (cancelled_cb), call);
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (create_cancelled_cb), call);
 
   session_token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->id = g_strconcat (SESSION_PATH_PREFIX, call->portal->sender, "/", session_token, NULL);
