@@ -67,6 +67,9 @@ open_call_free (OpenCall *call)
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
+  if (call->cancelled_id)
+    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+
   g_free (call->request_path);
 
   g_object_unref (call->portal);
@@ -88,12 +91,6 @@ response_received (GDBusConnection *bus,
   OpenCall *call = data;
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
-
-  if (call->cancelled_id)
-    {
-      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
-      call->cancelled_id = 0;
-    }
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
@@ -135,6 +132,10 @@ cancelled_cb (GCancellable *cancellable,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           NULL, NULL, NULL);
+
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "OpenURI call canceled by caller");
+
+  open_call_free (call);
 }
 
 static void
@@ -232,7 +233,7 @@ do_open (OpenCall *call)
                                                 G_DBUS_CALL_FLAGS_NONE,
                                                 -1,
                                                 fd_list,
-                                                cancellable,
+                                                NULL,
                                                 call_returned,
                                                 call);
     }
@@ -247,7 +248,7 @@ do_open (OpenCall *call)
                               NULL,
                               G_DBUS_CALL_FLAGS_NONE,
                               -1,
-                              cancellable,
+                              NULL,
                               call_returned,
                               call);
     }
