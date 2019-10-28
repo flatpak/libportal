@@ -78,6 +78,7 @@
     <xi:include href="xml/location.xml" />
     <xi:include href="xml/spawn.xml" />
     <xi:include href="xml/updates.xml" />
+    <xi:include href="xml/wallpaper.xml" />
 
   </chapter>
 

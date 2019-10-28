@@ -42,6 +42,7 @@ src = [
         'spawn.c',
         'trash.c',
         'updates.c',
+        'wallpaper.c',
 	'utils.c',
         portal_enums
 ]

@@ -33,3 +33,4 @@
 #include <spawn.h>
 #include <trash.h>
 #include <updates.h>
+#include <wallpaper.h>

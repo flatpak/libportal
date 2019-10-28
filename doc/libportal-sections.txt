@@ -170,3 +170,10 @@ xdp_portal_update_monitor_stop
 xdp_portal_update_install
 xdp_portal_update_install_finish
 </SECTION>
+
+<SECTION>
+<FILE>wallpaper</FILE>
+XdpWallpaperTarget
+xdp_portal_set_wallpaper
+xdp_portal_set_wallpaper_finish
+</SECTION>
