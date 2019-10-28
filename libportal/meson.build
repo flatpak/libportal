@@ -15,7 +15,8 @@ headers = files('portal.h',
                 'screenshot.h',
                 'spawn.h',
                 'trash.h',
-                'updates.h')
+                'updates.h',
+                'wallpaper.h')
 
 portal_enums = gnome.mkenums('portal-enums',
                              sources: headers,
