@@ -20,16 +20,20 @@
 #include <portal.h>
 #include <gtk/gtk.h>
 
+#if !(GTK_CHECK_VERSION(3,96,0) || GTK_CHECK_VERSION(4,0,0))
+#error "To use libportal with GTK3, include portal-gtk3.h"
+#endif
+
 #ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
+#include <gdk/x11/gdkx.h>
 #endif
 #ifdef GDK_WINDOWING_WAYLAND
-#include <gdk/gdkwayland.h>
+#include <gdk/wayland/gdkwayland.h>
 #endif
 
 G_BEGIN_DECLS
 
-static inline void _xdp_parent_exported_wayland (GdkWindow *window,
+static inline void _xdp_parent_exported_wayland (GdkSurface *surface,
                                                  const char *handle,
                                                  gpointer data)
 
@@ -46,8 +50,8 @@ static inline gboolean _xdp_parent_export_gtk (XdpParent *parent,
 #ifdef GDK_WINDOWING_X11
   if (GDK_IS_X11_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
     {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
-      guint32 xid = (guint32) gdk_x11_window_get_xid (w);
+      GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
+      guint32 xid = (guint32) gdk_x11_surface_get_xid (surface);
       g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
       callback (parent, handle, data);
       return TRUE;
@@ -56,10 +60,10 @@ static inline gboolean _xdp_parent_export_gtk (XdpParent *parent,
 #ifdef GDK_WINDOWING_WAYLAND
   if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
     {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
+      GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
       parent->callback = callback;
       parent->data = data;
-      return gdk_wayland_window_export_handle (w, _xdp_parent_exported_wayland, parent, NULL);
+      return gdk_wayland_surface_export_handle (surface, _xdp_parent_exported_wayland, parent, NULL);
     }
 #endif
   g_warning ("Couldn't export handle, unsupported windowing system");
@@ -71,8 +75,8 @@ static inline void _xdp_parent_unexport_gtk (XdpParent *parent)
 #ifdef GDK_WINDOWING_WAYLAND
   if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
     {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
-      gdk_wayland_window_unexport_handle (w);
+      GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
+      gdk_wayland_surface_unexport_handle (surface);
     }
 #endif
 }
