@@ -148,6 +148,28 @@ ensure_location_updated_connected (XdpPortal *portal)
 }
 
 static void
+cancelled_cb (GCancellable *cancellable,
+              gpointer data)
+{
+  CreateCall *call = data;
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          call->request_path,
+                          REQUEST_INTERFACE,
+                          "Close",
+                          NULL,
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          NULL, NULL, NULL);
+
+  g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Location call canceled by caller");
+
+  create_call_free (call);
+}
+
+static void
 call_returned (GObject *object,
                GAsyncResult *result,
                gpointer data)
@@ -165,36 +187,26 @@ call_returned (GObject *object,
 }
 
 static void
-session_created (GDBusConnection *bus,
-                 const char *sender_name,
-                 const char *object_path,
-                 const char *interface_name,
-                 const char *signal_name,
-                 GVariant *parameters,
+session_created (GObject *object,
+                 GAsyncResult *result,
                  gpointer data)
 {
   CreateCall *call = data;
   GVariantBuilder options;
   g_autofree char *token = NULL;
-  GCancellable *cancellable;
-  guint response;
   g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GError) error = NULL;
+  GCancellable *cancellable;
 
-  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
 
-  if (response != 0)
+  if (error)
     {
-      if (response == 1)
-        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "CreateLocation canceled");
-      else if (response == 2)
-        g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateLocation failed");
+      g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateLocation failed: %s", error->message);
 
       create_call_free (call);
       return;
     }
-
-  g_free (call->request_path);
-  g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
@@ -209,10 +221,13 @@ session_created (GDBusConnection *bus,
                                                         call,
                                                         NULL);
 
-  call->portal->location_monitor_handle = g_strdup (call->id);
+  g_variant_get (ret, "(o)", &call->portal->location_monitor_handle);
   ensure_location_updated_connected (call->portal);
 
   cancellable = g_task_get_cancellable (call->task);
+
+  if (cancellable)
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (cancelled_cb), call);
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
@@ -228,27 +243,9 @@ session_created (GDBusConnection *bus,
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          cancellable,
+                          NULL,
                           call_returned,
                           call);
-}
-
-static void
-create_cancelled_cb (GCancellable *cancellable,
-                     gpointer data)
-{
-  CreateCall *call = data;
-
-  g_dbus_connection_call (call->portal->bus,
-                          PORTAL_BUS_NAME,
-                          call->request_path,
-                          REQUEST_INTERFACE,
-                          "Close",
-                          NULL,
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          NULL, NULL, NULL);
 }
 
 static void create_session (CreateCall *call);
@@ -267,7 +264,6 @@ static void
 create_session (CreateCall *call)
 {
   GVariantBuilder options;
-  g_autofree char *token = NULL;
   g_autofree char *session_token = NULL;
   GCancellable *cancellable;
 
@@ -284,29 +280,12 @@ create_session (CreateCall *call)
       return;
     }
 
-  token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
-  call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
-  call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
-                                                        PORTAL_BUS_NAME,
-                                                        REQUEST_INTERFACE,
-                                                        "Response",
-                                                        call->request_path,
-                                                        NULL,
-                                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                        session_created,
-                                                        call,
-                                                        NULL);
-
   session_token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->id = g_strconcat (SESSION_PATH_PREFIX, call->portal->sender, "/", session_token, NULL);
 
   cancellable = g_task_get_cancellable (call->task);
 
-  if (cancellable)
-    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (create_cancelled_cb), call);
-
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   g_variant_builder_add (&options, "{sv}", "session_handle_token", g_variant_new_string (session_token));
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
@@ -318,7 +297,7 @@ create_session (CreateCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           cancellable,
-                          call_returned,
+                          session_created,
                           call);
 }
 
