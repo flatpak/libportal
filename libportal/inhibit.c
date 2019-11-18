@@ -544,7 +544,7 @@ create_monitor (CreateMonitorCall *call)
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          cancellable,
+                          NULL,
                           create_returned,
                           call);
 
@@ -577,7 +577,7 @@ xdp_portal_session_monitor_start (XdpPortal *portal,
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  call = g_new (CreateMonitorCall, 1);
+  call = g_new0 (CreateMonitorCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
     call->parent = _xdp_parent_copy (parent);
