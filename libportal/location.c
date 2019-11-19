@@ -287,6 +287,9 @@ create_session (CreateCall *call)
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "session_handle_token", g_variant_new_string (session_token));
+  g_variant_builder_add (&options, "{sv}", "distance-threshold", g_variant_new_uint32 (call->distance));
+  g_variant_builder_add (&options, "{sv}", "time-threshold", g_variant_new_uint32 (call->time));
+  g_variant_builder_add (&options, "{sv}", "accuracy", g_variant_new_uint32 (call->accuracy));
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
