@@ -195,14 +195,14 @@ session_created (GObject *object,
   GVariantBuilder options;
   g_autofree char *token = NULL;
   g_autoptr(GVariant) ret = NULL;
-  g_autoptr(GError) error = NULL;
+  GError *error = NULL;
   GCancellable *cancellable;
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
 
   if (error)
     {
-      g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateLocation failed: %s", error->message);
+      g_task_return_error (call->task, error);
 
       create_call_free (call);
       return;
