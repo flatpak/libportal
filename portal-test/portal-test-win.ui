@@ -198,6 +198,16 @@
             <property name="top-attach">3</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkCheckButton" id="open_local_dir">
+            <property name="visible">1</property>
+            <property name="label">Open Folder</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">3</property>
+          </packing>
+        </child>
 
         <child>
           <object class="GtkLabel">

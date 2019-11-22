@@ -55,6 +55,7 @@ struct _PortalTestWin
   GtkWidget *realname;
   GtkWidget *avatar;
   GtkWidget *save_how;
+  GtkWidget *open_local_dir;;
 
 
   GtkWidget *screencast_label;
@@ -168,12 +169,20 @@ opened_uri (GObject *object,
             gpointer data)
 {
   XdpPortal *portal = XDP_PORTAL (object);
+  PortalTestWin *win = data;
   g_autoptr(GError) error = NULL;
+  gboolean open_dir;
+  gboolean res;
 
-  if (!xdp_portal_open_uri_finish (portal, result, &error))
-    {
-      g_warning ("%s", error->message);
-    }
+  open_dir = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_dir));
+ 
+  if (open_dir)
+    res = xdp_portal_open_directory_finish (portal, result, &error);
+  else
+   res = xdp_portal_open_uri_finish (portal, result, &error);
+
+  if (!res)
+    g_warning ("%s", error->message);
 }
 
 static void
@@ -182,14 +191,21 @@ open_local (GtkWidget *button, PortalTestWin *win)
   XdpParent *parent;
   g_autoptr(GFile) file = NULL;
   g_autofree char *uri = NULL;
+  gboolean open_dir;
 
   file = g_file_new_for_path (PKGDATADIR "/test.txt");
   uri = g_file_get_uri (file);
 
   g_message ("Opening '%s'", uri);
 
+  open_dir = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_dir));
+
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
-  xdp_portal_open_uri (win->portal, parent, uri, FALSE, NULL, opened_uri, NULL);
+
+  if (open_dir)
+    xdp_portal_open_directory (win->portal, parent, uri, NULL, opened_uri, win);
+  else
+    xdp_portal_open_uri (win->portal, parent, uri, FALSE, NULL, opened_uri, win);
   xdp_parent_free (parent);
 }
 
@@ -1033,6 +1049,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_dir);
 }
 
 GtkApplicationWindow *
