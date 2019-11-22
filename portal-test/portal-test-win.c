@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "libportal/portal-gtk.h"
+#include "libportal/portal-gtk3.h"
 
 #include "portal-test-app.h"
 #include "portal-test-win.h"
@@ -48,7 +48,7 @@ struct _PortalTestWin
   GtkWidget *inhibit_logout;
   GtkWidget *inhibit_suspend;
   GtkWidget *inhibit_switch;
-  guint inhibit_cookie;
+  int inhibit_cookie;
   GtkApplicationInhibitFlags inhibit_flags;
 
   GtkWidget *username;
@@ -163,8 +163,23 @@ portal_test_win_init (PortalTestWin *win)
 }
 
 static void
+opened_uri (GObject *object,
+            GAsyncResult *result,
+            gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (object);
+  g_autoptr(GError) error = NULL;
+
+  if (!xdp_portal_open_uri_finish (portal, result, &error))
+    {
+      g_warning ("%s", error->message);
+    }
+}
+
+static void
 open_local (GtkWidget *button, PortalTestWin *win)
 {
+  XdpParent *parent;
   g_autoptr(GFile) file = NULL;
   g_autofree char *uri = NULL;
 
@@ -173,7 +188,9 @@ open_local (GtkWidget *button, PortalTestWin *win)
 
   g_message ("Opening '%s'", uri);
 
-  g_app_info_launch_default_for_uri (uri, NULL, NULL);
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+  xdp_portal_open_uri (win->portal, parent, uri, FALSE, NULL, opened_uri, NULL);
+  xdp_parent_free (parent);
 }
 
 static gboolean
@@ -840,6 +857,17 @@ print_cb (GtkButton *button, PortalTestWin *win)
 }
 
 static void
+inhibit_finished (GObject *source,
+                  GAsyncResult *result,
+                  gpointer data)
+{
+  g_autoptr(GError) error = NULL;
+  PortalTestWin *win = data;
+
+  win->inhibit_cookie = xdp_portal_session_inhibit_finish (XDP_PORTAL (source), result, &error);
+}
+
+static void
 inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
 {
   GtkApplicationInhibitFlags flags = 0;
@@ -858,7 +886,7 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
 
   if (win->inhibit_cookie != 0)
     {
-      xdp_portal_session_uninhibit (win->portal, "inhibit");
+      xdp_portal_session_uninhibit (win->portal, win->inhibit_cookie);
       win->inhibit_cookie = 0;
     }
 
@@ -873,7 +901,9 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
                                   parent,
                                   win->inhibit_flags,
                                   "Portal Testing",
-                                  "inhibit");
+                                  NULL,
+                                  inhibit_finished,
+                                  win);
       xdp_parent_free (parent);
     }
 }
