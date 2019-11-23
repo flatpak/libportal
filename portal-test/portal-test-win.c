@@ -639,7 +639,7 @@ notify_me (PortalTestWin *win)
   g_variant_builder_add (&notification, "{sv}", "body", g_variant_new_string ("Really important information would ordinarily appear here"));
   g_variant_builder_add (&notification, "{sv}", "buttons", g_variant_builder_end (&buttons));
 
-  xdp_portal_add_notification (win->portal, "notification", g_variant_builder_end (&notification));
+  xdp_portal_add_notification (win->portal, "notification", g_variant_builder_end (&notification), NULL, NULL, NULL);
 }
 
 void
