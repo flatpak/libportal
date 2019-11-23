@@ -68,6 +68,25 @@ ensure_action_invoked_connection (XdpPortal *portal)
                                            NULL);
 }
 
+typedef struct {
+  XdpPortal *portal;
+  GAsyncReadyCallback callback;
+  gpointer data;
+} CallDoneData;
+
+static void
+call_done (GObject *source,
+           GAsyncResult *result,
+           gpointer data)
+{
+  CallDoneData *call_done_data = data;
+
+  call_done_data->callback (G_OBJECT (call_done_data->portal), result, call_done_data->data);
+
+  g_object_unref (call_done_data->portal);
+  g_free (call_done_data);
+}           
+
 /**
  * xdp_portal_add_notification:
  * @portal: a #XdpPortal
@@ -116,8 +135,19 @@ xdp_portal_add_notification (XdpPortal           *portal,
                              gpointer             data)
 {
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  GAsyncReadyCallback call_done_cb = NULL;
+  CallDoneData *call_done_data = NULL;
 
   ensure_action_invoked_connection (portal);
+
+  if (callback)
+    {
+      call_done_cb = call_done; 
+      call_done_data = g_new (CallDoneData, 1);
+      call_done_data->portal = g_object_ref (portal);
+      call_done_data->callback = callback,
+      call_done_data->data = data;
+    }
 
   g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
@@ -129,8 +159,8 @@ xdp_portal_add_notification (XdpPortal           *portal,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           cancellable,
-                          callback,
-                          data);
+                          call_done_cb,
+                          call_done_data);
 }
 
 /**
@@ -149,7 +179,11 @@ xdp_portal_add_notification_finish (XdpPortal     *portal,
                                     GAsyncResult  *result,
                                     GError       **error)
 {
-  return g_dbus_connection_call_finish (portal->bus, result, error);
+  g_autoptr(GVariant) res = NULL;
+
+  res = g_dbus_connection_call_finish (portal->bus, result, error);
+
+  return !!res;
 }
 
 /**
