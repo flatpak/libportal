@@ -25,6 +25,7 @@ xdp_portal_pick_color_finish
 <SECTION>
 <FILE>notification</FILE>
 xdp_portal_add_notification
+xdp_portal_add_notification_finish
 xdp_portal_remove_notification
 </SECTION>
 

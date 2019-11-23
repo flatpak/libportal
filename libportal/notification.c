@@ -73,6 +73,9 @@ ensure_action_invoked_connection (XdpPortal *portal)
  * @portal: a #XdpPortal
  * @id: unique ID for the notification
  * @notification: a #GVariant dictionary with the content of the notification
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
  *
  * Sends a desktop notification.
  *
@@ -105,9 +108,12 @@ ensure_action_invoked_connection (XdpPortal *portal)
  * To withdraw a notification, use xdp_portal_remove_notification().
  */
 void
-xdp_portal_add_notification (XdpPortal  *portal,
-                             const char *id,
-                             GVariant   *notification)
+xdp_portal_add_notification (XdpPortal           *portal,
+                             const char          *id,
+                             GVariant            *notification,
+                             GCancellable        *cancellable,
+                             GAsyncReadyCallback  callback,
+                             gpointer             data)
 {
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
@@ -122,9 +128,28 @@ xdp_portal_add_notification (XdpPortal  *portal,
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
-                          NULL,
-                          NULL,
-                          NULL);
+                          cancellable,
+                          callback,
+                          data);
+}
+
+/**
+ * xdp_portal_add_notification_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes the notification request, and returns the result
+ * as a boolean.
+ *
+ * Returns: %TRUE if the notification was added
+ */
+gboolean
+xdp_portal_add_notification_finish (XdpPortal     *portal,
+                                    GAsyncResult  *result,
+                                    GError       **error)
+{
+  return g_dbus_connection_call_finish (portal->bus, result, error);
 }
 
 /**
