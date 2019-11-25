@@ -40,7 +40,7 @@ typedef struct {
   XdpPortal *portal;
   XdpParent *parent;
   char *parent_handle;
-  gboolean save_mode;
+  char *method;
   char *title;
   gboolean modal;
   gboolean multiple;
@@ -77,6 +77,7 @@ file_call_free (FileCall *call)
   g_object_unref (call->portal);
   g_object_unref (call->task);
 
+  g_free (call->method);
   g_free (call->title);
   g_free (call->current_name);
   g_free (call->current_folder);
@@ -225,7 +226,7 @@ open_file (FileCall *call)
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.FileChooser",
-                          call->save_mode ? "SaveFile" : "OpenFile",
+                          call->method,
                           g_variant_new ("(ssa{sv})", call->parent_handle, call->title, &options),
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
@@ -299,6 +300,7 @@ xdp_portal_open_file (XdpPortal *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
+  call->method = "OpenFile";
   call->title = g_strdup (title);
   call->modal = modal;
   call->multiple = multiple;
@@ -392,7 +394,7 @@ xdp_portal_save_file (XdpPortal *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
-  call->save_mode = TRUE;
+  call->method = "SaveFile";
   call->title = g_strdup (title);
   call->modal = modal;
   call->current_name = g_strdup (current_name);
