@@ -24,7 +24,9 @@ G_BEGIN_DECLS
 XDP_PUBLIC
 void       xdp_portal_compose_email        (XdpPortal            *portal,
                                             XdpParent            *parent,
-                                            const char           *address,
+                                            const char *const    *addresses,
+                                            const char *const    *cc,
+                                            const char *const    *bcc,
                                             const char           *subject,
                                             const char           *body,
                                             const char *const    *attachments,

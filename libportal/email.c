@@ -50,7 +50,9 @@ typedef struct {
   XdpPortal *portal;
   XdpParent *parent;
   char *parent_handle;
-  char *address;
+  char **addresses;
+  char **cc;
+  char **bcc;
   char *subject;
   char *body;
   char **attachments;
@@ -81,7 +83,9 @@ email_call_free (EmailCall *call)
   g_object_unref (call->portal);
   g_object_unref (call->task);
 
-  g_free (call->address);
+  g_strfreev (call->addresses);
+  g_strfreev (call->cc);
+  g_strfreev (call->bcc);
   g_free (call->subject);
   g_free (call->body);
   g_strfreev (call->attachments);
@@ -181,12 +185,27 @@ compose_email (EmailCall *call)
   g_autofree char *token = NULL;
   g_autoptr(GUnixFDList) fd_list = NULL;
   GCancellable *cancellable;
+  g_autoptr(GVariant) ret = NULL;
+  guint version;
 
   if (call->parent_handle == NULL)
     {
       call->parent->export (call->parent, parent_exported, call);
       return;
     }
+
+  ret = g_dbus_connection_call_sync (call->portal->bus,
+                                     PORTAL_BUS_NAME,
+                                     PORTAL_OBJECT_PATH,
+                                     "org.freedesktop.DBus.Properties",
+                                     "Get",
+                                     g_variant_new ("(ss)", "org.freedesktop.portal.Email", "version"),
+                                     G_VARIANT_TYPE ("(u)"),
+                                     0,
+                                     G_MAXINT,
+                                     NULL,
+                                     NULL);
+  g_variant_get (ret, "(u)", &version);
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
@@ -207,8 +226,21 @@ compose_email (EmailCall *call)
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
-  if (call->address)
-    g_variant_builder_add (&options, "{sv}", "address", g_variant_new_string (call->address));
+  if (version >= 3)
+    {
+      if (call->addresses)
+        g_variant_builder_add (&options, "{sv}", "addresses", g_variant_new_strv ((const char *const *)call->addresses, -1));
+      if (call->cc)
+        g_variant_builder_add (&options, "{sv}", "cc", g_variant_new_strv ((const char * const *)call->cc, -1));
+      if (call->bcc)
+        g_variant_builder_add (&options, "{sv}", "bcc", g_variant_new_strv ((const char * const *)call->bcc, -1));
+    }
+  else
+    {
+      if (call->addresses)
+        g_variant_builder_add (&options, "{sv}", "address", g_variant_new_string (call->addresses[0]));
+    }
+
   if (call->subject)
     g_variant_builder_add (&options, "{sv}", "subject", g_variant_new_string (call->subject));
   if (call->body)
@@ -264,7 +296,9 @@ compose_email (EmailCall *call)
  * xdp_portal_compose_email:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
- * @address: (nullable): the email address to send to
+ * @addresses: (nullable): the email addresses to send to
+ * @cc: (nullable): the email addresses to cc
+ * @bcc: (nullable): the email addresses to bcc
  * @subject: (nullable): the subject for the email
  * @body: (nullable): the body for the email
  * @attachments: (nullable): an array of paths for files to attach
@@ -281,7 +315,9 @@ compose_email (EmailCall *call)
 void
 xdp_portal_compose_email (XdpPortal *portal,
                           XdpParent *parent,
-                          const char *address,
+                          const char *const *addresses,
+                          const char *const *cc,
+                          const char *const *bcc,
                           const char *subject,
                           const char *body,
                           const char *const *attachments,
@@ -299,7 +335,9 @@ xdp_portal_compose_email (XdpPortal *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
-  call->address = g_strdup (address);
+  call->addresses = g_strdupv ((char**)addresses);
+  call->cc = g_strdupv ((char **)cc);
+  call->bcc = g_strdupv ((char **)bcc);
   call->subject = g_strdup (subject);
   call->body = g_strdup (body);
   call->attachments = g_strdupv ((char **)attachments);
