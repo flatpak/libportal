@@ -40,13 +40,14 @@ typedef struct {
   XdpPortal *portal;
   XdpParent *parent;
   char *parent_handle;
-  gboolean save_mode;
+  char *method;
   char *title;
   gboolean modal;
   gboolean multiple;
   char *current_name;
   char *current_folder;
   char *current_file;
+  GVariant *files;
   GVariant *filters;
   GVariant *current_filter;
   GVariant *choices;
@@ -77,10 +78,13 @@ file_call_free (FileCall *call)
   g_object_unref (call->portal);
   g_object_unref (call->task);
 
+  g_free (call->method);
   g_free (call->title);
   g_free (call->current_name);
   g_free (call->current_folder);
   g_free (call->current_file);
+  if (call->files)
+    g_variant_unref (call->files);
   if (call->filters)
     g_variant_unref (call->filters);
   if (call->current_filter)
@@ -208,6 +212,8 @@ open_file (FileCall *call)
   g_variant_builder_add (&options, "{sv}", "modal", g_variant_new_boolean (call->modal));
   if (call->multiple)
     g_variant_builder_add (&options, "{sv}", "multiple", g_variant_new_boolean (call->multiple));
+  if (call->files)
+    g_variant_builder_add (&options, "{sv}", "files", call->files);
   if (call->filters)
     g_variant_builder_add (&options, "{sv}", "filters", call->filters);
   if (call->current_filter)
@@ -225,7 +231,7 @@ open_file (FileCall *call)
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.FileChooser",
-                          call->save_mode ? "SaveFile" : "OpenFile",
+                          call->method,
                           g_variant_new ("(ssa{sv})", call->parent_handle, call->title, &options),
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
@@ -299,6 +305,7 @@ xdp_portal_open_file (XdpPortal *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
+  call->method = "OpenFile";
   call->title = g_strdup (title);
   call->modal = modal;
   call->multiple = multiple;
@@ -392,7 +399,7 @@ xdp_portal_save_file (XdpPortal *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
-  call->save_mode = TRUE;
+  call->method = "SaveFile";
   call->title = g_strdup (title);
   call->modal = modal;
   call->current_name = g_strdup (current_name);
@@ -433,6 +440,103 @@ xdp_portal_save_file_finish (XdpPortal *portal,
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_save_file, NULL);
+
+  ret = g_task_propagate_pointer (G_TASK (result), error);
+  return ret ? g_variant_ref (ret) : NULL;
+}
+
+/**
+ * xdp_portal_save_files:
+ * @portal: a #XdpPortal
+ * @parent: (nullable): parent window information
+ * @title: title for the file chooser dialog
+ * @modal: whether the dialog should be modal
+ * @current_name: (nullable): suggested filename
+ * @current_folder: (nullable): suggested folder to save the file in
+ * @files: An array of file names to be saved
+ * @choices: (nullable): a #GVariant describing extra widgets
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Asks for a folder as a location to save one or more files. The
+ * names of the files will be used as-is and appended to the selected
+ * folder's path in the list of returned files. If the selected folder
+ * already contains a file with one of the given names, the portal may
+ * prompt or take some other action to construct a unique file name and
+ * return that instead.
+ *
+ * The format for the @choices argument is the same as for xdp_portal_open_file().
+ *
+ * When the request is done, @callback will be called. You can then
+ * call xdp_portal_save_file_finish() to get the results.
+ */
+void
+xdp_portal_save_files (XdpPortal *portal,
+                       XdpParent *parent,
+                       const char *title,
+                       gboolean modal,
+                       const char *current_name,
+                       const char *current_folder,
+                       GVariant *files,
+                       GVariant *choices,
+                       GCancellable *cancellable,
+                       GAsyncReadyCallback  callback,
+                       gpointer data)
+{
+  FileCall *call;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (files != NULL);
+
+  call = g_new0 (FileCall, 1);
+  call->portal = g_object_ref (portal);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
+  call->method = "SaveFiles";
+  call->title = g_strdup (title);
+  call->modal = modal;
+  call->current_name = g_strdup (current_name);
+  call->current_folder = g_strdup (current_folder);
+  call->files = g_variant_ref (files);
+  call->choices = choices ? g_variant_ref (choices) : NULL;
+  call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_save_files);
+
+  open_file (call);
+}
+
+/**
+ * xdp_portal_save_files_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes the save-files request, and returns
+ * the result in the form of a #GVariant dictionary containing
+ * the following fields:
+ * - uris `(as)`: an array of strings containing the uri corresponding to each
+ *   file passed to the save-files request, in the same order. Note that the
+ *   file names may have changed, for example if a file with the same name in
+ *   the selected folder already exists.
+ * - choices `a(ss)`: an array of pairs of strings, the first string being the
+ *   ID of a combobox that was passed into this call, the second string
+ *   being the selected option.
+ *
+ * Returns: (transfer full): a #GVariant dictionary with the results
+ */
+GVariant *
+xdp_portal_save_files_finish (XdpPortal *portal,
+                              GAsyncResult *result,
+                              GError **error)
+{
+  GVariant *ret;
+
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
+  g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_save_files, NULL);
 
   ret = g_task_propagate_pointer (G_TASK (result), error);
   return ret ? g_variant_ref (ret) : NULL;

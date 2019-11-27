@@ -59,4 +59,22 @@ GVariant *xdp_portal_save_file_finish             (XdpPortal            *portal,
                                                    GAsyncResult         *result,
                                                    GError              **error);
 
+XDP_PUBLIC
+void       xdp_portal_save_files                  (XdpPortal            *portal,
+                                                   XdpParent            *parent,
+                                                   const char           *title,
+                                                   gboolean              modal,
+                                                   const char           *current_name,
+                                                   const char           *current_folder,
+                                                   GVariant             *files,
+                                                   GVariant             *choices,
+                                                   GCancellable         *cancellable,
+                                                   GAsyncReadyCallback   callback,
+                                                   gpointer              data);
+
+XDP_PUBLIC
+GVariant *xdp_portal_save_files_finish            (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
+
 G_END_DECLS
