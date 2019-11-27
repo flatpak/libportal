@@ -186,7 +186,9 @@ compose_email (EmailCall *call)
   g_autoptr(GUnixFDList) fd_list = NULL;
   GCancellable *cancellable;
   g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) v = NULL;
   guint version;
+  g_autoptr(GError) error = NULL;
 
   if (call->parent_handle == NULL)
     {
@@ -200,12 +202,15 @@ compose_email (EmailCall *call)
                                      "org.freedesktop.DBus.Properties",
                                      "Get",
                                      g_variant_new ("(ss)", "org.freedesktop.portal.Email", "version"),
-                                     G_VARIANT_TYPE ("(u)"),
+                                     G_VARIANT_TYPE ("(v)"),
                                      0,
                                      G_MAXINT,
                                      NULL,
-                                     NULL);
-  g_variant_get (ret, "(u)", &version);
+                                     &error);
+  if (!ret)
+    g_warning ("%s", error->message);
+  g_variant_get (ret, "(v)", &v);
+  g_variant_get (v, "u", &version);
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
