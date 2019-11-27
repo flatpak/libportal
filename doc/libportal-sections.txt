@@ -74,6 +74,8 @@ xdp_portal_open_file
 xdp_portal_open_file_finish
 xdp_portal_save_file
 xdp_portal_save_file_finish
+xdp_portal_save_files
+xdp_portal_save_files_finish
 </SECTION>
 
 <SECTION>
