@@ -78,7 +78,7 @@ file_call_free (FileCall *call)
   g_object_unref (call->portal);
   g_object_unref (call->task);
 
-  g_free (call->method);
+  // call->method not free'ed as it is assigned from static strings
   g_free (call->title);
   g_free (call->current_name);
   g_free (call->current_folder);
