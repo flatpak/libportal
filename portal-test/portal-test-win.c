@@ -310,7 +310,7 @@ save_dialog (GtkWidget *button, PortalTestWin *win)
     {
       const char *method;
       char *filename;
-      gboolean res;
+      gboolean res = TRUE;
       g_autoptr(GError) error = NULL;
 
       method = gtk_combo_box_get_active_id (GTK_COMBO_BOX (win->save_how));
