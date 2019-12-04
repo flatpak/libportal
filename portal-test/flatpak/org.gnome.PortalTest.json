@@ -17,7 +17,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/matthiasclasen/portal-test.git"
+                    "url": "https://github.com/flatpak/libportal",
+                    "branch": "build-portal-test"
                 }
             ]
         }
