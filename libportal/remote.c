@@ -518,6 +518,9 @@ session_started (GDBusConnection *bus,
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
+  _xdp_session_set_session_state (call->session, response == 0 ? XDP_SESSION_ACTIVE
+                                                               : XDP_SESSION_CLOSED);
+ 
   if (response == 0)
     {
       guint32 devices;
@@ -535,9 +538,6 @@ session_started (GDBusConnection *bus,
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Screencast failed");
 
-  _xdp_session_set_session_state (call->session, response == 0 ? XDP_SESSION_ACTIVE
-                                                               : XDP_SESSION_CLOSED);
- 
   start_call_free (call);
 }
 
