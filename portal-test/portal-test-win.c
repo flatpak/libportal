@@ -124,8 +124,11 @@ portal_test_win_init (PortalTestWin *win)
   g_auto(GStrv) proxies = NULL;
   g_autofree char *proxy = NULL;
   g_autofree char *path = NULL;
+  g_autofree char *filename = NULL;
   g_autoptr(GError) error = NULL;
   g_autoptr(GFile) file = NULL;
+  g_autoptr(GFile) dst = NULL;
+  g_autoptr(GFile) src = NULL;
 
   win->portal = xdp_portal_new ();
 
@@ -161,6 +164,11 @@ portal_test_win_init (PortalTestWin *win)
   g_signal_connect (win->update_monitor, "changed", G_CALLBACK (update_monitor_changed), win);
 
   g_signal_connect (win->update_dialog, "response", G_CALLBACK (update_dialog_response), win);
+
+  filename = g_build_filename (g_get_user_data_dir (), "test.txt", NULL);
+  dst = g_file_new_for_path (filename);
+  src = g_file_new_for_path (APPDATADIR "/test.txt");
+  g_file_copy (src, dst, 0, NULL, NULL, NULL, NULL);
 }
 
 static void
@@ -189,11 +197,13 @@ static void
 open_local (GtkWidget *button, PortalTestWin *win)
 {
   XdpParent *parent;
+  g_autofree char *filename = NULL;
   g_autoptr(GFile) file = NULL;
   g_autofree char *uri = NULL;
   gboolean open_dir;
 
-  file = g_file_new_for_path (APPDATADIR "/test.txt");
+  filename = g_build_filename (g_get_user_data_dir (), "test.txt", NULL);
+  file = g_file_new_for_path (filename);
   uri = g_file_get_uri (file);
 
   g_message ("Opening '%s'", uri);
@@ -563,19 +573,27 @@ static void
 compose_email (PortalTestWin *win)
 {
   XdpParent *parent;
+  g_autofree char *filename = NULL;
   const char *addresses[2];
+  const char *cc[3];
   const char *attachments[2];
 
-  attachments[0] = APPDATADIR "/test.txt";
+  filename = g_build_filename (g_get_user_data_dir (), "test.txt", NULL);
+
+  attachments[0] = filename;
   attachments[1] = NULL;
 
   addresses[0] = "recipes-list@gnome.org";
   addresses[1] = NULL;
 
+  cc[0] = "mclasen@redhat.com";
+  cc[1] = "dead@email.com";
+  cc[2] = NULL;
+
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_portal_compose_email (win->portal,
                             parent,
-                            addresses, NULL, NULL,
+                            addresses, cc, NULL,
                             "Test subject",
                             "Test body",
                             attachments,
