@@ -193,7 +193,7 @@ open_local (GtkWidget *button, PortalTestWin *win)
   g_autofree char *uri = NULL;
   gboolean open_dir;
 
-  file = g_file_new_for_path (PKGDATADIR "/test.txt");
+  file = g_file_new_for_path (APPDATADIR "/test.txt");
   uri = g_file_get_uri (file);
 
   g_message ("Opening '%s'", uri);
@@ -566,7 +566,7 @@ compose_email (PortalTestWin *win)
   const char *addresses[2];
   const char *attachments[2];
 
-  attachments[0] = PKGDATADIR "/test.txt";
+  attachments[0] = APPDATADIR "/test.txt";
   attachments[1] = NULL;
 
   addresses[0] = "recipes-list@gnome.org";
