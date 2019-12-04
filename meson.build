@@ -35,3 +35,4 @@ configure_file(input: 'libportal.pc.in',
 
 subdir('libportal')
 subdir('doc')
+subdir('portal-test')
