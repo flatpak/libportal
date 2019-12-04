@@ -563,15 +563,19 @@ static void
 compose_email (PortalTestWin *win)
 {
   XdpParent *parent;
+  const char *addresses[2];
   const char *attachments[2];
 
   attachments[0] = PKGDATADIR "/test.txt";
   attachments[1] = NULL;
 
+  addresses[0] = "recipes-list@gnome.org";
+  addresses[1] = NULL;
+
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_portal_compose_email (win->portal,
                             parent,
-                            "recipes-list@gnome.org",
+                            addresses, NULL, NULL,
                             "Test subject",
                             "Test body",
                             attachments,
