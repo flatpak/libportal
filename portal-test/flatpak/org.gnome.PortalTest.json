@@ -1,0 +1,26 @@
+{
+    "app-id": "org.gnome.PortalTest",
+    "runtime": "org.gnome.Platform",
+    "runtime-version": "3.34",
+    "sdk": "org.gnome.Sdk",
+    "command": "portal-test",
+    "finish-args": [
+        "--socket=wayland",
+        "--socket=x11",
+        "--socket=pulseaudio"
+    ],
+    "modules": [
+        {
+            "name": "portal-test",
+            "buildsystem": "meson",
+            "builddir": true,
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/flatpak/libportal",
+                    "branch": "build-portal-test"
+                }
+            ]
+        }
+    ]
+}

@@ -10,6 +10,7 @@ conf = configuration_data()
 conf.set_quoted('G_LOG_DOMAIN', 'libportal')
 conf.set_quoted('PACKAGE_NAME', 'libportal')
 conf.set_quoted('PKGDATADIR', join_paths(get_option('prefix'), get_option('datadir'), 'libportal'))
+conf.set_quoted('APPDATADIR', join_paths(get_option('prefix'), get_option('datadir'), 'org.gnome.PortalTest'))
 
 visibility_arg = []
 if cc.has_argument('-fvisibility=hidden')
@@ -35,3 +36,4 @@ configure_file(input: 'libportal.pc.in',
 
 subdir('libportal')
 subdir('doc')
+subdir('portal-test')
