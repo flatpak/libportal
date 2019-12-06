@@ -14,6 +14,9 @@
             "name": "portal-test",
             "buildsystem": "meson",
             "builddir": true,
+            "build-options": {
+                "config-opts": [ "-Dbuild-portal-test=true" ]
+            },
             "sources": [
                 {
                     "type": "git",
