@@ -1033,6 +1033,41 @@ play_clicked (GtkButton *button, PortalTestWin *win)
 }
 
 static void
+set_wallpaper_called (GObject *source,
+                      GAsyncResult *result,
+                      gpointer data)
+{
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  gboolean ret = xdp_portal_set_wallpaper_finish (win->portal, result, &error);
+  if (!ret)
+    {
+      g_warning ("Wallpaper request failed: %s", error ? error->message : "Unknown error");
+      return;
+    }
+
+  g_message ("Wallpaper request successful!");
+}
+
+static void
+set_wallpaper (PortalTestWin *win)
+{
+  XdpParent *parent;
+  const char *uri = "";
+
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+  xdp_portal_set_wallpaper (win->portal,
+                            parent,
+                            uri,
+                            TRUE,
+                            XDP_WALLPAPER_TARGET_BACKGROUND | XDP_WALLPAPER_TARGET_LOCKSCREEN,
+                            NULL,
+                            set_wallpaper_called,
+                            win);
+  xdp_parent_free (parent);
+}
+
+static void
 portal_test_win_class_init (PortalTestWinClass *class)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (class);
@@ -1051,6 +1086,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, get_user_information);
   gtk_widget_class_bind_template_callback (widget_class, compose_email);
   gtk_widget_class_bind_template_callback (widget_class, request_background);
+  gtk_widget_class_bind_template_callback (widget_class, set_wallpaper);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, sandbox_status);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, network_status);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, monitor_name);
