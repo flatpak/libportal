@@ -1053,7 +1053,7 @@ static void
 set_wallpaper (PortalTestWin *win)
 {
   XdpParent *parent;
-  const char *uri = "";
+  const char *uri = "https://gitlab.gnome.org/GNOME/gtk/raw/master/demos/gtk-demo/portland-rose.jpg";
 
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_portal_set_wallpaper (win->portal,
