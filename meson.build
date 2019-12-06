@@ -36,4 +36,6 @@ configure_file(input: 'libportal.pc.in',
 
 subdir('libportal')
 subdir('doc')
-subdir('portal-test')
+if get_option('build-portal-test')
+  subdir('portal-test')
+endif
