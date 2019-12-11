@@ -47,6 +47,7 @@ typedef struct {
   XdpParent *parent;
   char *parent_handle;
   char *uri;
+  gboolean ask;
   gboolean writable;
   gboolean open_dir;
   guint signal_id;
@@ -200,6 +201,7 @@ do_open (OpenCall *call)
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   g_variant_builder_add (&options, "{sv}", "writable", g_variant_new_boolean (call->writable));
+  g_variant_builder_add (&options, "{sv}", "ask", g_variant_new_boolean (call->ask));
 
   file = g_file_new_for_uri (call->uri);
 
@@ -271,6 +273,7 @@ void
 xdp_portal_open_uri (XdpPortal           *portal,
                      XdpParent           *parent,
                      const char          *uri,
+                     gboolean             ask,
                      gboolean             writable,
                      GCancellable        *cancellable,
                      GAsyncReadyCallback  callback,
@@ -287,6 +290,7 @@ xdp_portal_open_uri (XdpPortal           *portal,
   else
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);
+  call->ask = ask;
   call->writable = writable;
   call->open_dir = FALSE;
   call->task = g_task_new (portal, cancellable, callback, data);
@@ -351,6 +355,7 @@ xdp_portal_open_directory (XdpPortal           *portal,
   else
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);
+  call->ask = FALSE;
   call->writable = FALSE;
   call->open_dir = TRUE;
   call->task = g_task_new (portal, cancellable, callback, data);

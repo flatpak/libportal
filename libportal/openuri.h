@@ -25,6 +25,7 @@ XDP_PUBLIC
 void       xdp_portal_open_uri                    (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *uri,
+                                                   gboolean              ask,
                                                    gboolean              writable,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
