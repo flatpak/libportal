@@ -262,6 +262,7 @@ do_open (OpenCall *call)
  * @portal: a #XdpPortal
  * @parent: parent window information
  * @uri: the URI to open
+ * @ask: request to show an application chooser
  * @writable: whether to make the file writable
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
