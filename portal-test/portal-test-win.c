@@ -1112,6 +1112,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_dir);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_ask);
 }
 
 GtkApplicationWindow *
