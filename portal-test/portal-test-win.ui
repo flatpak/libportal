@@ -199,9 +199,21 @@
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="open_local_dir">
+          <object class="GtkBox">
             <property name="visible">1</property>
-            <property name="label">Open Folder</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkCheckButton" id="open_local_ask">
+                <property name="visible">1</property>
+                <property name="label">Ask</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="open_local_dir">
+                <property name="visible">1</property>
+                <property name="label">Open Folder</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="left-attach">2</property>

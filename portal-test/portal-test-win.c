@@ -55,7 +55,8 @@ struct _PortalTestWin
   GtkWidget *realname;
   GtkWidget *avatar;
   GtkWidget *save_how;
-  GtkWidget *open_local_dir;;
+  GtkWidget *open_local_ask;
+  GtkWidget *open_local_dir;
 
 
   GtkWidget *screencast_label;
@@ -200,6 +201,7 @@ open_local (GtkWidget *button, PortalTestWin *win)
   g_autofree char *filename = NULL;
   g_autoptr(GFile) file = NULL;
   g_autofree char *uri = NULL;
+  gboolean ask;
   gboolean open_dir;
 
   filename = g_build_filename (g_get_user_data_dir (), "test.txt", NULL);
@@ -208,6 +210,7 @@ open_local (GtkWidget *button, PortalTestWin *win)
 
   g_message ("Opening '%s'", uri);
 
+  ask = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_ask));
   open_dir = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_dir));
 
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
@@ -215,7 +218,7 @@ open_local (GtkWidget *button, PortalTestWin *win)
   if (open_dir)
     xdp_portal_open_directory (win->portal, parent, uri, NULL, opened_uri, win);
   else
-    xdp_portal_open_uri (win->portal, parent, uri, FALSE, NULL, opened_uri, win);
+    xdp_portal_open_uri (win->portal, parent, uri, ask, FALSE, NULL, opened_uri, win);
   xdp_parent_free (parent);
 }
 
@@ -1053,14 +1056,15 @@ static void
 set_wallpaper (PortalTestWin *win)
 {
   XdpParent *parent;
-  const char *uri = "https://gitlab.gnome.org/GNOME/gtk/raw/master/demos/gtk-demo/portland-rose.jpg";
+//  const char *uri = "https://gitlab.gnome.org/GNOME/gtk/raw/master/demos/gtk-demo/portland-rose.jpg";
+  const char *uri = "file:////var/home/mclasen/portland-rose.jpg";
 
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_portal_set_wallpaper (win->portal,
                             parent,
                             uri,
                             TRUE,
-                            XDP_WALLPAPER_TARGET_BACKGROUND | XDP_WALLPAPER_TARGET_LOCKSCREEN,
+                            XDP_WALLPAPER_TARGET_BACKGROUND,// | XDP_WALLPAPER_TARGET_LOCKSCREEN,
                             NULL,
                             set_wallpaper_called,
                             win);
