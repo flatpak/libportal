@@ -88,7 +88,6 @@ response_received (GDBusConnection *bus,
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
 
-g_print ("response received\n");
   if (call->cancelled_id)
     {
       g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
@@ -221,8 +220,7 @@ g_print ("calling background\n");
  * @parent: (nullable): parent window information
  * @commandline: (element-type utf8) (transfer container): command line to autostart
  * @reason: (nullable): reason to present to user for request
- * @autostart: if autostart permissions should be requested
- * @dbus_activatable: if launched command is dbus activatable.
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @user_data: (closure): data to pass to @callback
@@ -235,10 +233,9 @@ g_print ("calling background\n");
 void
 xdp_portal_request_background (XdpPortal *portal,
                                XdpParent *parent,
-                               GPtrArray *commandline,
                                char *reason,
-                               gboolean autostart,
-                               gboolean dbus_activatable,
+                               GPtrArray *commandline,
+                               XdpBackgroundFlags flags,
                                GCancellable *cancellable,
                                GAsyncReadyCallback callback,
                                gpointer user_data)
@@ -246,6 +243,8 @@ xdp_portal_request_background (XdpPortal *portal,
   BackgroundCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_BACKGROUND_FLAG_AUTOSTART |
+                               XDP_BACKGROUND_FLAG_ACTIVATABLE)) == 0);
 
   call = g_new0 (BackgroundCall, 1);
   call->portal = g_object_ref (portal);
@@ -254,8 +253,8 @@ xdp_portal_request_background (XdpPortal *portal,
   else
     call->parent_handle = g_strdup ("");
 
-  call->autostart = autostart;
-  call->dbus_activatable = dbus_activatable;
+  call->autostart = (flags & XDP_BACKGROUND_FLAG_AUTOSTART) != 0;
+  call->dbus_activatable = (flags & XDP_BACKGROUND_FLAG_ACTIVATABLE) != 0;
   call->reason = g_strdup (reason);
   if (commandline)
     call->commandline = g_ptr_array_ref (commandline);

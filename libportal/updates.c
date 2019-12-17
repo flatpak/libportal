@@ -217,6 +217,7 @@ create_monitor (CreateMonitorCall *call)
 /**
  * xdp_portal_update_monitor_start:
  * @portal: a #XdpPortal
+ * @flags: options for this cal..
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -230,6 +231,7 @@ create_monitor (CreateMonitorCall *call)
  */
 void
 xdp_portal_update_monitor_start (XdpPortal *portal,
+                                 XdpUpdateMonitorFlags flags,
                                  GCancellable *cancellable,
                                  GAsyncReadyCallback callback,
                                  gpointer data)
@@ -237,6 +239,7 @@ xdp_portal_update_monitor_start (XdpPortal *portal,
   CreateMonitorCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_UPDATE_MONITOR_FLAG_NONE);
 
   call = g_new (CreateMonitorCall, 1);
   call->portal = g_object_ref (portal);
@@ -396,6 +399,7 @@ install_update (InstallUpdateCall *call)
  * xdp_portal_update_install:
  * @portal: a #XdpPortal
  * @parent: a #XdpParent
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -409,6 +413,7 @@ install_update (InstallUpdateCall *call)
 void
 xdp_portal_update_install (XdpPortal *portal,
                            XdpParent *parent,
+                           XdpUpdateInstallFlags flags,
                            GCancellable *cancellable,
                            GAsyncReadyCallback callback,
                            gpointer data)
@@ -416,6 +421,7 @@ xdp_portal_update_install (XdpPortal *portal,
   InstallUpdateCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_UPDATE_INSTALL_FLAG_NONE);
 
   call = g_new (InstallUpdateCall, 1);
   call->portal = g_object_ref (portal);

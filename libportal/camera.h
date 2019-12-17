@@ -24,17 +24,22 @@ G_BEGIN_DECLS
 XDP_PUBLIC
 gboolean  xdp_portal_is_camera_present   (XdpPortal            *portal);
 
-XDP_PUBLIC
-void      xdp_portal_access_camera       (XdpPortal            *portal,
-                                          XdpParent            *parent,
-                                          GCancellable         *cancellable,
-                                          GAsyncReadyCallback   callback,
-                                          gpointer              data);
+typedef enum {
+  XDP_CAMERA_FLAG_NONE = 0
+} XdpCameraFlags;
 
 XDP_PUBLIC
-gboolean xdp_portal_access_camera_finish (XdpPortal            *portal,
-                                          GAsyncResult         *result,
-                                          GError              **error);
+void      xdp_portal_access_camera       (XdpPortal           *portal,
+                                          XdpParent           *parent,
+                                          XdpCameraFlags       flags,
+                                          GCancellable        *cancellable,
+                                          GAsyncReadyCallback  callback,
+                                          gpointer             data);
+
+XDP_PUBLIC
+gboolean xdp_portal_access_camera_finish (XdpPortal           *portal,
+                                          GAsyncResult        *result,
+                                          GError             **error);
 
 XDP_PUBLIC
 int      xdp_portal_open_pipewire_remote_for_camera (XdpPortal *portal);

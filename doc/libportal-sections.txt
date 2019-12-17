@@ -16,6 +16,7 @@ xdp_parent_new_gtk
 
 <SECTION>
 <FILE>screenshot</FILE>
+XdpScreenshotFlags
 xdp_portal_take_screenshot
 xdp_portal_take_screenshot_finish
 xdp_portal_pick_color
@@ -24,6 +25,7 @@ xdp_portal_pick_color_finish
 
 <SECTION>
 <FILE>notification</FILE>
+XdpNotificationFlags
 xdp_portal_add_notification
 xdp_portal_add_notification_finish
 xdp_portal_remove_notification
@@ -31,18 +33,21 @@ xdp_portal_remove_notification
 
 <SECTION>
 <FILE>email</FILE>
+XdpEmailFlags
 xdp_portal_compose_email
 xdp_portal_compose_email_finish
 </SECTION>
 
 <SECTION>
 <FILE>background</FILE>
+XdpBackgroundFlags
 xdp_portal_request_background
 xdp_portal_request_background_finish
 </SECTION>
 
 <SECTION>
 <FILE>account</FILE>
+XdpUserInformationFlags
 xdp_portal_get_user_information
 xdp_portal_get_user_information_finish
 </SECTION>
@@ -50,10 +55,11 @@ xdp_portal_get_user_information_finish
 <SECTION>
 <FILE>inhibit</FILE>
 XdpInhibitFlags
-XdpLoginSessionState
+XdpSessionState
 xdp_portal_session_inhibit
 xdp_portal_session_inhibit_finish
 xdp_portal_session_uninhibit
+XdpSessionMonitorFlags
 xdp_portal_session_monitor_start
 xdp_portal_session_monitor_start_finish
 xdp_portal_session_monitor_stop
@@ -62,6 +68,7 @@ xdp_portal_session_monitor_query_end_response
 
 <SECTION>
 <FILE>open</FILE>
+XdpOpenUriFlags
 xdp_portal_open_uri
 xdp_portal_open_uri_finish
 xdp_portal_open_directory
@@ -70,8 +77,10 @@ xdp_portal_open_directory_finish
 
 <SECTION>
 <FILE>filechooser</FILE>
+XdpOpenFileFlags
 xdp_portal_open_file
 xdp_portal_open_file_finish
+XdpSaveFileFlags
 xdp_portal_save_file
 xdp_portal_save_file_finish
 xdp_portal_save_files
@@ -86,6 +95,7 @@ xdp_portal_trash_file_finish
 
 <SECTION>
 <FILE>print</FILE>
+XdpPrintFlags
 xdp_portal_prepare_print
 xdp_portal_prepare_print_finish
 xdp_portal_print_file
@@ -113,8 +123,7 @@ xdp_session_get_type
 <SECTION>
 <FILE>screencast</FILE>
 XdpOutputType
-XDP_OUTPUT_NONE
-XDP_OUTPUT_ALL
+XdpScreenCastFlags
 xdp_portal_create_screencast_session
 xdp_portal_create_screencast_session_finish
 </SECTION>
@@ -122,8 +131,7 @@ xdp_portal_create_screencast_session_finish
 <SECTION>
 <FILE>remote</FILE>
 XdpDeviceType
-XDP_DEVICE_NONE
-XDP_DEVICE_ALL
+XdpRemoteDesktopFlags
 xdp_portal_create_remote_desktop_session
 xdp_portal_create_remote_desktop_session_finish
 xdp_session_pointer_motion
@@ -142,6 +150,7 @@ xdp_session_touch_up
 
 <SECTION>
 <FILE>camera</FILE>
+XdpCameraFlags
 xdp_portal_is_camera_present
 xdp_portal_access_camera
 xdp_portal_access_camera_finish
@@ -151,6 +160,7 @@ xdp_portal_open_pipewire_remote_for_camera
 <SECTION>
 <FILE>location</FILE>
 XdpLocationAccuracy
+XdpLocationMonitorFlags
 xdp_portal_location_monitor_start
 xdp_portal_location_monitor_start_finish
 xdp_portal_location_monitor_stop
@@ -167,16 +177,18 @@ xdp_portal_spawn_signal
 <SECTION>
 <FILE>updates</FILE>
 XdpUpdateStatus
+XdpUpdateMonitorFlags
 xdp_portal_update_monitor_start
 xdp_portal_update_monitor_start_finish
 xdp_portal_update_monitor_stop
+XdpUpdateInstallFlags
 xdp_portal_update_install
 xdp_portal_update_install_finish
 </SECTION>
 
 <SECTION>
 <FILE>wallpaper</FILE>
-XdpWallpaperTarget
+XdpWallpaperFlags
 xdp_portal_set_wallpaper
 xdp_portal_set_wallpaper_finish
 </SECTION>

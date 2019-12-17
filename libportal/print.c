@@ -49,7 +49,6 @@ typedef struct {
   XdpParent *parent;
   char *parent_handle;
   char *title;
-  gboolean modal;
   gboolean is_prepare;
   GVariant *settings;
   GVariant *page_setup;
@@ -214,7 +213,6 @@ do_print (PrintCall *call)
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
-  g_variant_builder_add (&options, "{sv}", "modal", g_variant_new_boolean (call->modal));
   if (!call->is_prepare)
     g_variant_builder_add (&options, "{sv}", "token", g_variant_new_uint32 (call->token));
   
@@ -277,9 +275,9 @@ do_print (PrintCall *call)
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
  * @title: tile for the print dialog
- * @modal: whether the dialog should be modal
  * @settings: (nullable): Serialized print settings
  * @page_setup: (nullable): Serialized page setup
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -293,9 +291,9 @@ void
 xdp_portal_prepare_print (XdpPortal *portal,
                           XdpParent *parent,
                           const char *title,
-                          gboolean modal,
                           GVariant *settings,
                           GVariant *page_setup,
+                          XdpPrintFlags flags,
                           GCancellable *cancellable,
                           GAsyncReadyCallback callback,
                           gpointer data)
@@ -303,6 +301,7 @@ xdp_portal_prepare_print (XdpPortal *portal,
   PrintCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_PRINT_FLAG_NONE);
 
   call = g_new0 (PrintCall, 1);
   call->portal = g_object_ref (portal);
@@ -311,7 +310,6 @@ xdp_portal_prepare_print (XdpPortal *portal,
   else
     call->parent_handle = g_strdup ("");
   call->title = g_strdup (title);
-  call->modal = modal;
   call->is_prepare = TRUE;
   call->settings = settings ? g_variant_ref (settings) : NULL;
   call->page_setup = page_setup ? g_variant_ref (page_setup) : NULL;
@@ -353,9 +351,9 @@ xdp_portal_prepare_print_finish (XdpPortal *portal,
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
  * @title: tile for the print dialog
- * @modal: whether the dialog should be modal
  * @token: token that was returned by a previous xdp_portal_prepare_print() call, or 0
  * @file: path of the document to print
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -373,9 +371,9 @@ void
 xdp_portal_print_file (XdpPortal *portal,
                        XdpParent *parent,
                        const char *title,
-                       gboolean modal,
                        guint token,
                        const char *file,
+                       XdpPrintFlags flags,
                        GCancellable *cancellable,
                        GAsyncReadyCallback callback,
                        gpointer data)
@@ -383,6 +381,7 @@ xdp_portal_print_file (XdpPortal *portal,
   PrintCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_PRINT_FLAG_NONE);
 
   call = g_new0 (PrintCall, 1);
   call->portal = g_object_ref (portal);
@@ -391,7 +390,6 @@ xdp_portal_print_file (XdpPortal *portal,
   else
     call->parent_handle = g_strdup ("");
   call->title = g_strdup (title);
-  call->modal = modal;
   call->is_prepare = FALSE;
   call->token = token;
   call->file = g_strdup (file);

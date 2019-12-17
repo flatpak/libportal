@@ -201,8 +201,8 @@ open_local (GtkWidget *button, PortalTestWin *win)
   g_autofree char *filename = NULL;
   g_autoptr(GFile) file = NULL;
   g_autofree char *uri = NULL;
-  gboolean ask;
   gboolean open_dir;
+  XdpOpenUriFlags flags = XDP_OPEN_URI_FLAG_NONE;
 
   filename = g_build_filename (g_get_user_data_dir (), "test.txt", NULL);
   file = g_file_new_for_path (filename);
@@ -210,15 +210,17 @@ open_local (GtkWidget *button, PortalTestWin *win)
 
   g_message ("Opening '%s'", uri);
 
-  ask = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_ask));
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_ask)))
+    flags |= XDP_OPEN_URI_FLAG_ASK;
+
   open_dir = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_dir));
 
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
 
   if (open_dir)
-    xdp_portal_open_directory (win->portal, parent, uri, NULL, opened_uri, win);
+    xdp_portal_open_directory (win->portal, parent, uri, flags, NULL, opened_uri, win);
   else
-    xdp_portal_open_uri (win->portal, parent, uri, ask, FALSE, NULL, opened_uri, win);
+    xdp_portal_open_uri (win->portal, parent, uri, flags, NULL, opened_uri, win);
   xdp_parent_free (parent);
 }
 
@@ -395,15 +397,14 @@ static void
 take_screenshot (GtkButton *button,
                  PortalTestWin *win)
 {
-  gboolean modal;
-  gboolean interactive;
   XdpParent *parent;
+  XdpScreenshotFlags flags = XDP_SCREENSHOT_FLAG_NONE;
 
-  modal = TRUE;
-  interactive = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->interactive));
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->interactive)))
+    flags = XDP_SCREENSHOT_FLAG_INTERACTIVE;
 
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
-  xdp_portal_take_screenshot (win->portal, parent, modal, interactive, NULL, taken, win);
+  xdp_portal_take_screenshot (win->portal, parent, flags, NULL, taken, win);
   xdp_parent_free (parent);
 }
 
@@ -473,7 +474,7 @@ start_screencast (PortalTestWin *win)
 {
   g_clear_object (&win->session);
 
-  xdp_portal_create_screencast_session (win->portal, XDP_OUTPUT_MONITOR|XDP_OUTPUT_WINDOW, TRUE, NULL, session_created, win);
+  xdp_portal_create_screencast_session (win->portal, XDP_OUTPUT_MONITOR|XDP_OUTPUT_WINDOW, XDP_SCREENCAST_FLAG_NONE, NULL, session_created, win);
 }
 
 static void
@@ -549,6 +550,7 @@ get_user_information (PortalTestWin *win)
   xdp_portal_get_user_information (win->portal,
                                    parent,
                                    "Allows portal-test to test the Account portal.",
+                                   XDP_USER_INFORMATION_FLAG_NONE,
                                    NULL,
                                    account_response,
                                    win);
@@ -600,6 +602,7 @@ compose_email (PortalTestWin *win)
                             "Test subject",
                             "Test body",
                             attachments,
+                            XDP_EMAIL_FLAG_NONE,
                             NULL,
                             compose_email_called,
                             win);
@@ -634,9 +637,9 @@ request_background (PortalTestWin *win)
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_portal_request_background (win->portal,
                                  parent,
-                                 commandline,
                                  "Test reason",
-                                 TRUE, FALSE,    
+                                 commandline,
+                                 XDP_BACKGROUND_FLAG_AUTOSTART,
                                  NULL,
                                  request_background_called,
                                  win);
@@ -664,7 +667,7 @@ notify_me (PortalTestWin *win)
   g_variant_builder_add (&notification, "{sv}", "body", g_variant_new_string ("Really important information would ordinarily appear here"));
   g_variant_builder_add (&notification, "{sv}", "buttons", g_variant_builder_end (&buttons));
 
-  xdp_portal_add_notification (win->portal, "notification", g_variant_builder_end (&notification), NULL, NULL, NULL);
+  xdp_portal_add_notification (win->portal, "notification", g_variant_builder_end (&notification), XDP_NOTIFICATION_FLAG_NONE, NULL, NULL, NULL);
 }
 
 void
@@ -940,8 +943,8 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
       parent = xdp_parent_new_gtk (GTK_WINDOW (win));
       xdp_portal_session_inhibit (win->portal,
                                   parent,
-                                  win->inhibit_flags,
                                   "Portal Testing",
+                                  win->inhibit_flags,
                                   NULL,
                                   inhibit_finished,
                                   win);
@@ -1063,8 +1066,7 @@ set_wallpaper (PortalTestWin *win)
   xdp_portal_set_wallpaper (win->portal,
                             parent,
                             uri,
-                            TRUE,
-                            XDP_WALLPAPER_TARGET_BACKGROUND,// | XDP_WALLPAPER_TARGET_LOCKSCREEN,
+                            XDP_WALLPAPER_FLAG_BACKGROUND | XDP_WALLPAPER_FLAG_PREVIEW,
                             NULL,
                             set_wallpaper_called,
                             win);

@@ -21,15 +21,26 @@
 
 G_BEGIN_DECLS
 
+/**
+ * XdpOpenFileFlags:
+ * @XDP_OPEN_FILE_FLAG_NONE: No options
+ * @XDP_OPEN_FILE_FLAG_MULTIPLE: Allow selecting multiple files
+ *
+ * Options for opening files.
+ */
+typedef enum {
+  XDP_OPEN_FILE_FLAG_NONE     = 0,
+  XDP_OPEN_FILE_FLAG_MULTIPLE = 1 << 0,
+} XdpOpenFileFlags;
+
 XDP_PUBLIC
 void       xdp_portal_open_file                   (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *title,
-                                                   gboolean              modal,
-                                                   gboolean              multiple,
                                                    GVariant             *filters,
                                                    GVariant             *current_filter,
                                                    GVariant             *choices,
+                                                   XdpOpenFileFlags      flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);
@@ -39,17 +50,21 @@ GVariant *xdp_portal_open_file_finish             (XdpPortal            *portal,
                                                    GAsyncResult         *result,
                                                    GError              **error);
 
+typedef enum {
+  XDP_SAVE_FILE_FLAG_NONE = 0
+} XdpSaveFileFlags;
+
 XDP_PUBLIC
 void       xdp_portal_save_file                   (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *title,
-                                                   gboolean              modal,
                                                    const char           *current_name,
                                                    const char           *current_folder,
                                                    const char           *current_file,
                                                    GVariant             *filters,
                                                    GVariant             *current_filter,
                                                    GVariant             *choices,
+                                                   XdpSaveFileFlags      flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);
@@ -63,11 +78,11 @@ XDP_PUBLIC
 void       xdp_portal_save_files                  (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *title,
-                                                   gboolean              modal,
                                                    const char           *current_name,
                                                    const char           *current_folder,
                                                    GVariant             *files,
                                                    GVariant             *choices,
+                                                   XdpSaveFileFlags      flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);

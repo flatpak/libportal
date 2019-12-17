@@ -237,6 +237,11 @@ xdp_portal_spawn (XdpPortal            *portal,
   SpawnCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & !(XDP_SPAWN_FLAG_CLEARENV |
+                               XDP_SPAWN_FLAG_LATEST |
+                               XDP_SPAWN_FLAG_SANDBOX |
+                               XDP_SPAWN_FLAG_NO_NETWORK |
+                               XDP_SPAWN_FLAG_WATCH)) == 0);
 
   call = g_new (SpawnCall, 1);
   call->portal = g_object_ref (portal);

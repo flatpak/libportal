@@ -215,6 +215,7 @@ g_debug ("Calling AccessCamera");
  * xdp_portal_access_camera:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -228,6 +229,7 @@ g_debug ("Calling AccessCamera");
 void
 xdp_portal_access_camera (XdpPortal           *portal,
                           XdpParent           *parent,
+                          XdpCameraFlags       flags,
                           GCancellable        *cancellable,
                           GAsyncReadyCallback  callback,
                           gpointer             data)
@@ -235,6 +237,7 @@ xdp_portal_access_camera (XdpPortal           *portal,
   AccessCameraCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_CAMERA_FLAG_NONE);
 
   call = g_new0 (AccessCameraCall, 1);
   call->portal = g_object_ref (portal);

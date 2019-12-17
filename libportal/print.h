@@ -21,13 +21,17 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+  XDP_PRINT_FLAG_NONE = 0
+} XdpPrintFlags;
+
 XDP_PUBLIC
 void      xdp_portal_prepare_print                (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *title,
-                                                   gboolean              modal,
                                                    GVariant             *settings,
                                                    GVariant             *page_setup,
+                                                   XdpPrintFlags         flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);
@@ -41,9 +45,9 @@ XDP_PUBLIC
 void      xdp_portal_print_file                   (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *title,
-                                                   gboolean              modal,
                                                    guint                 token,
                                                    const char           *file,
+                                                   XdpPrintFlags         flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);

@@ -22,16 +22,20 @@
 G_BEGIN_DECLS
 
 /**
- * XdpWallpaperTarget:
- * @XDP_WALLPAPER_TARGET_BACKGROUND: Set wallpaper on the desktop background
- * @XDP_WALLPAPER_TARGET_LOCKSCREEN: Set wallpaper on the lockscreen
+ * XdpWallpaperFlags:
+ * @XDP_WALLPAPER_FLAG_NONE: No flags
+ * @XDP_WALLPAPER_FLAG_BACKGROUND: Set wallpaper on the desktop background
+ * @XDP_WALLPAPER_FLAG_LOCKSCREEN: Set wallpaper on the lockscreen
+ * @XDP_WALLPAPER_FLAG_PREVIEW: Request the preview to be shown
  *
  * The values of this enumeration determine where the wallpaper is being set.
  */
 typedef enum {
-  XDP_WALLPAPER_TARGET_BACKGROUND = 1 << 0,
-  XDP_WALLPAPER_TARGET_LOCKSCREEN = 1 << 1
-} XdpWallpaperTarget;
+  XDP_WALLPAPER_FLAG_NONE       = 0,  
+  XDP_WALLPAPER_FLAG_BACKGROUND = 1 << 0,
+  XDP_WALLPAPER_FLAG_LOCKSCREEN = 1 << 1,
+  XDP_WALLPAPER_FLAG_PREVIEW    = 1 << 2
+} XdpWallpaperFlags;
 
 #define XDP_WALLPAPER_TARGET_BOTH (XDP_WALLPAPER_TARGET_BACKGROUND|XDP_WALLPAPER_TARGET_LOCKSCREEN)
 
@@ -39,8 +43,7 @@ XDP_PUBLIC
 void       xdp_portal_set_wallpaper           (XdpPortal            *portal,
                                                XdpParent            *parent,
                                                const char           *uri,
-                                               gboolean              show_preview,
-                                               XdpWallpaperTarget    target,
+                                               XdpWallpaperFlags     flags,
                                                GCancellable         *cancellable,
                                                GAsyncReadyCallback   callback,
                                                gpointer              data);

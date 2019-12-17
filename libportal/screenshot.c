@@ -36,7 +36,6 @@ typedef struct {
   XdpParent *parent;
   char *parent_handle;
   gboolean color;
-  gboolean modal;
   gboolean interactive;
   guint signal_id;
   GTask *task;
@@ -202,10 +201,7 @@ take_screenshot (ScreenshotCall *call)
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   if (!call->color)
-    {
-      g_variant_builder_add (&options, "{sv}", "modal", g_variant_new_boolean (call->modal));
-      g_variant_builder_add (&options, "{sv}", "interactive", g_variant_new_boolean (call->interactive));
-    }
+    g_variant_builder_add (&options, "{sv}", "interactive", g_variant_new_boolean (call->interactive));
 
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
@@ -225,8 +221,7 @@ take_screenshot (ScreenshotCall *call)
  * xdp_portal_take_screenshot:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
- * @modal: whether to presend a modal dialog
- * @interactive: whether the dialog should offer options
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -239,8 +234,7 @@ take_screenshot (ScreenshotCall *call)
 void
 xdp_portal_take_screenshot (XdpPortal *portal,
                             XdpParent *parent,
-                            gboolean modal,
-                            gboolean interactive,
+                            XdpScreenshotFlags flags,
                             GCancellable *cancellable,
                             GAsyncReadyCallback  callback,
                             gpointer data)
@@ -248,6 +242,7 @@ xdp_portal_take_screenshot (XdpPortal *portal,
   ScreenshotCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_SCREENSHOT_FLAG_INTERACTIVE)) == 0);
 
   call = g_new0 (ScreenshotCall, 1);
   call->color = FALSE;
@@ -256,8 +251,7 @@ xdp_portal_take_screenshot (XdpPortal *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
-  call->modal = modal;
-  call->interactive = interactive;
+  call->interactive = (flags & XDP_SCREENSHOT_FLAG_INTERACTIVE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_take_screenshot);
 

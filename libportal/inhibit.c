@@ -213,8 +213,8 @@ do_inhibit (InhibitCall *call)
  * xdp_portal_session_inhibit:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
- * @inhibit: information about what to inhibit
  * @reason: (nullable): user-visible reason for the inhibition
+ * @flags: information about what to inhibit
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -230,8 +230,8 @@ do_inhibit (InhibitCall *call)
 void
 xdp_portal_session_inhibit (XdpPortal            *portal,
                             XdpParent            *parent,
-                            XdpInhibitFlags       inhibit,
                             const char           *reason,
+                            XdpInhibitFlags       flags,
                             GCancellable         *cancellable,
                             GAsyncReadyCallback   callback,
                             gpointer              data)
@@ -239,6 +239,10 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
   InhibitCall *call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_INHIBIT_FLAG_LOGOUT |
+                               XDP_INHIBIT_FLAG_USER_SWITCH |
+                               XDP_INHIBIT_FLAG_SUSPEND |
+                               XDP_INHIBIT_FLAG_IDLE)) == 0);
 
   if (portal->inhibit_handles == NULL)
     portal->inhibit_handles = g_hash_table_new_full (NULL, NULL, NULL, g_free);
@@ -253,7 +257,7 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
     call->parent = _xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
-  call->inhibit = inhibit;
+  call->inhibit = flags;
   call->id = portal->next_inhibit_id;
   call->reason = g_strdup (reason);
   call->task = g_task_new (portal, cancellable, callback, data);
@@ -554,6 +558,7 @@ create_monitor (CreateMonitorCall *call)
  * xdp_portal_session_monitor_start:
  * @portal: a #XdpPortal
  * @parent: (nullable): a XdpParent, or %NULL
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -568,6 +573,7 @@ create_monitor (CreateMonitorCall *call)
 void
 xdp_portal_session_monitor_start (XdpPortal *portal,
                                   XdpParent *parent,
+                                  XdpSessionMonitorFlags flags,
                                   GCancellable *cancellable,
                                   GAsyncReadyCallback callback,
                                   gpointer data)
@@ -576,6 +582,7 @@ xdp_portal_session_monitor_start (XdpPortal *portal,
   CreateMonitorCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_SESSION_MONITOR_FLAG_NONE);
 
   call = g_new0 (CreateMonitorCall, 1);
   call->portal = g_object_ref (portal);

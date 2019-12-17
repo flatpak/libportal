@@ -23,33 +23,33 @@ G_BEGIN_DECLS
 
 /**
  * XdpInhibitFlags:
- * @XDP_INHIBIT_LOGOUT: Inhibit logout.
- * @XDP_INHIBIT_USER_SWITCH: Inhibit user switching.
- * @XDP_INHIBIT_SUSPEND: Inhibit suspend.
- * @XDP_INHIBIT_IDLE: Inhibit the session going idle.
+ * @XDP_INHIBIT_FLAG_LOGOUT: Inhibit logout
+ * @XDP_INHIBIT_FLAG_USER_SWITCH: Inhibit user switching
+ * @XDP_INHIBIT_FLAG_SUSPEND: Inhibit suspend
+ * @XDP_INHIBIT_FLAG_IDLE: Inhibit the session going idle
  *
  * Flags that determine what session status changes are inhibited.
  */
 typedef enum {
-  XDP_INHIBIT_LOGOUT      = 1,
-  XDP_INHIBIT_USER_SWITCH = 2,
-  XDP_INHIBIT_SUSPEND     = 4,
-  XDP_INHIBIT_IDLE        = 8
+  XDP_INHIBIT_FLAG_LOGOUT      = 1 << 0,
+  XDP_INHIBIT_FLAG_USER_SWITCH = 1 << 1,
+  XDP_INHIBIT_FLAG_SUSPEND     = 1 << 2,
+  XDP_INHIBIT_FLAG_IDLE        = 1 << 3
 } XdpInhibitFlags;
 
 XDP_PUBLIC
 void       xdp_portal_session_inhibit             (XdpPortal            *portal,
                                                    XdpParent            *parent,
-                                                   XdpInhibitFlags       inhibit,
                                                    const char           *reason,
+                                                   XdpInhibitFlags       inhibit,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);
 
 XDP_PUBLIC
-int        xdp_portal_session_inhibit_finish      (XdpPortal           *portal,
-                                                   GAsyncResult        *result,
-                                                   GError             **error);
+int        xdp_portal_session_inhibit_finish      (XdpPortal            *portal,
+                                                   GAsyncResult         *result,
+                                                   GError              **error);
 
 XDP_PUBLIC
 void       xdp_portal_session_uninhibit           (XdpPortal            *portal,
@@ -72,22 +72,27 @@ typedef enum {
   XDP_LOGIN_SESSION_ENDING =    3,
 } XdpLoginSessionState;
 
-XDP_PUBLIC
-void       xdp_portal_session_monitor_start              (XdpPortal            *portal,
-                                                          XdpParent            *parent,
-                                                          GCancellable         *cancellable,
-                                                          GAsyncReadyCallback   callback,
-                                                          gpointer              data);
+typedef enum {
+  XDP_SESSION_MONITOR_FLAG_NONE = 0
+} XdpSessionMonitorFlags;
 
 XDP_PUBLIC
-gboolean   xdp_portal_session_monitor_start_finish       (XdpPortal            *portal,
-                                                          GAsyncResult         *result,
-                                                          GError              **error);
+void       xdp_portal_session_monitor_start              (XdpPortal               *portal,
+                                                          XdpParent               *parent,
+                                                          XdpSessionMonitorFlags   flags,
+                                                          GCancellable            *cancellable,
+                                                          GAsyncReadyCallback      callback,
+                                                          gpointer                 data);
 
 XDP_PUBLIC
-void       xdp_portal_session_monitor_stop               (XdpPortal            *portal);
+gboolean   xdp_portal_session_monitor_start_finish       (XdpPortal               *portal,
+                                                          GAsyncResult            *result,
+                                                          GError                 **error);
 
 XDP_PUBLIC
-void       xdp_portal_session_monitor_query_end_response (XdpPortal            *portal);
+void       xdp_portal_session_monitor_stop               (XdpPortal               *portal);
+
+XDP_PUBLIC
+void       xdp_portal_session_monitor_query_end_response (XdpPortal               *portal);
 
 G_END_DECLS

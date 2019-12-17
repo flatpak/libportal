@@ -36,26 +36,13 @@ GType xdp_session_get_type (void) G_GNUC_CONST;
  * Flags to specify what kind of sources to offer for a screencast session.
  */
 typedef enum {
-  XDP_OUTPUT_MONITOR = 1,
-  XDP_OUTPUT_WINDOW  = 2
+  XDP_OUTPUT_MONITOR = 1 << 0,
+  XDP_OUTPUT_WINDOW  = 1 << 1
 } XdpOutputType;
 
 /**
- * XDP_OUTPUT_NONE:
- *
- * The value to use as null value for XdpOutputType.
- */
-#define XDP_OUTPUT_NONE 0
-
-/**
- * XDP_OUTPUT_ALL:
- *
- * A convenient value to select all possible kinds of output.
- */
-#define XDP_OUTPUT_ALL  (XDP_OUTPUT_MONITOR | XDP_OUTPUT_WINDOW)
-
-/**
  * XdpDeviceType:
+ * @XDP_DEVICE_NONE: no device
  * @XDP_DEVICE_KEYBOARD: control the keyboard.
  * @XDP_DEVICE_POINTER: control the pointer.
  * @XDP_DEVICE_TOUCHSCREEN: control the touchscreen.
@@ -63,24 +50,11 @@ typedef enum {
  * Flags to specify what input devices to control for a remote desktop session.
  */
 typedef enum {
-  XDP_DEVICE_KEYBOARD    = 1,
-  XDP_DEVICE_POINTER     = 2,
-  XDP_DEVICE_TOUCHSCREEN = 4
+  XDP_DEVICE_NONE        = 0,
+  XDP_DEVICE_KEYBOARD    = 1 << 0,
+  XDP_DEVICE_POINTER     = 1 << 1,
+  XDP_DEVICE_TOUCHSCREEN = 1 << 2
 } XdpDeviceType;
-
-/**
- * XDP_DEVICE_NONE:
- *
- * The value to use as null value for XdpDeviceType.
- */
-#define XDP_DEVICE_NONE 0
-
-/**
- * XDP_DEVICE_ALL:
- *
- * A convenient value to select all possible input devices.
- */
-#define XDP_DEVICE_ALL (XDP_DEVICE_KEYBOARD | XDP_DEVICE_POINTER | XDP_DEVICE_TOUCHSCREEN)
 
 /**
  * XdpSessionType:
@@ -108,10 +82,22 @@ typedef enum {
   XDP_SESSION_CLOSED
 } XdpSessionState;
 
+/**
+ * XdpScreencastFlags:
+ * @XDP_SCREENCAST_FLAG_NONE: No options
+ * @XDP_SCREENCAST_FLAG_MULTIPLE: allow opening multiple streams
+ *
+ * Options for starting screen casts.
+ */
+typedef enum {
+  XDP_SCREENCAST_FLAG_NONE     = 0,
+  XDP_SCREENCAST_FLAG_MULTIPLE = 1 << 0
+} XdpScreencastFlags;
+
 XDP_PUBLIC
 void        xdp_portal_create_screencast_session            (XdpPortal            *portal,
                                                              XdpOutputType         outputs,
-                                                             gboolean              multiple,
+                                                             XdpScreencastFlags    flags,
                                                              GCancellable         *cancellable,
                                                              GAsyncReadyCallback   callback,
                                                              gpointer              data);
@@ -121,19 +107,31 @@ XdpSession *xdp_portal_create_screencast_session_finish     (XdpPortal          
                                                              GAsyncResult         *result,
                                                              GError              **error);
 
-XDP_PUBLIC
-void        xdp_portal_create_remote_desktop_session        (XdpPortal            *portal,
-                                                             XdpDeviceType         devices,
-                                                             XdpOutputType         outputs,
-                                                             gboolean              multiple,
-                                                             GCancellable         *cancellable,
-                                                             GAsyncReadyCallback   callback,
-                                                             gpointer              data);
+/**
+ * XdpRemoteDesktopFlags:
+ * @XDP_REMOTE_DESKTOP_FLAG_NONE: No options
+ * @XDP_REMOTE_DESKTOP_FLAG_MULTIPLE: allow opening multiple streams
+ *
+ * Options for starting remote desktop sessions.
+ */
+typedef enum {
+  XDP_REMOTE_DESKTOP_FLAG_NONE     = 0,
+  XDP_REMOTE_DESKTOP_FLAG_MULTIPLE = 1 << 0
+} XdpRemoteDesktopFlags;
 
 XDP_PUBLIC
-XdpSession *xdp_portal_create_remote_desktop_session_finish (XdpPortal            *portal,
-                                                             GAsyncResult         *result,
-                                                             GError              **error);
+void        xdp_portal_create_remote_desktop_session        (XdpPortal              *portal,
+                                                             XdpDeviceType           devices,
+                                                             XdpOutputType           outputs,
+                                                             XdpRemoteDesktopFlags   flags,
+                                                             GCancellable           *cancellable,
+                                                             GAsyncReadyCallback     callback,
+                                                             gpointer                data);
+
+XDP_PUBLIC
+XdpSession *xdp_portal_create_remote_desktop_session_finish (XdpPortal              *portal,
+                                                             GAsyncResult           *result,
+                                                             GError                **error);
 
 XDP_PUBLIC
 void        xdp_session_start                (XdpSession           *session,

@@ -21,6 +21,10 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+  XDP_EMAIL_FLAG_NONE = 0
+} XdpEmailFlags;
+
 XDP_PUBLIC
 void       xdp_portal_compose_email        (XdpPortal            *portal,
                                             XdpParent            *parent,
@@ -30,6 +34,7 @@ void       xdp_portal_compose_email        (XdpPortal            *portal,
                                             const char           *subject,
                                             const char           *body,
                                             const char *const    *attachments,
+                                            XdpEmailFlags         flags,
                                             GCancellable         *cancellable,
                                             GAsyncReadyCallback   callback,
                                             gpointer              data);

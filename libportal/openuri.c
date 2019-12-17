@@ -262,8 +262,7 @@ do_open (OpenCall *call)
  * @portal: a #XdpPortal
  * @parent: parent window information
  * @uri: the URI to open
- * @ask: request to show an application chooser
- * @writable: whether to make the file writable
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -271,18 +270,19 @@ do_open (OpenCall *call)
  * Opens @uri with an external hamdler.
  */
 void
-xdp_portal_open_uri (XdpPortal           *portal,
-                     XdpParent           *parent,
-                     const char          *uri,
-                     gboolean             ask,
-                     gboolean             writable,
-                     GCancellable        *cancellable,
-                     GAsyncReadyCallback  callback,
-                     gpointer             data)
+xdp_portal_open_uri (XdpPortal *portal,
+                     XdpParent *parent,
+                     const char *uri,
+                     XdpOpenUriFlags flags,
+                     GCancellable *cancellable,
+                     GAsyncReadyCallback callback,
+                     gpointer data)
 {
   OpenCall *call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_OPEN_URI_FLAG_ASK |
+                              XDP_OPEN_URI_FLAG_WRITABLE)) == 0);
 
   call = g_new0 (OpenCall, 1);
   call->portal = g_object_ref (portal);
@@ -291,8 +291,8 @@ xdp_portal_open_uri (XdpPortal           *portal,
   else
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);
-  call->ask = ask;
-  call->writable = writable;
+  call->ask = (flags & XDP_OPEN_URI_FLAG_ASK) != 0;
+  call->writable = (flags & XDP_OPEN_URI_FLAG_WRITABLE) != 0;
   call->open_dir = FALSE;
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_open_uri);
@@ -328,7 +328,7 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
  * @portal: a #XdpPortal
  * @parent: parent window information
  * @uri: the URI to open
- * @writable: whether to make the file writable
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -338,16 +338,18 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
  * to.
  */
 void
-xdp_portal_open_directory (XdpPortal           *portal,
-                           XdpParent           *parent,
-                           const char          *uri,
-                           GCancellable        *cancellable,
-                           GAsyncReadyCallback  callback,
-                           gpointer             data)
+xdp_portal_open_directory (XdpPortal *portal,
+                           XdpParent *parent,
+                           const char *uri,
+                           XdpOpenUriFlags flags,
+                           GCancellable *cancellable,
+                           GAsyncReadyCallback callback,
+                           gpointer data)
 {
   OpenCall *call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_OPEN_URI_FLAG_ASK)) == 0);
 
   call = g_new0 (OpenCall, 1);
   call->portal = g_object_ref (portal);
@@ -356,7 +358,7 @@ xdp_portal_open_directory (XdpPortal           *portal,
   else
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);
-  call->ask = FALSE;
+  call->ask = (flags & XDP_OPEN_URI_FLAG_ASK) != 0;
   call->writable = FALSE;
   call->open_dir = TRUE;
   call->task = g_task_new (portal, cancellable, callback, data);
