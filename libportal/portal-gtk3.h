@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <portal.h>
+#include <libportal/portal.h>
 #include <gtk/gtk.h>
 
 #if GTK_CHECK_VERSION(3,96,0) || GTK_CHECK_VERSION(4,0,0)
