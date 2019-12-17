@@ -17,20 +17,20 @@
 
 #pragma once
 
-#include <portal-enums.h>
-#include <account.h>
-#include <background.h>
-#include <camera.h>
-#include <email.h>
-#include <filechooser.h>
-#include <inhibit.h>
-#include <location.h>
-#include <notification.h>
-#include <openuri.h>
-#include <print.h>
-#include <remote.h>
-#include <screenshot.h>
-#include <spawn.h>
-#include <trash.h>
-#include <updates.h>
-#include <wallpaper.h>
+#include <libportal/portal-enums.h>
+#include <libportal/account.h>
+#include <libportal/background.h>
+#include <libportal/camera.h>
+#include <libportal/email.h>
+#include <libportal/filechooser.h>
+#include <libportal/inhibit.h>
+#include <libportal/location.h>
+#include <libportal/notification.h>
+#include <libportal/openuri.h>
+#include <libportal/print.h>
+#include <libportal/remote.h>
+#include <libportal/screenshot.h>
+#include <libportal/spawn.h>
+#include <libportal/trash.h>
+#include <libportal/updates.h>
+#include <libportal/wallpaper.h>
