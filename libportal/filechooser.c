@@ -42,7 +42,6 @@ typedef struct {
   char *parent_handle;
   char *method;
   char *title;
-  gboolean modal;
   gboolean multiple;
   char *current_name;
   char *current_folder;
@@ -209,7 +208,6 @@ open_file (FileCall *call)
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
-  g_variant_builder_add (&options, "{sv}", "modal", g_variant_new_boolean (call->modal));
   if (call->multiple)
     g_variant_builder_add (&options, "{sv}", "multiple", g_variant_new_boolean (call->multiple));
   if (call->files)
@@ -246,11 +244,10 @@ open_file (FileCall *call)
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
  * @title: title for the file chooser dialog
- * @modal: whether the dialog should be modal
- * @multiple: whether multiple files can be selected or not
  * @filters: (nullable): a #GVariant describing file filters
  * @current_filter: (nullable): a #GVariant describing the current file filter
  * @choices: (nullable): a #GVariant describing extra widgets
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -286,11 +283,10 @@ void
 xdp_portal_open_file (XdpPortal *portal,
                       XdpParent *parent,
                       const char *title,
-                      gboolean modal,
-                      gboolean multiple,
                       GVariant *filters,
                       GVariant *current_filter,
                       GVariant *choices,
+                      XdpOpenFileFlags flags,
                       GCancellable *cancellable,
                       GAsyncReadyCallback  callback,
                       gpointer data)
@@ -298,6 +294,7 @@ xdp_portal_open_file (XdpPortal *portal,
   FileCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags & ~(XDP_OPEN_FILE_FLAG_MULTIPLE));
 
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
@@ -307,8 +304,7 @@ xdp_portal_open_file (XdpPortal *portal,
     call->parent_handle = g_strdup ("");
   call->method = "OpenFile";
   call->title = g_strdup (title);
-  call->modal = modal;
-  call->multiple = multiple;
+  call->multiple = (flags & XDP_OPEN_FILE_FLAG_MULTIPLE) != 0;
   call->filters = filters ? g_variant_ref (filters) : NULL;
   call->current_filter = current_filter ? g_variant_ref (current_filter) : NULL;
   call->choices = choices ? g_variant_ref (choices) : NULL;
@@ -354,13 +350,13 @@ xdp_portal_open_file_finish (XdpPortal *portal,
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
  * @title: title for the file chooser dialog
- * @modal: whether the dialog should be modal
  * @current_name: (nullable): suggested filename
  * @current_folder: (nullable): suggested folder to save the file in
  * @current_file: (nullable): the current file (when saving an existing file)
  * @filters: (nullable): a #GVariant describing file filters
  * @current_filter: (nullable): a #GVariant describing the current file filter
  * @choices: (nullable): a #GVariant describing extra widgets
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -378,13 +374,13 @@ void
 xdp_portal_save_file (XdpPortal *portal,
                       XdpParent *parent,
                       const char *title,
-                      gboolean modal,
                       const char *current_name,
                       const char *current_folder,
                       const char *current_file,
                       GVariant *filters,
                       GVariant *current_filter,
                       GVariant *choices,
+                      XdpSaveFileFlags flags,
                       GCancellable *cancellable,
                       GAsyncReadyCallback  callback,
                       gpointer data)
@@ -392,6 +388,7 @@ xdp_portal_save_file (XdpPortal *portal,
   FileCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_SAVE_FILE_FLAG_NONE);
 
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
@@ -401,7 +398,6 @@ xdp_portal_save_file (XdpPortal *portal,
     call->parent_handle = g_strdup ("");
   call->method = "SaveFile";
   call->title = g_strdup (title);
-  call->modal = modal;
   call->current_name = g_strdup (current_name);
   call->current_folder = g_strdup (current_folder);
   call->current_file = g_strdup (current_file);
@@ -450,11 +446,11 @@ xdp_portal_save_file_finish (XdpPortal *portal,
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
  * @title: title for the file chooser dialog
- * @modal: whether the dialog should be modal
  * @current_name: (nullable): suggested filename
  * @current_folder: (nullable): suggested folder to save the file in
  * @files: An array of file names to be saved
  * @choices: (nullable): a #GVariant describing extra widgets
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -475,11 +471,11 @@ void
 xdp_portal_save_files (XdpPortal *portal,
                        XdpParent *parent,
                        const char *title,
-                       gboolean modal,
                        const char *current_name,
                        const char *current_folder,
                        GVariant *files,
                        GVariant *choices,
+                       XdpSaveFileFlags flags,
                        GCancellable *cancellable,
                        GAsyncReadyCallback  callback,
                        gpointer data)
@@ -488,6 +484,7 @@ xdp_portal_save_files (XdpPortal *portal,
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (files != NULL);
+  g_return_if_fail (flags == XDP_SAVE_FILE_FLAG_NONE);
 
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
@@ -497,7 +494,6 @@ xdp_portal_save_files (XdpPortal *portal,
     call->parent_handle = g_strdup ("");
   call->method = "SaveFiles";
   call->title = g_strdup (title);
-  call->modal = modal;
   call->current_name = g_strdup (current_name);
   call->current_folder = g_strdup (current_folder);
   call->files = g_variant_ref (files);

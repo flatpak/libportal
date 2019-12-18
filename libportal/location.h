@@ -42,22 +42,27 @@ typedef enum {
   XDP_LOCATION_ACCURACY_EXACT
 } XdpLocationAccuracy;
 
-XDP_PUBLIC
-void     xdp_portal_location_monitor_start        (XdpPortal            *portal,
-                                                   XdpParent            *parent,
-                                                   guint                 distance_threshold,
-                                                   guint                 time_threshold,
-                                                   XdpLocationAccuracy   accuracy,
-                                                   GCancellable         *cancellable,
-                                                   GAsyncReadyCallback   callback,
-                                                   gpointer              data);
+typedef enum {
+  XDP_LOCATION_MONITOR_FLAG_NONE = 0
+} XdpLocationMonitorFlags;
 
 XDP_PUBLIC
-gboolean xdp_portal_location_monitor_start_finish (XdpPortal            *portal,
-                                                   GAsyncResult         *result,
-                                                   GError              **error);
+void     xdp_portal_location_monitor_start        (XdpPortal                *portal,
+                                                   XdpParent                *parent,
+                                                   guint                     distance_threshold,
+                                                   guint                     time_threshold,
+                                                   XdpLocationAccuracy       accuracy,
+                                                   XdpLocationMonitorFlags   flags,
+                                                   GCancellable             *cancellable,
+                                                   GAsyncReadyCallback       callback,
+                                                   gpointer                  data);
 
 XDP_PUBLIC
-void     xdp_portal_location_monitor_stop         (XdpPortal            *portal);
+gboolean xdp_portal_location_monitor_start_finish (XdpPortal                *portal,
+                                                   GAsyncResult             *result,
+                                                   GError                  **error);
+
+XDP_PUBLIC
+void     xdp_portal_location_monitor_stop         (XdpPortal                *portal);
 
 G_END_DECLS

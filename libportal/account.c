@@ -207,6 +207,7 @@ get_user_information (AccountCall *call)
  * @parent: (nullable): parent window information
  * @reason: (nullable) a string that can be shown in the dialog to explain
  *    why the information is needed
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -220,6 +221,7 @@ void
 xdp_portal_get_user_information (XdpPortal *portal,
                                  XdpParent *parent,
                                  const char *reason,
+                                 XdpUserInformationFlags flags,
                                  GCancellable *cancellable,
                                  GAsyncReadyCallback  callback,
                                  gpointer data)
@@ -227,6 +229,7 @@ xdp_portal_get_user_information (XdpPortal *portal,
   AccountCall *call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_USER_INFORMATION_FLAG_NONE);
 
   call = g_new0 (AccountCall, 1);
   call->portal = g_object_ref (portal);

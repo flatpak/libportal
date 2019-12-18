@@ -21,21 +21,26 @@
 
 G_BEGIN_DECLS
 
-XDP_PUBLIC
-void       xdp_portal_add_notification    (XdpPortal           *portal,
-                                           const char          *id,
-                                           GVariant            *notification,
-                                           GCancellable        *cancellable,
-                                           GAsyncReadyCallback  callback,
-                                           gpointer             data);
+typedef enum {
+  XDP_NOTIFICATION_FLAG_NONE = 0
+} XdpNotificationFlags;
 
 XDP_PUBLIC
-gboolean   xdp_portal_add_notification_finish (XdpPortal    *portal,
-                                               GAsyncResult *result,
-                                               GError       **error);
+void       xdp_portal_add_notification        (XdpPortal             *portal,
+                                               const char            *id,
+                                               GVariant              *notification,
+                                               XdpNotificationFlags   flags,
+                                               GCancellable          *cancellable,
+                                               GAsyncReadyCallback    callback,
+                                               gpointer               data);
 
 XDP_PUBLIC
-void       xdp_portal_remove_notification (XdpPortal  *portal,
-                                           const char *id);
+gboolean   xdp_portal_add_notification_finish (XdpPortal             *portal,
+                                               GAsyncResult          *result,
+                                               GError               **error);
+
+XDP_PUBLIC
+void       xdp_portal_remove_notification     (XdpPortal             *portal,
+                                               const char            *id);
 
 G_END_DECLS

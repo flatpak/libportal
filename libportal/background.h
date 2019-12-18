@@ -21,21 +21,34 @@
 
 G_BEGIN_DECLS
 
+/**
+ * XdpBackgroundFlags:
+ * @XDP_BACKGROUND_FLAG_NONE: No options
+ * @XDP_BACKGROUND_FLAG_AUTOSTART: Request autostart as well
+ * @XDP_BACKGROUND_FLAG_ACTIVATABLE: Whether the application is D-Bus-activatable
+ *
+ * Options to use when requesting background.
+ */
+typedef enum {
+  XDP_BACKGROUND_FLAG_NONE        = 0,
+  XDP_BACKGROUND_FLAG_AUTOSTART   = 1 << 0,
+  XDP_BACKGROUND_FLAG_ACTIVATABLE = 1 << 1
+} XdpBackgroundFlags;
+
 XDP_PUBLIC
 void      xdp_portal_request_background         (XdpPortal           *portal,
                                                  XdpParent           *parent,
-                                                 GPtrArray           *commandline,
                                                  char                *reason,
-                                                 gboolean             autostart,
-                                                 gboolean             dbus_activatable,
+                                                 GPtrArray           *commandline,
+                                                 XdpBackgroundFlags   flags,
                                                  GCancellable        *cancellable,
                                                  GAsyncReadyCallback  callback,
                                                  gpointer             user_data);
 
 XDP_PUBLIC
-gboolean   xdp_portal_request_background_finish (XdpPortal     *portal,
-                                                 GAsyncResult  *result,
-                                                 GError       **error);
+gboolean   xdp_portal_request_background_finish (XdpPortal           *portal,
+                                                 GAsyncResult        *result,
+                                                 GError             **error);
 
 
 G_END_DECLS

@@ -21,17 +21,22 @@
 
 G_BEGIN_DECLS
 
-XDP_PUBLIC
-void       xdp_portal_get_user_information        (XdpPortal            *portal,
-                                                   XdpParent            *parent,
-                                                   const char           *reason,
-                                                   GCancellable         *cancellable,
-                                                   GAsyncReadyCallback   callback,
-                                                   gpointer              data);
+typedef enum {
+  XDP_USER_INFORMATION_FLAG_NONE = 0
+} XdpUserInformationFlags;
 
 XDP_PUBLIC
-GVariant * xdp_portal_get_user_information_finish (XdpPortal            *portal,
-                                                   GAsyncResult         *result,
-                                                   GError              **error);
+void       xdp_portal_get_user_information        (XdpPortal                *portal,
+                                                   XdpParent                *parent,
+                                                   const char               *reason,
+                                                   XdpUserInformationFlags   flags,
+                                                   GCancellable             *cancellable,
+                                                   GAsyncReadyCallback       callback,
+                                                   gpointer                  data);
+
+XDP_PUBLIC
+GVariant * xdp_portal_get_user_information_finish (XdpPortal                *portal,
+                                                   GAsyncResult             *result,
+                                                   GError                  **error);
 
 G_END_DECLS

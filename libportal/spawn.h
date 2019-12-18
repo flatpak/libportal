@@ -23,6 +23,7 @@ G_BEGIN_DECLS
 
 /**
  * XdpSpawnFlags:
+ * @XDP_SPAWN_FLAG_NONE: No flags
  * @XDP_SPAWN_FLAG_CLEARENV: Clear the environment
  * @XDP_SPAWN_FLAG_LATEST: Spawn the latest version of the app
  * @XDP_SPAWN_FLAG_SANDBOX: Spawn in a sandbox (equivalent to the --sandbox option of flatpak run)
@@ -33,6 +34,7 @@ G_BEGIN_DECLS
  * new sandbox is created.
  */
 typedef enum {
+  XDP_SPAWN_FLAG_NONE       = 0,
   XDP_SPAWN_FLAG_CLEARENV   = 1 << 0,
   XDP_SPAWN_FLAG_LATEST     = 1 << 1,
   XDP_SPAWN_FLAG_SANDBOX    = 1 << 2,

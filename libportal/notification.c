@@ -92,6 +92,7 @@ call_done (GObject *source,
  * @portal: a #XdpPortal
  * @id: unique ID for the notification
  * @notification: a #GVariant dictionary with the content of the notification
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -127,16 +128,19 @@ call_done (GObject *source,
  * To withdraw a notification, use xdp_portal_remove_notification().
  */
 void
-xdp_portal_add_notification (XdpPortal           *portal,
-                             const char          *id,
-                             GVariant            *notification,
-                             GCancellable        *cancellable,
-                             GAsyncReadyCallback  callback,
-                             gpointer             data)
+xdp_portal_add_notification (XdpPortal *portal,
+                             const char *id,
+                             GVariant *notification,
+                             XdpNotificationFlags flags,
+                             GCancellable *cancellable,
+                             GAsyncReadyCallback callback,
+                             gpointer data)
 {
-  g_return_if_fail (XDP_IS_PORTAL (portal));
   GAsyncReadyCallback call_done_cb = NULL;
   CallDoneData *call_done_data = NULL;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_NOTIFICATION_FLAG_NONE);
 
   ensure_action_invoked_connection (portal);
 

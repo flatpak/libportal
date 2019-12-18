@@ -21,12 +21,17 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+  XDP_OPEN_URI_FLAG_NONE     = 0,
+  XDP_OPEN_URI_FLAG_ASK      = 1 << 0,
+  XDP_OPEN_URI_FLAG_WRITABLE = 1 << 1
+} XdpOpenUriFlags;
+
 XDP_PUBLIC
 void       xdp_portal_open_uri                    (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *uri,
-                                                   gboolean              ask,
-                                                   gboolean              writable,
+                                                   XdpOpenUriFlags       flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);
@@ -40,6 +45,7 @@ XDP_PUBLIC
 void       xdp_portal_open_directory              (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *uri,
+                                                   XdpOpenUriFlags       flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);

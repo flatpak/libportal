@@ -311,6 +311,7 @@ create_session (CreateCall *call)
  * @distance_threshold: distance threshold, in meters
  * @time_threshold: time threshold, in seconds
  * @accuracy: desired accuracy
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -334,6 +335,7 @@ xdp_portal_location_monitor_start (XdpPortal *portal,
                                    guint distance_threshold,
                                    guint time_threshold,
                                    XdpLocationAccuracy accuracy,
+                                   XdpLocationMonitorFlags flags,
                                    GCancellable *cancellable,
                                    GAsyncReadyCallback callback,
                                    gpointer data)
@@ -341,6 +343,7 @@ xdp_portal_location_monitor_start (XdpPortal *portal,
   CreateCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_LOCATION_MONITOR_FLAG_NONE);
 
   call = g_new0 (CreateCall, 1);
   call->portal = g_object_ref (portal);

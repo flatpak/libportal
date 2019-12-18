@@ -39,30 +39,42 @@ typedef enum {
   XDP_UPDATE_STATUS_FAILED
 } XdpUpdateStatus;
 
-XDP_PUBLIC
-void       xdp_portal_update_monitor_start        (XdpPortal            *portal,
-                                                   GCancellable         *cancellable,
-                                                   GAsyncReadyCallback   callback,
-                                                   gpointer              data);
+typedef enum
+{
+  XDP_UPDATE_MONITOR_FLAG_NONE = 0,
+} XdpUpdateMonitorFlags;
 
 XDP_PUBLIC
-gboolean   xdp_portal_update_monitor_start_finish (XdpPortal            *portal,
-                                                   GAsyncResult         *result,
-                                                   GError              **error);
+void       xdp_portal_update_monitor_start        (XdpPortal              *portal,
+                                                   XdpUpdateMonitorFlags   flags,
+                                                   GCancellable           *cancellable,
+                                                   GAsyncReadyCallback     callback,
+                                                   gpointer                data);
 
 XDP_PUBLIC
-void       xdp_portal_update_monitor_stop         (XdpPortal            *portal);
+gboolean   xdp_portal_update_monitor_start_finish (XdpPortal              *portal,
+                                                   GAsyncResult           *result,
+                                                   GError                **error);
 
 XDP_PUBLIC
-void       xdp_portal_update_install              (XdpPortal            *portal,
-                                                   XdpParent            *parent,
-                                                   GCancellable         *cancellable,
-                                                   GAsyncReadyCallback   callback,
-                                                   gpointer              data);
+void       xdp_portal_update_monitor_stop         (XdpPortal              *portal);
+
+typedef enum
+{
+  XDP_UPDATE_INSTALL_FLAG_NONE = 0,
+} XdpUpdateInstallFlags;
 
 XDP_PUBLIC
-gboolean   xdp_portal_update_install_finish       (XdpPortal            *portal,
-                                                   GAsyncResult         *result,
-                                                   GError              **error);
+void       xdp_portal_update_install              (XdpPortal              *portal,
+                                                   XdpParent              *parent,
+                                                   XdpUpdateInstallFlags   flags,
+                                                   GCancellable           *cancellable,
+                                                   GAsyncReadyCallback     callback,
+                                                   gpointer                data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_update_install_finish       (XdpPortal              *portal,
+                                                   GAsyncResult           *result,
+                                                   GError                **error);
 
 G_END_DECLS

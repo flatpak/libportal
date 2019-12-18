@@ -21,11 +21,15 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+  XDP_SCREENSHOT_FLAG_NONE        = 0,
+  XDP_SCREENSHOT_FLAG_INTERACTIVE = 1 << 0
+} XdpScreenshotFlags;
+
 XDP_PUBLIC
 void       xdp_portal_take_screenshot        (XdpPortal           *portal,
                                               XdpParent           *parent,
-                                              gboolean             modal,
-                                              gboolean             interactive,
+                                              XdpScreenshotFlags   flags,
                                               GCancellable        *cancellable,
                                               GAsyncReadyCallback  callback,
                                               gpointer             data);

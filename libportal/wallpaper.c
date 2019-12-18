@@ -47,7 +47,7 @@ typedef struct {
   char *parent_handle;
   char *uri;
   gboolean show_preview;
-  XdpWallpaperTarget target;
+  XdpWallpaperFlags target;
   guint signal_id;
   GTask *task;
   char *request_path;
@@ -166,14 +166,15 @@ call_returned (GObject *object,
 #endif
 
 static const char *
-target_to_string (XdpWallpaperTarget target)
+target_to_string (XdpWallpaperFlags target)
 {
-  if (target == XDP_WALLPAPER_TARGET_BACKGROUND)
-    return "background";
-  else if (target == XDP_WALLPAPER_TARGET_LOCKSCREEN)
-    return "lockscreen";
-  else if (target == XDP_WALLPAPER_TARGET_BOTH)
+  if (((target & XDP_WALLPAPER_FLAG_BACKGROUND) != 0) &&
+      ((target & XDP_WALLPAPER_FLAG_LOCKSCREEN) != 0))
     return "both";
+  else if ((target & XDP_WALLPAPER_FLAG_BACKGROUND) != 0)
+    return "background";
+  else if ((target & XDP_WALLPAPER_FLAG_LOCKSCREEN) != 0)
+    return "lockscreen";
   else
     {
       g_warning ("Unknown XdpWallpaperTarget value");
@@ -276,8 +277,7 @@ set_wallpaper (WallpaperCall *call)
  * @portal: a #XdpPortal
  * @parent: parent window information
  * @uri: the URI to use
- * @show_preview: whether to show a preview dialog
- * @target: where to set the wallpaper
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -288,8 +288,7 @@ void
 xdp_portal_set_wallpaper (XdpPortal           *portal,
                           XdpParent           *parent,
                           const char          *uri,
-                          gboolean             show_preview,
-                          XdpWallpaperTarget   target,
+                          XdpWallpaperFlags    flags,
                           GCancellable        *cancellable,
                           GAsyncReadyCallback  callback,
                           gpointer             data)
@@ -297,6 +296,9 @@ xdp_portal_set_wallpaper (XdpPortal           *portal,
   WallpaperCall *call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_WALLPAPER_FLAG_BACKGROUND |
+                               XDP_WALLPAPER_FLAG_LOCKSCREEN |
+                               XDP_WALLPAPER_FLAG_PREVIEW)) == 0); 
 
   call = g_new0 (WallpaperCall, 1);
   call->portal = g_object_ref (portal);
@@ -305,8 +307,8 @@ xdp_portal_set_wallpaper (XdpPortal           *portal,
   else
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);
-  call->show_preview = show_preview;
-  call->target = target;
+  call->show_preview = (flags & XDP_WALLPAPER_FLAG_PREVIEW) != 0;
+  call->target = flags & (XDP_WALLPAPER_FLAG_BACKGROUND | XDP_WALLPAPER_FLAG_LOCKSCREEN);
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_set_wallpaper);
 

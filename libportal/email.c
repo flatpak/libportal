@@ -307,6 +307,7 @@ compose_email (EmailCall *call)
  * @subject: (nullable): the subject for the email
  * @body: (nullable): the body for the email
  * @attachments: (nullable): an array of paths for files to attach
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -326,6 +327,7 @@ xdp_portal_compose_email (XdpPortal *portal,
                           const char *subject,
                           const char *body,
                           const char *const *attachments,
+                          XdpEmailFlags flags,
                           GCancellable *cancellable,
                           GAsyncReadyCallback  callback,
                           gpointer data)
@@ -333,6 +335,7 @@ xdp_portal_compose_email (XdpPortal *portal,
   EmailCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_EMAIL_FLAG_NONE);
 
   call = g_new0 (EmailCall, 1);
   call->portal = g_object_ref (portal);

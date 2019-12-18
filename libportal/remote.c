@@ -339,7 +339,7 @@ create_session (CreateCall *call)
  * xdp_portal_create_screencast_session:
  * @portal: a #XdpPortal
  * @outputs: which kinds of source to offer in the dialog
- * @multiple: whether to allow selecting multiple sources
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -352,7 +352,7 @@ create_session (CreateCall *call)
 void
 xdp_portal_create_screencast_session (XdpPortal *portal,
                                       XdpOutputType outputs,
-                                      gboolean multiple,
+                                      XdpScreencastFlags flags,
                                       GCancellable *cancellable,
                                       GAsyncReadyCallback  callback,
                                       gpointer data)
@@ -360,13 +360,14 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
   CreateCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_SCREENCAST_FLAG_MULTIPLE)) == 0);
 
   call = g_new0 (CreateCall, 1);
   call->portal = g_object_ref (portal);
   call->type = XDP_SESSION_SCREENCAST;
   call->devices = XDP_DEVICE_NONE;
   call->outputs = outputs;
-  call->multiple = multiple;
+  call->multiple = (flags & XDP_SCREENCAST_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
   create_session (call);
@@ -404,7 +405,7 @@ xdp_portal_create_screencast_session_finish (XdpPortal *portal,
  * @portal: a #XdpPortal
  * @devices: which kinds of input devices to ofer in the new dialog
  * @outputs: which kinds of source to offer in the dialog
- * @multiple: whether to allow selecting multiple sources
+ * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -418,7 +419,7 @@ void
 xdp_portal_create_remote_desktop_session (XdpPortal *portal,
                                           XdpDeviceType devices,
                                           XdpOutputType outputs,
-                                          gboolean multiple,
+                                          XdpRemoteDesktopFlags flags,
                                           GCancellable *cancellable,
                                           GAsyncReadyCallback  callback,
                                           gpointer data)
@@ -426,13 +427,14 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
   CreateCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail ((flags & ~(XDP_REMOTE_DESKTOP_FLAG_MULTIPLE)) == 0);
 
   call = g_new0 (CreateCall, 1);
   call->portal = g_object_ref (portal);
   call->type = XDP_SESSION_REMOTE_DESKTOP;
   call->devices = devices;
   call->outputs = outputs;
-  call->multiple = multiple;
+  call->multiple = (flags & XDP_REMOTE_DESKTOP_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
   create_session (call);
