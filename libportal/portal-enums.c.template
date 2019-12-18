@@ -1,6 +1,6 @@
 /*** BEGIN file-header ***/
 
-#include "portal.h"
+#include <libportal/portal.h>
 
 /*** END file-header ***/
 

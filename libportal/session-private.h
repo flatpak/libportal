@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "remote.h"
+#include <libportal/remote.h>
 
 struct _XdpSession {
   GObject parent_instance;

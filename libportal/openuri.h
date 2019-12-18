@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <portal-helpers.h>
+#include <libportal/portal-helpers.h>
 
 G_BEGIN_DECLS
 

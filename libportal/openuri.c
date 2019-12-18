@@ -282,7 +282,7 @@ xdp_portal_open_uri (XdpPortal *portal,
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail ((flags & ~(XDP_OPEN_URI_FLAG_ASK |
-                              XDP_OPEN_URI_FLAG_WRITABLE)) == 0);
+                               XDP_OPEN_URI_FLAG_WRITABLE)) == 0);
 
   call = g_new0 (OpenCall, 1);
   call->portal = g_object_ref (portal);
