@@ -39,20 +39,12 @@ typedef struct {
   XdpPortal *portal;
   GTask *task;
   char *request_path;
-  guint signal_id;
-  guint cancelled_id;
   char *id;
 } CreateMonitorCall;
 
 static void
 create_monitor_call_free (CreateMonitorCall *call)
 {
-  if (call->signal_id)
-    g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
-
-  if (call->cancelled_id)
-    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
-
   g_free (call->request_path);
   g_free (call->id);
 
@@ -77,7 +69,7 @@ update_available_received (GDBusConnection *bus,
   const char *local_commit;
   const char *remote_commit;
 
-  g_variant_get (parameters, "@a{sv})", &update_info);
+  g_variant_get (parameters, "(@a{sv})", &update_info);
   g_variant_lookup (update_info, "running-commit", "&s", &running_commit);
   g_variant_lookup (update_info, "local-commit", "&s", &local_commit);
   g_variant_lookup (update_info, "remote-commit", "&s", &remote_commit);
@@ -103,16 +95,20 @@ update_progress_received (GDBusConnection *bus,
   guint op;
   guint progress;
   XdpUpdateStatus status;
-  const char *error;
-  const char *error_message;
+  const char *error = NULL;
+  const char *error_message = NULL;
 
-  g_variant_get (parameters, "@a{sv})", &info);
+  g_variant_get (parameters, "(@a{sv})", &info);
   g_variant_lookup (info, "n_ops", "u", &n_ops);
   g_variant_lookup (info, "op", "u", &op);
   g_variant_lookup (info, "progress", "u", &progress);
   g_variant_lookup (info, "status", "u", &status);
-  g_variant_lookup (info, "error", "&s", &error);
-  g_variant_lookup (info, "error_message", "&s", &error_message);
+  if (status == XDP_UPDATE_STATUS_FAILED)
+    {
+      g_variant_lookup (info, "error", "&s", &error);
+      g_variant_lookup (info, "error_message", "&s", &error_message);
+    }
+g_print ("update progress received %u/%u %u%% %d\n", op, n_ops, progress, status);
 
   g_signal_emit_by_name (portal, "update-progress",
                          n_ops,
@@ -241,7 +237,7 @@ xdp_portal_update_monitor_start (XdpPortal *portal,
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (flags == XDP_UPDATE_MONITOR_FLAG_NONE);
 
-  call = g_new (CreateMonitorCall, 1);
+  call = g_new0 (CreateMonitorCall, 1);
   call->portal = g_object_ref (portal);
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_update_monitor_start);
@@ -389,9 +385,9 @@ install_update (InstallUpdateCall *call)
                           call->portal->update_monitor_handle,
                           UPDATE_MONITOR_INTERFACE,
                           "Update",
-                          g_variant_new ("(sa{sv}",
+                          g_variant_new ("(sa{sv})",
                                          call->parent_handle,
-                                         options),
+                                         &options),
                           NULL, 0, -1, cancellable, update_started, call);
 }
 
@@ -423,7 +419,7 @@ xdp_portal_update_install (XdpPortal *portal,
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (flags == XDP_UPDATE_INSTALL_FLAG_NONE);
 
-  call = g_new (InstallUpdateCall, 1);
+  call = g_new0 (InstallUpdateCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
     call->parent = _xdp_parent_copy (parent);

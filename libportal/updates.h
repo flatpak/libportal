@@ -23,14 +23,14 @@ G_BEGIN_DECLS
 
 /**
  * XdpUpdateStatus:
- * @XDP_UPDATE_STATUS_RUNNING: Update in progress
- * @XDP_UPDATE_STATUS_EMPTY: No update to install
- * @XDP_UPDATE_STATUS_DONE: Update finished successfully
- * @XDP_UPDATE_STATUS_FAILED: Update failed
+ * @XDP_UPDATE_STATUS_RUNNING: Installation in progress
+ * @XDP_UPDATE_STATUS_EMPTY: Nothing to install
+ * @XDP_UPDATE_STATUS_DONE: Installation finished successfully
+ * @XDP_UPDATE_STATUS_FAILED: Installation failed
  *
  * The values of this enum are returned in the
  * #XdpPortal::update-progress signal to indicate
- * the current progress of an update installation.
+ * the current progress of an installation.
  */
 typedef enum {
   XDP_UPDATE_STATUS_RUNNING,
