@@ -108,7 +108,6 @@ update_progress_received (GDBusConnection *bus,
       g_variant_lookup (info, "error", "&s", &error);
       g_variant_lookup (info, "error_message", "&s", &error_message);
     }
-g_print ("update progress received %u/%u %u%% %d\n", op, n_ops, progress, status);
 
   g_signal_emit_by_name (portal, "update-progress",
                          n_ops,
@@ -310,6 +309,7 @@ typedef struct {
   XdpParent *parent;
   char *parent_handle;
   GTask *task;
+  char *ref;
 } InstallUpdateCall;
 
 static void
@@ -324,6 +324,7 @@ install_update_call_free (InstallUpdateCall *call)
 
   g_object_unref (call->portal);
   g_object_unref (call->task);
+  g_free (call->ref);
 
   g_free (call);
 }
@@ -380,15 +381,27 @@ install_update (InstallUpdateCall *call)
   cancellable = g_task_get_cancellable (call->task);
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (call->portal->bus,
-                          FLATPAK_PORTAL_BUS_NAME,
-                          call->portal->update_monitor_handle,
-                          UPDATE_MONITOR_INTERFACE,
-                          "Update",
-                          g_variant_new ("(sa{sv})",
-                                         call->parent_handle,
-                                         &options),
-                          NULL, 0, -1, cancellable, update_started, call);
+  if (call->ref)
+      g_dbus_connection_call (call->portal->bus,
+                              FLATPAK_PORTAL_BUS_NAME,
+                              call->portal->update_monitor_handle,
+                              UPDATE_MONITOR_INTERFACE,
+                              "Install",
+                              g_variant_new ("(ssa{sv})",
+                                             call->parent_handle,
+                                             call->ref,
+                                             &options),
+                              NULL, 0, -1, cancellable, update_started, call);
+    else
+      g_dbus_connection_call (call->portal->bus,
+                              FLATPAK_PORTAL_BUS_NAME,
+                              call->portal->update_monitor_handle,
+                              UPDATE_MONITOR_INTERFACE,
+                              "Update",
+                              g_variant_new ("(sa{sv})",
+                                             call->parent_handle,
+                                             &options),
+                              NULL, 0, -1, cancellable, update_started, call);
 }
 
 /**
@@ -455,6 +468,77 @@ xdp_portal_update_install_finish (XdpPortal *portal,
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_update_install, FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+/**
+ * xdp_portal_update_install_ref:
+ * @portal: a #XdpPortal
+ * @parent: a #XdpParent
+ * @ref: the ref to install
+ * @flags: options for this call
+ * @cancellable: (nullable): optional #GCancellable
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Installs an available application or runtime extension of the
+ * app making this call.
+ *
+ * During the installation, the #XdpPortal::update-progress
+ * signal will be emitted to provide progress information.
+ */
+void
+xdp_portal_update_install_ref (XdpPortal *portal,
+                               XdpParent *parent,
+                               const char *ref,
+                               XdpUpdateInstallFlags flags,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer data)
+{
+  InstallUpdateCall *call;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (flags == XDP_UPDATE_INSTALL_FLAG_NONE);
+
+  call = g_new (InstallUpdateCall, 1);
+  call->portal = g_object_ref (portal);
+  if (parent)
+    call->parent = _xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
+  call->ref = g_strdup (ref);
+  call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_update_install_ref);
+
+  install_update (call);
+}
+
+/**
+ * xdp_portal_update_install_ref_finish:
+ * @portal: a #XdpPortal
+ * @result: a #GAsyncResult
+ * @error: return location for an error
+ *
+ * Finishes an installation request, and returns
+ * the result in the form of boolean.
+ *
+ * Note that the install may not be completed
+ * by the time this function is called. You need to
+ * listen to the #XdpPortal::update-progress signal
+ * to learn when it is complete.
+ *
+ * Returns: %TRUE if the installation was started
+ */
+gboolean
+xdp_portal_update_install_ref_finish (XdpPortal *portal,
+                                      GAsyncResult *result,
+                                      GError **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_update_install_ref, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }

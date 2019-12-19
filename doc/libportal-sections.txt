@@ -184,6 +184,8 @@ xdp_portal_update_monitor_stop
 XdpUpdateInstallFlags
 xdp_portal_update_install
 xdp_portal_update_install_finish
+xdp_portal_update_install_ref
+xdp_portal_update_install_ref_finish
 </SECTION>
 
 <SECTION>
