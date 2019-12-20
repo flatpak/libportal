@@ -199,7 +199,7 @@ request_background (BackgroundCall *call)
   if (call->commandline)
     g_variant_builder_add (&options, "{sv}", "commandline", g_variant_new_strv ((const char* const*)call->commandline->pdata, call->commandline->len));
 
-g_print ("calling background\n");
+  g_debug ("calling background");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
