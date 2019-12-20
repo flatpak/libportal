@@ -3,6 +3,7 @@
   <!-- interface-requires gtk+ 3.8 -->
   <object class="GtkDialog" id="update_dialog">
     <property name="transient-for">PortalTestWin</property>
+    <property name="modal">1</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <child>
@@ -28,6 +29,41 @@
     <action-widgets>
       <action-widget response="cancel">close</action-widget>
       <action-widget response="ok">ok</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="update_dialog2">
+    <property name="transient-for">PortalTestWin</property>
+    <property name="modal">1</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <child>
+          <object class="GtkLabel" id="update_label">
+            <property name="visible">1</property>
+            <property name="label">Update available!</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="update_progressbar">
+            <property name="visible">1</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="ok2">
+        <property name="visible">1</property>
+        <property name="label">Install now</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="close2">
+        <property name="visible">1</property>
+        <property name="label">Close</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">close2</action-widget>
+      <action-widget response="ok">ok2</action-widget>
     </action-widgets>
   </object>
   <object class="GtkFileChooserDialog" id="filechooser">

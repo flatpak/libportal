@@ -64,6 +64,10 @@ struct _PortalTestWin
 
   GFileMonitor *update_monitor;
   GtkWidget *update_dialog;
+  GtkWidget *update_dialog2;
+  GtkWidget *update_progressbar;
+  GtkWidget *update_label;
+  GtkWidget *ok2;
 };
 
 struct _PortalTestWinClass
@@ -98,6 +102,18 @@ update_network_status (PortalTestWin *win)
   gtk_label_set_label (GTK_LABEL (win->network_status), s->str);
 }
 
+static gboolean
+show_restart_dialog (gpointer data)
+{
+  PortalTestWin *win = data;
+
+  if (gtk_widget_get_visible (win->update_dialog2))
+    return G_SOURCE_CONTINUE;
+
+  gtk_window_present (GTK_WINDOW (win->update_dialog));
+  return G_SOURCE_REMOVE;
+}
+
 static void
 update_monitor_changed (GFileMonitor      *monitor,
                         GFile             *file,
@@ -106,7 +122,7 @@ update_monitor_changed (GFileMonitor      *monitor,
                         PortalTestWin     *win)
 {
   if (event == G_FILE_MONITOR_EVENT_CREATED)
-    gtk_window_present (GTK_WINDOW (win->update_dialog));
+    g_timeout_add_seconds (5, show_restart_dialog, win);
 }
 
 static void
@@ -116,6 +132,88 @@ update_dialog_response (GtkDialog     *dialog,
 {
   if (response == GTK_RESPONSE_OK)
     portal_test_app_restart (PORTAL_TEST_APP (gtk_window_get_application (GTK_WINDOW (win))));
+
+  gtk_widget_hide (win->update_dialog);
+}
+
+static void
+update_available (XdpPortal *portal,
+                  const char *running,
+                  const char *local,
+                  const char *remote,
+                  PortalTestWin *win)
+{
+  g_message ("Update  available");
+   
+  gtk_label_set_label (GTK_LABEL (win->update_label), "Update available");
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (win->update_progressbar), 0.0);
+
+  gtk_window_present (GTK_WINDOW (win->update_dialog2));
+}
+
+static void
+update_progress (XdpPortal *portal,
+                 guint      n_ops,
+                 guint      op,
+                 guint      progress,
+                 int        status,
+                 const char *error,
+                 const char *message,
+                 PortalTestWin *win)
+{
+  g_message ("Progress!");
+
+  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (win->update_progressbar), progress / 100.0);
+
+  if (status == XDP_UPDATE_STATUS_FAILED)
+    {
+      gtk_label_set_label (GTK_LABEL (win->update_label), "Something went wrong");
+      gtk_widget_hide (win->update_progressbar);
+    }
+  else if (status == XDP_UPDATE_STATUS_DONE)
+    {
+      gtk_label_set_label (GTK_LABEL (win->update_label), "Installed");
+    }
+
+  if (status != XDP_UPDATE_STATUS_RUNNING)
+    g_signal_handlers_disconnect_by_func (win->portal, update_progress, win); 
+}
+
+static void
+update_called (GObject *source,
+               GAsyncResult *result,
+               gpointer data)
+{
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+
+  if (!xdp_portal_update_install_finish (win->portal, result, &error))
+    {
+      g_warning ("Installation failed:  %s", error->message);
+      gtk_widget_hide (win->update_dialog2);
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->update_label), "Installing…");
+  gtk_widget_set_sensitive (win->ok2, FALSE);
+  g_signal_connect (win->portal, "update-progress", G_CALLBACK (update_progress), win);
+}
+
+static void
+update_dialog2_response (GtkDialog     *dialog,
+                        int            response,
+                        PortalTestWin *win)
+{
+  if (response == GTK_RESPONSE_OK)
+    {
+      XdpParent *parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+      xdp_portal_update_install (win->portal, parent, 0, NULL, update_called, win);
+      xdp_parent_free (parent);
+    }
+  else
+    {
+      g_signal_handlers_disconnect_by_func (win->portal, update_available, win);
+      gtk_widget_hide (win->update_dialog2);
+    }
 }
 
 static void
@@ -170,6 +268,10 @@ portal_test_win_init (PortalTestWin *win)
   dst = g_file_new_for_path (filename);
   src = g_file_new_for_path (APPDATADIR "/test.txt");
   g_file_copy (src, dst, 0, NULL, NULL, NULL, NULL);
+
+  xdp_portal_update_monitor_start (win->portal, 0, NULL, NULL, NULL);
+  g_signal_connect (win->portal, "update-available", G_CALLBACK (update_available), win);
+  g_signal_connect (win->update_dialog2, "response", G_CALLBACK (update_dialog2_response), win);
 }
 
 static void
@@ -1113,6 +1215,10 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog2);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_progressbar);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_label);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, ok2);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_dir);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_ask);
 }
