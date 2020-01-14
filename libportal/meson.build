@@ -1,6 +1,7 @@
 headers = files('portal.h',
                 'portal-gtk3.h',
                 'portal-gtk4.h',
+                'portal-qt5.h',
                 'portal-helpers.h',
                 'account.h',
                 'background.h',
