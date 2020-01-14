@@ -317,7 +317,7 @@ install_update_call_free (InstallUpdateCall *call)
 {
   if (call->parent)
     {
-      call->parent->unexport (call->parent);
+      call->parent->parent_unexport (call->parent);
       _xdp_parent_free (call->parent);
     }
   g_free (call->parent_handle);
@@ -373,7 +373,7 @@ install_update (InstallUpdateCall *call)
 
   if (call->parent_handle == NULL)
     {
-      call->parent->export (call->parent, create_parent_exported, call);
+      call->parent->parent_export (call->parent, create_parent_exported, call);
       return;
     }
 

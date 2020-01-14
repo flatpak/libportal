@@ -54,7 +54,7 @@ inhibit_call_free (InhibitCall *call)
 {
   if (call->parent)
     {
-      call->parent->unexport (call->parent);
+      call->parent->parent_unexport (call->parent);
       _xdp_parent_free (call->parent);
     }
  g_free (call->parent_handle);
@@ -168,7 +168,7 @@ do_inhibit (InhibitCall *call)
 
   if (call->parent_handle == NULL)
     {
-      call->parent->export (call->parent, inhibit_parent_exported, call);
+      call->parent->parent_export (call->parent, inhibit_parent_exported, call);
       return;
     }
 
@@ -346,7 +346,7 @@ create_monitor_call_free (CreateMonitorCall *call)
 {
   if (call->parent)
     {
-      call->parent->unexport (call->parent);
+      call->parent->parent_unexport (call->parent);
       _xdp_parent_free (call->parent);
     }
   g_free (call->parent_handle);
@@ -512,7 +512,7 @@ create_monitor (CreateMonitorCall *call)
 
   if (call->parent_handle == NULL)
     {
-      call->parent->export (call->parent, create_parent_exported, call);
+      call->parent->parent_export (call->parent, create_parent_exported, call);
       return;
     }
 
