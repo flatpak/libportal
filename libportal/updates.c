@@ -108,7 +108,6 @@ update_progress_received (GDBusConnection *bus,
       g_variant_lookup (info, "error", "&s", &error);
       g_variant_lookup (info, "error_message", "&s", &error_message);
     }
-g_print ("update progress received %u/%u %u%% %d\n", op, n_ops, progress, status);
 
   g_signal_emit_by_name (portal, "update-progress",
                          n_ops,
