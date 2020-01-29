@@ -67,7 +67,7 @@ email_call_free (EmailCall *call)
 {
   if (call->parent)
     {
-      call->parent->unexport (call->parent);
+      call->parent->parent_unexport (call->parent);
       _xdp_parent_free (call->parent);
     }
   g_free (call->parent_handle);
@@ -192,7 +192,7 @@ compose_email (EmailCall *call)
 
   if (call->parent_handle == NULL)
     {
-      call->parent->export (call->parent, parent_exported, call);
+      call->parent->parent_export (call->parent, parent_exported, call);
       return;
     }
 

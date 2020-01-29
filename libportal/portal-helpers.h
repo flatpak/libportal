@@ -54,8 +54,8 @@ typedef void     (* XdpParentUnexport) (XdpParent         *parent);
 
 struct _XdpParent {
   /*< private >*/
-  XdpParentExport export;
-  XdpParentUnexport unexport;
+  XdpParentExport parent_export;
+  XdpParentUnexport parent_unexport;
   GObject *object;
   XdpParentExported callback;
   gpointer data;

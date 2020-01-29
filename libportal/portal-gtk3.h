@@ -91,8 +91,8 @@ static inline XdpParent *xdp_parent_new_gtk (GtkWindow *window);
 static inline XdpParent *xdp_parent_new_gtk (GtkWindow *window)
 {
   XdpParent *parent = g_new0 (XdpParent, 1);
-  parent->export = _xdp_parent_export_gtk;
-  parent->unexport = _xdp_parent_unexport_gtk;
+  parent->parent_export = _xdp_parent_export_gtk;
+  parent->parent_unexport = _xdp_parent_unexport_gtk;
   parent->object = (GObject *) g_object_ref (window);
   return parent;
 }
