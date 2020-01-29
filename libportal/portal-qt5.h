@@ -36,11 +36,17 @@ static inline gboolean _xdp_parent_export_qt (XdpParent *parent,
         return TRUE;
       }
     }
-
-  /* TODO: QtWayland doesn't support xdg-foreign protocol yet
-   * Upstream bugs: https://bugreports.qt.io/browse/QTBUG-73801
-   *                https://bugreports.qt.io/browse/QTBUG-76983
-   */
+  else
+    {
+      /* TODO: QtWayland doesn't support xdg-foreign protocol yet
+       * Upstream bugs: https://bugreports.qt.io/browse/QTBUG-73801
+       *                https://bugreports.qt.io/browse/QTBUG-76983
+       */
+      g_warning ("QtWayland doesn't support xdg-foreign protocol yet");
+      g_autofree char *handle = g_strdup ("");
+      callback (parent, handle, data);
+      return TRUE;
+    }
 
   g_warning ("Couldn't export handle, unsupported windowing system");
   return FALSE;
