@@ -63,6 +63,12 @@ libportal = library('portal',
                     install: true,
                     dependencies: [gio_dep, gio_unix_dep])
 
+pkgconfig.generate(libportal,
+  description: 'Portal API wrappers',
+  name: 'libportal',
+  requires: [ gio_dep ],
+)
+
 libportal_dep = declare_dependency(sources: src,
                                    include_directories: top_inc,
                                    dependencies: [gio_dep, gio_unix_dep],
