@@ -221,9 +221,9 @@ open_file (FileCall *call)
   if (call->current_name)
     g_variant_builder_add (&options, "{sv}", "current_name", g_variant_new_string (call->current_name));
   if (call->current_folder)
-    g_variant_builder_add (&options, "{sv}", "current_folder", g_variant_new_string (call->current_folder));
+    g_variant_builder_add (&options, "{sv}", "current_folder", g_variant_new_bytestring (call->current_folder));
   if (call->current_file)
-    g_variant_builder_add (&options, "{sv}", "current_file", g_variant_new_string (call->current_file));
+    g_variant_builder_add (&options, "{sv}", "current_file", g_variant_new_bytestring (call->current_file));
 
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
