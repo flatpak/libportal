@@ -77,4 +77,18 @@ gboolean   xdp_portal_update_install_finish       (XdpPortal              *porta
                                                    GAsyncResult           *result,
                                                    GError                **error);
 
+XDP_PUBLIC
+void       xdp_portal_update_install_ref          (XdpPortal              *portal,
+                                                   XdpParent              *parent,
+                                                   const char             *ref,
+                                                   XdpUpdateInstallFlags   flags,
+                                                   GCancellable           *cancellable,
+                                                   GAsyncReadyCallback     callback,
+                                                   gpointer                data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_update_install_ref_finish   (XdpPortal              *portal,
+                                                   GAsyncResult           *result,
+                                                   GError                **error);
+
 G_END_DECLS

@@ -1176,6 +1176,77 @@ set_wallpaper (PortalTestWin *win)
 }
 
 static void
+install_debuginfo_called (GObject *source,
+                          GAsyncResult *result,
+                          gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (source);
+  g_autoptr(GError) error = NULL;
+  gboolean ret;
+
+  g_print ("install debuginfo called\n");
+  ret = xdp_portal_update_install_ref_finish (portal, result, &error);
+  if (!ret)
+    {
+      g_warning ("Install request failed: %s", error ? error->message : "Unknown error");
+      return;
+    }
+
+  g_message ("Install request successful!");
+}
+
+static void
+update_progress (XdpPortal *portal,
+                 guint n_ops,
+                 guint op,
+                 guint progress,
+                 XdpUpdateStatus status,
+                 const char *error,
+                 const char *error_message,
+                 gpointer data)
+{
+  g_message ("Installation progress %u/%u %u%%\n", op, n_ops, progress);
+  if (status != 0)
+    g_warning ("Installation failed: %s", error_message);
+
+  if (progress == 100 && status == 0)
+    g_message ("Installation completed successfully");
+
+  if (status != 0 || progress == 100)
+    {
+      g_print ("Stopping the update monitor\n");
+      g_signal_handlers_disconnect_by_func (portal, update_progress, NULL);
+      xdp_portal_update_monitor_stop (portal);
+    }
+}
+
+static void
+monitor_started_cb (GObject *source,
+                    GAsyncResult *result,
+                    gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (source);
+  g_autoptr(GError) error = NULL;
+  const char *ref = "runtime/org.gnome.PortalTest.Debug/x86_64/master";
+
+  if (!xdp_portal_update_monitor_start_finish (portal, result, &error))
+    {
+      g_warning ("Failed to start update monitor: %s", error->message);
+      return;
+    }
+
+  g_signal_connect (portal, "update-progress", G_CALLBACK (update_progress), NULL);
+
+  xdp_portal_update_install_ref (portal, NULL, ref, 0, NULL, install_debuginfo_called, NULL);
+}
+
+static void
+install_debuginfo (PortalTestWin *win)
+{
+  xdp_portal_update_monitor_start (win->portal, 0, NULL, monitor_started_cb, NULL);
+}
+
+static void
 portal_test_win_class_init (PortalTestWinClass *class)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (class);
@@ -1195,6 +1266,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, compose_email);
   gtk_widget_class_bind_template_callback (widget_class, request_background);
   gtk_widget_class_bind_template_callback (widget_class, set_wallpaper);
+  gtk_widget_class_bind_template_callback (widget_class, install_debuginfo);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, sandbox_status);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, network_status);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, monitor_name);
