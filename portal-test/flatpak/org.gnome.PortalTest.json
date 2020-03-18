@@ -15,7 +15,10 @@
             "buildsystem": "meson",
             "builddir": true,
             "build-options": {
-                "config-opts": [ "-Dbuild-portal-test=true" ]
+                "config-opts": [
+                  "-Dbuild-portal-test=true",
+                  "-Dgtk_doc=false"
+                ]
             },
             "sources": [
                 {
