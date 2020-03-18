@@ -1,3 +1,4 @@
 option('build-portal-test', type: 'boolean', value: false,
   description : 'Build the portal-test application')
-
+option('gtk_doc', type: 'boolean', value: true,
+  description : 'Build API reference with gtk-doc')
