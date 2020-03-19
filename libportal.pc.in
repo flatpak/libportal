@@ -5,6 +5,7 @@ includedir=@includedir@
 Name: libportal
 Description: Portal API wrappers
 Version: @VERSION@
-Requires: gio-unix-2.0
+Requires: gio-2.0
+Requires.private: gio-unix-2.0
 Libs: -L${libdir} -lportal
 Cflags: -I${includedir}
