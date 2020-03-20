@@ -23,7 +23,7 @@ portal_enums = gnome.mkenums('portal-enums',
                              sources: headers,
                              c_template: 'portal-enums.c.template',
                              h_template: 'portal-enums.h.template',
-                             install_dir: join_paths (get_option('prefix'), 'include', 'libportal'),
+                             install_dir: join_paths (get_option('includedir'), 'libportal'),
                              install_header: true)
 
 src = [
@@ -62,6 +62,12 @@ libportal = library('portal',
                     c_args: visibility_args,
                     install: true,
                     dependencies: [gio_dep, gio_unix_dep])
+
+pkgconfig.generate(libportal,
+  description: 'Portal API wrappers',
+  name: 'libportal',
+  requires: [ gio_dep ],
+)
 
 libportal_dep = declare_dependency(sources: src,
                                    include_directories: top_inc,
