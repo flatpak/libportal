@@ -41,7 +41,7 @@ XDP_PUBLIC
 void       xdp_portal_session_inhibit             (XdpPortal            *portal,
                                                    XdpParent            *parent,
                                                    const char           *reason,
-                                                   XdpInhibitFlags       inhibit,
+                                                   XdpInhibitFlags       flags,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
                                                    gpointer              data);
