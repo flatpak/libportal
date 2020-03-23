@@ -22,3 +22,8 @@ executable('portal-test',
 install_data('test.txt', install_dir: 'share/org.gnome.PortalTest')
 install_data('org.gnome.PortalTest.desktop', install_dir: 'share/applications')
 install_data('org.gnome.PortalTest.service', install_dir: 'share/dbus-1/services')
+
+executable('portal-linking-test',
+           [ 'portal-linking-test.c' ],
+           include_directories: [libportal_inc],
+           dependencies: [gtk_dep, libportal_dep])
