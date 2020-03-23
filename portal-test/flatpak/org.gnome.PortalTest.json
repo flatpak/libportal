@@ -11,6 +11,24 @@
     ],
     "modules": [
         {
+            "name": "gtk3",
+            "disabled": true,
+            "buildsystem": "meson",
+            "builddir": true,
+            "build-options": {
+                "config-opts": [
+                    "-Dgtk_doc=false"
+                ]
+            },
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/gtk.git",
+                    "branch": "gtk-3-24"
+                }
+            ]
+        },
+        {
             "name": "portal-test",
             "buildsystem": "meson",
             "builddir": true,
