@@ -49,7 +49,7 @@ src = [
         portal_enums
 ]
 
-gio_dep = dependency('gio-2.0')
+gio_dep = dependency('gio-2.0', version: '>= 2.58')
 gio_unix_dep = dependency('gio-unix-2.0')
 
 install_headers(headers, subdir: 'libportal')
