@@ -22,9 +22,9 @@ doc:
 	ninja; \
 	cd -; \
 
-# Install build and run-time requirements for libportal
+# Get build and run-time system requirements
 requirements:
-	sudo apt install 
+	sudo apt install \
 		python3 \
 		python3-pip \
 		python3-setuptools \
@@ -32,7 +32,7 @@ requirements:
 		ninja-build \
 		libgtk2.0-dev \
 		libgtk-3-dev \
-		gtk-doc-tools; \
+		gtk-doc-tools \
 		libgstreamer-plugins-base1.0-dev; \
 
 	pip3 install meson; \
