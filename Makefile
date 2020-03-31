@@ -1,9 +1,11 @@
+# Build libportal
 lib:
 	meson build/lib; \
 	cd build/lib; \
 	ninja; \
 	cd -; \
 
+# Build and run the libportal test application
 test:
 	meson build/test -Dbuild-portal-test=true; \
 	cd build/test; \
@@ -13,15 +15,14 @@ test:
 	echo "libportal: Just a test file" > $(HOME)/.local/share/test.txt; \
 	./build/test/portal-test/portal-test; \
 
+# Build libportal documentation
 doc:
 	meson build/doc -Dgtk_doc=true; \
 	cd build/doc; \
 	ninja; \
 	cd -; \
 
-#
 # Install build and run-time requirements for libportal
-#
 requirements:
 	sudo apt install 
 		python3 \
