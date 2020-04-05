@@ -8,7 +8,7 @@ libportal provides GIO-style async APIs for most Flatpak portals.
 
 ### The Meson build-system
 
-`libportal` uses the Meson to build its projects. To install Meson on your system, follow instructions here: https://mesonbuild.com/Getting-meson.html. If your system is missing a dependency, Meson will tell you which one. It is up to you, how you install your system dependencies.
+`libportal` uses Meson to build its projects. To install Meson on your system, follow instructions here: https://mesonbuild.com/Getting-meson.html. If your system is missing a dependency, Meson will tell you which one. How you install your missing dependencies is up to you.
 
 ### Build libportal
 ```
