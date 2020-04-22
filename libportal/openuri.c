@@ -209,11 +209,16 @@ do_open (OpenCall *call)
     {
       g_autoptr(GUnixFDList) fd_list = NULL;
       g_autofree char *path = NULL;
-      int fd, fd_in;
+      int fd, fd_in, flags;
 
       path = g_file_get_path (file);
 
-      fd = g_open (path, O_PATH | O_CLOEXEC);
+      if (call->writable)
+        flags = O_RDWR | O_CLOEXEC;
+      else
+        flags = O_RDONLY | O_CLOEXEC;
+
+      fd = g_open (path, flags);
       if (fd == -1)
         {
           g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Failed to open '%s'", call->uri);
