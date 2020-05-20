@@ -122,7 +122,15 @@ response_received (GDBusConnection *bus,
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
   if (response == 0)
-    g_task_return_boolean (call->task, TRUE);
+    {
+      GVariant *streams;
+
+      g_print ("ret: %s\n", g_variant_print (ret, FALSE));
+      g_variant_lookup (ret, "streams", "@a(ua{sv})", &streams);
+      g_object_set_data_full (G_OBJECT (call->task), "streams",
+                              g_variant_ref (streams), (GDestroyNotify)g_variant_unref);
+      g_task_return_boolean (call->task, TRUE);
+    }
   else if (response == 1)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Camera access canceled");
   else
@@ -137,7 +145,7 @@ cancelled_cb (GCancellable *cancellable,
 {
   AccessCameraCall *call = data;
 
-g_debug ("Calling Close");
+  g_debug ("Calling Close");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           call->request_path,
@@ -196,7 +204,7 @@ access_camera (AccessCameraCall *call)
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
 
-g_debug ("Calling AccessCamera");
+  g_debug ("Calling AccessCamera");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
@@ -274,6 +282,27 @@ xdp_portal_access_camera_finish (XdpPortal     *portal,
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_access_camera, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+GVariant *
+xdp_portal_access_camera_finish_streams (XdpPortal     *portal,
+                                         GAsyncResult  *result,
+                                         GError       **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_access_camera, FALSE);
+
+  if (g_task_propagate_boolean (G_TASK (result), error))
+    {
+      GVariant *streams;
+
+      streams = (GVariant *)g_object_get_data (G_OBJECT (result), "streams");
+      if (streams)
+        return g_variant_ref (streams);
+    }
+
+  return NULL;
 }
 
 /**
