@@ -33,7 +33,7 @@
 
 G_BEGIN_DECLS
 
-static inline void _xdp_parent_exported_wayland (GdkSurface *surface,
+static inline void _xdp_parent_exported_wayland (GdkToplevel *toplevel,
                                                  const char *handle,
                                                  gpointer data)
 
@@ -63,7 +63,10 @@ static inline gboolean _xdp_parent_export_gtk (XdpParent *parent,
       GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
       parent->callback = callback;
       parent->data = data;
-      return gdk_wayland_surface_export_handle (surface, _xdp_parent_exported_wayland, parent, NULL);
+      return gdk_wayland_toplevel_export_handle (GDK_TOPLEVEL (surface),
+                                                 _xdp_parent_exported_wayland,
+                                                 parent,
+                                                 NULL);
     }
 #endif
   g_warning ("Couldn't export handle, unsupported windowing system");
@@ -76,7 +79,7 @@ static inline void _xdp_parent_unexport_gtk (XdpParent *parent)
   if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
     {
       GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
-      gdk_wayland_surface_unexport_handle (surface);
+      gdk_wayland_toplevel_unexport_handle (GDK_TOPLEVEL (surface));
     }
 #endif
 }
