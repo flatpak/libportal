@@ -1,3 +1,13 @@
+Changes in 0.4
+==============
+
+- Make GTK4 support work with GTK 4.0
+- Qt5 support
+- OpenURI: Support write access
+- Build fixes
+- Add more tests
+- Require GLib 2.58
+
 Changes in 0.3
 ==============
 
