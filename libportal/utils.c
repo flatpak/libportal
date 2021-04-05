@@ -29,6 +29,7 @@ _xdp_parent_copy (XdpParent *source)
   parent->parent_export = source->parent_export;
   parent->parent_unexport = source->parent_unexport;
   g_set_object (&parent->object, source->object);
+  parent->data = source->data;
 
   return parent;
 }

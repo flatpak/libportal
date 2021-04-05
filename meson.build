@@ -7,6 +7,8 @@ cc = meson.get_compiler('c')
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
 
+qt = import('qt5')
+
 conf = configuration_data()
 conf.set_quoted('G_LOG_DOMAIN', 'libportal')
 conf.set_quoted('PACKAGE_NAME', 'libportal')
@@ -30,4 +32,8 @@ if get_option('gtk_doc')
 endif
 if get_option('build-portal-test')
   subdir('portal-test')
+endif
+
+if get_option('build-portal-test-qt')
+  subdir('portal-test-qt')
 endif
