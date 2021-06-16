@@ -1,7 +1,4 @@
-if get_option('build-portal-test')
-  subdir('gtk3')
-endif
-
-if get_option('build-portal-test-qt')
-  subdir('qt')
-endif
+portal_tests = get_option('portal-tests')
+foreach portal_test : portal_tests
+  subdir(portal_test)
+endforeach

@@ -31,7 +31,7 @@
             "buildsystem": "meson",
             "builddir": true,
             "config-opts": [
-              "-Dbuild-portal-test=true",
+              "-Dportal-tests=gtk3",
               "-Dgtk_doc=false"
             ],
             "sources": [
