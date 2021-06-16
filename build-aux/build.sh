@@ -4,7 +4,7 @@ TOP_DIR=`dirname $0`/../..
 OLD_DIR=`pwd`
 
 cd "$TOP_DIR"
-JSON=build-aux/org.gnome.PortalTest.json
+JSON=build-aux/org.gnome.PortalTest.Gtk3.json
 # Keep in sync with manifest
 MESON_ARGS="-Dbuild-portal-test=true -Dgtk_doc=false"
 

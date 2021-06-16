@@ -19,9 +19,9 @@ executable('portal-test',
            dependencies: [gtk_dep, gst_dep, libportal_dep],
            install : true)
 
-install_data('test.txt', install_dir: 'share/org.gnome.PortalTest')
-install_data('org.gnome.PortalTest.desktop', install_dir: 'share/applications')
-install_data('org.gnome.PortalTest.service', install_dir: 'share/dbus-1/services')
+install_data('test.txt', install_dir: 'share/org.gnome.PortalTest.Gtk3')
+install_data('org.gnome.PortalTest.Gtk3.desktop', install_dir: 'share/applications')
+install_data('org.gnome.PortalTest.Gtk3.service', install_dir: 'share/dbus-1/services')
 
 executable('portal-linking-test',
            [ 'portal-linking-test.c' ],
