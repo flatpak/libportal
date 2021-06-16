@@ -15,11 +15,9 @@
             "disabled": true,
             "buildsystem": "meson",
             "builddir": true,
-            "build-options": {
-                "config-opts": [
-                    "-Dgtk_doc=false"
-                ]
-            },
+            "config-opts": [
+                "-Dgtk_doc=false"
+            ],
             "sources": [
                 {
                     "type": "git",
@@ -32,12 +30,10 @@
             "name": "portal-test-gtk3",
             "buildsystem": "meson",
             "builddir": true,
-            "build-options": {
-                "config-opts": [
-                  "-Dbuild-portal-test=true",
-                  "-Dgtk_doc=false"
-                ]
-            },
+            "config-opts": [
+              "-Dbuild-portal-test=true",
+              "-Dgtk_doc=false"
+            ],
             "sources": [
                 {
                     "type": "git",
