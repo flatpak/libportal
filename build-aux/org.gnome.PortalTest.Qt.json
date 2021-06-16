@@ -1,0 +1,29 @@
+{
+    "app-id": "org.gnome.PortalTest.Qt",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "5.15",
+    "sdk": "org.kde.Sdk",
+    "command": "portal-test-qt",
+    "finish-args": [
+        "--socket=wayland",
+        "--socket=x11",
+        "--socket=pulseaudio"
+    ],
+    "modules": [
+        {
+            "name": "portal-test-qt",
+            "buildsystem": "meson",
+            "builddir": true,
+            "config-opts": [
+              "-Dbuild-portal-test-qt=true",
+              "-Dgtk_doc=false"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/flatpak/libportal"
+                }
+            ]
+        }
+    ]
+}
