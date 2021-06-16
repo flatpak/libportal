@@ -13,7 +13,7 @@ src = ['main.c',
        'portal-test-win.c',
        resources ]
 
-executable('portal-test',
+executable('portal-test-gtk3',
            src,
            include_directories: [top_inc, libportal_inc],
            dependencies: [gtk_dep, gst_dep, libportal_dep],
@@ -23,7 +23,7 @@ install_data('test.txt', install_dir: 'share/org.gnome.PortalTest.Gtk3')
 install_data('org.gnome.PortalTest.Gtk3.desktop', install_dir: 'share/applications')
 install_data('org.gnome.PortalTest.Gtk3.service', install_dir: 'share/dbus-1/services')
 
-executable('portal-linking-test',
+executable('portal-linking-test-gtk3',
            [ 'portal-linking-test.c' ],
            include_directories: [libportal_inc],
            dependencies: [gtk_dep, libportal_dep])
