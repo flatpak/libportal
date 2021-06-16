@@ -242,7 +242,7 @@ portal_test_app_new (void)
   GApplication *app;
 
   app = g_object_new (portal_test_app_get_type (),
-                      "application-id", "org.gnome.PortalTest",
+                      "application-id", "org.gnome.PortalTest.Gtk3",
                       NULL);
 
   g_action_map_add_action_entries (G_ACTION_MAP (app), entries, G_N_ELEMENTS (entries), app);
