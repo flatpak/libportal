@@ -574,7 +574,13 @@ start_screencast (PortalTestWin *win)
 {
   g_clear_object (&win->session);
 
-  xdp_portal_create_screencast_session (win->portal, XDP_OUTPUT_MONITOR|XDP_OUTPUT_WINDOW, XDP_SCREENCAST_FLAG_NONE, NULL, session_created, win);
+  xdp_portal_create_screencast_session (win->portal,
+                                        XDP_OUTPUT_MONITOR | XDP_OUTPUT_WINDOW,
+                                        XDP_SCREENCAST_FLAG_NONE,
+                                        XDP_CURSOR_MODE_HIDDEN,
+                                        NULL,
+                                        session_created,
+                                        win);
 }
 
 static void

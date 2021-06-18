@@ -96,10 +96,25 @@ typedef enum {
   XDP_SCREENCAST_FLAG_MULTIPLE = 1 << 0
 } XdpScreencastFlags;
 
+/**
+ * XdpCursorMode:
+ * @XDP_CURSOR_MODE_HIDDEN: no cursor
+ * @XDP_CURSOR_MODE_EMBEDDED: cursor is embedded on the stream
+ * @XDP_CURSOR_MODE_METADATA: cursor is sent as metadata of the stream
+ *
+ * Options for how the cursor is handled.
+ */
+typedef enum {
+  XDP_CURSOR_MODE_HIDDEN   = 1 << 0,
+  XDP_CURSOR_MODE_EMBEDDED = 1 << 1,
+  XDP_CURSOR_MODE_METADATA = 1 << 2,
+} XdpCursorMode;
+
 XDP_PUBLIC
 void        xdp_portal_create_screencast_session            (XdpPortal            *portal,
                                                              XdpOutputType         outputs,
                                                              XdpScreencastFlags    flags,
+                                                             XdpCursorMode         cursor_mode,
                                                              GCancellable         *cancellable,
                                                              GAsyncReadyCallback   callback,
                                                              gpointer              data);
@@ -126,6 +141,7 @@ void        xdp_portal_create_remote_desktop_session        (XdpPortal          
                                                              XdpDeviceType           devices,
                                                              XdpOutputType           outputs,
                                                              XdpRemoteDesktopFlags   flags,
+                                                             XdpCursorMode           cursor_mode,
                                                              GCancellable           *cancellable,
                                                              GAsyncReadyCallback     callback,
                                                              gpointer                data);

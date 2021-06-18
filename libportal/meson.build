@@ -57,8 +57,7 @@ install_headers(headers, subdir: 'libportal')
 
 libportal = library('portal',
                     src,
-                    version: '0.0.1',
-                    soversion: 0,
+                    version: '1.0.0',
                     include_directories: [top_inc, libportal_inc],
                     c_args: visibility_args,
                     install: true,
