@@ -157,10 +157,23 @@
           </packing>
         </child>
         <child>
-          <object class="GtkFileChooserButton">
+          <object class="GtkBox">
             <property name="visible">1</property>
-            <property name="title">File Chooser Portal</property>
-            <property name="action">open</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkFileChooserButton" id="file_chooser_button">
+                <property name="visible">1</property>
+                <property name="title">File Chooser Portal</property>
+                <property name="action">open</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="label">Open directory</property>
+                <signal name="clicked" handler="open_directory"/>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="left-attach">1</property>

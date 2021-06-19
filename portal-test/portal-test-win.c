@@ -57,6 +57,7 @@ struct _PortalTestWin
   GtkWidget *save_how;
   GtkWidget *open_local_ask;
   GtkWidget *open_local_dir;
+  GtkWidget *file_chooser_button;
 
 
   GtkWidget *screencast_label;
@@ -465,6 +466,46 @@ save_dialog (GtkWidget *button, PortalTestWin *win)
   gtk_label_set_label (GTK_LABEL (win->encoding), text);
 
   g_object_unref (dialog);
+}
+
+static void
+opened_directory (GObject *object,
+                  GAsyncResult *result,
+                  gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (object);
+  g_autoptr(GError) error = NULL;
+  gboolean res;
+
+  res = xdp_portal_open_directory_finish (portal, result, &error);
+
+  if (!res)
+    g_warning ("%s", error->message);
+}
+
+static void
+open_directory (GtkWidget *button, PortalTestWin *win)
+{
+  GtkFileChooser *file_chooser;
+  g_autofree gchar *uri = NULL;
+  XdpParent *parent;
+
+  file_chooser = GTK_FILE_CHOOSER (win->file_chooser_button);
+  uri = gtk_file_chooser_get_uri (file_chooser);
+  if (!uri)
+    return;
+
+  g_message ("Opening '%s'", uri);
+
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+  xdp_portal_open_directory (win->portal,
+                             parent,
+                             uri,
+                             XDP_OPEN_URI_FLAG_NONE,
+                             NULL,
+                             opened_directory,
+                             win);
+  xdp_parent_free (parent);
 }
 
 static void
@@ -1184,6 +1225,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
                                                "/org/gtk/portal-test/portal-test-win.ui");
 
   gtk_widget_class_bind_template_callback (widget_class, save_dialog);
+  gtk_widget_class_bind_template_callback (widget_class, open_directory);
   gtk_widget_class_bind_template_callback (widget_class, open_local);
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
   gtk_widget_class_bind_template_callback (widget_class, screencast_toggled);
@@ -1221,6 +1263,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, ok2);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_dir);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, open_local_ask);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, file_chooser_button);
 }
 
 GtkApplicationWindow *
