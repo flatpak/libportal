@@ -67,7 +67,7 @@ static inline void xdp_parent_free (XdpParent *parent);
 
 static inline void xdp_parent_free (XdpParent *parent)
 {
-  g_clear_object (&parent->data);
+  g_clear_object (&parent->object);
   g_free (parent);
 }
 
