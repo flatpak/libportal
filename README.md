@@ -5,8 +5,6 @@ libportal provides GIO-style async APIs for most Flatpak portals.
 
 ## Getting started
 
-### The Meson build system
-
 `libportal` uses Meson to build its projects. To install Meson on your system, follow the [Getting Meson instructions](https://mesonbuild.com/Getting-meson.html). If your system is missing a dependency, Meson will tell you which one. How you install your missing dependencies is up to you.
 
 ### Build libportal
@@ -25,18 +23,24 @@ ninja -C _build
 
 For subsequent builds, you only need to use the `ninja -C _build` command.
 
-### Build and run portal-test
+### Passing options
 
-If this is your first time building libportal, configure the project to include portal-test:
+libportal includes [Meson build options](https://mesonbuild.com/Build-options.html#build-options) for components that can optionally be built. After first running `meson _build`, you can view the available options with:
 
 ```
-meson _build -Dbuild-portal-test=true
+meson configure _build
 ```
 
-Otherwise, re-configure the project:
+To change an option, re-configure the project:
 
 ```
 meson configure _build -Dbuild-portal-test=true
+```
+
+You can also pass in options right from the start, e.g. with:
+
+```
+meson _build -Dbuild-portal-test=true
 ```
 
 Then build:
@@ -45,8 +49,18 @@ Then build:
 ninja -C _build
 ```
 
-And run the binary:
+## Optional components
+
+### `portal-test` and `portal-test-qt`
+
+Set the `build-portal-test` or `build-portal-test-qt` option to `true` and build the project to compile the corresponding binary. Then run the binary, e.g.:
 
 ```
 ./_build/portal-test/portal-test
+```
+
+or
+
+```
+./_build/portal-test/portal-test-qt
 ```
