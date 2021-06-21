@@ -17,6 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo add-apt-repository ppa:alexlarsson/glib260
+        sudo add-apt-repository 'deb https://download.mono-project.com/repo/ubuntu stable-bionic main' # Needed for updates to work
         sudo apt-get update
         sudo apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson
     - name: Check out libportal
