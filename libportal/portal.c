@@ -201,6 +201,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @accuracy: the accuracy, in meters
    * @speed: the speed, in meters per second
    * @heading: the heading, in degrees
+   * @description: the description
    * @timestamp_s: the timestamp seconds since the Unix epoch
    * @timestamp_ms: the microseconds fraction of the timestamp
    *
@@ -214,13 +215,14 @@ xdp_portal_class_init (XdpPortalClass *klass)
                   0,
                   NULL, NULL,
                   NULL,
-                  G_TYPE_NONE, 8,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
-                  G_TYPE_INT,
+                  G_TYPE_NONE, 9,
+                  G_TYPE_DOUBLE,
+                  G_TYPE_DOUBLE,
+                  G_TYPE_DOUBLE,
+                  G_TYPE_DOUBLE,
+                  G_TYPE_DOUBLE,
+                  G_TYPE_DOUBLE,
+                  G_TYPE_STRING,
                   G_TYPE_INT64,
                   G_TYPE_INT64);
 
