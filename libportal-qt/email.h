@@ -17,30 +17,22 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#ifndef PORTAL_TEST_QT_H
-#define PORTAL_TEST_QT_H
+#ifndef LIBPORTALQT_EMAIL_H
+#define LIBPORTALQT_EMAIL_H
 
-#include <QMainWindow>
-#include "portal.h"
+#include <QFlags>
 
-class Ui_PortalTestQt;
+namespace Xdp {
 
-class PortalTestQt : public QMainWindow
+enum class EmailFlag
 {
-    Q_OBJECT
-public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~PortalTestQt();
-
-    void updateLastOpenedFile(const QString &file);
-private Q_SLOTS:
-    void onUserInformationReceived(const Xdp::Response &response);
-    void onFileOpened(const Xdp::Response &response);
-    void onSessionInhibited(const Xdp::Response &response);
-
-private:
-    Ui_PortalTestQt *m_mainWindow;
-    int m_inhibitorId = -1;
+    None = 0x0
 };
+Q_DECLARE_FLAGS(EmailFlags, EmailFlag)
+}
+Q_DECLARE_OPERATORS_FOR_FLAGS(Xdp::EmailFlags)
 
-#endif // PORTAL_TEST_QT_H
+#endif // LIBPORTALQT_EMAIL_H
+
+
+
