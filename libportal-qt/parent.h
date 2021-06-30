@@ -17,32 +17,33 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#ifndef PORTAL_TEST_QT_H
-#define PORTAL_TEST_QT_H
+#ifndef LIBPORTALQT_PARENT_H
+#define LIBPORTALQT_PARENT_H
 
-#include <QMainWindow>
-#include "portal.h"
+#include <QObject>
+#include <QWindow>
 
-class Ui_PortalTestQt;
+#include "libportalqt_export.h"
 
-class PortalTestQt : public QMainWindow
+namespace Xdp
+{
+
+class ParentPrivate;
+
+class LIBPORTALQT_EXPORT Parent : public QObject
 {
     Q_OBJECT
 public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~PortalTestQt();
-
-    void updateLastOpenedFile(const QString &file);
-private Q_SLOTS:
-    void onUserInformationReceived(const Xdp::Response &response);
-    void onFileOpened(const Xdp::Response &response);
-    void onSessionInhibited(const Xdp::Response &response);
+    explicit Parent(QWindow *window, QObject *parent = nullptr);
+    ~Parent();
 
 private:
-    Ui_PortalTestQt *m_mainWindow;
-    int m_inhibitorId = -1;
-    QString m_fileToPrint;
-    int m_printToken;
-};
+    Q_DECLARE_PRIVATE(Parent)
 
-#endif // PORTAL_TEST_QT_H
+    const QScopedPointer<ParentPrivate> d_ptr;
+
+    friend class PortalPrivate;
+};
+} // namespace Xdp
+
+#endif // LIBPORTALQT_PARENT_H

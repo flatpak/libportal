@@ -17,32 +17,43 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#ifndef PORTAL_TEST_QT_H
-#define PORTAL_TEST_QT_H
+#ifndef LIBPORTALQT_INHIBIT_H
+#define LIBPORTALQT_INHIBIT_H
 
-#include <QMainWindow>
-#include "portal.h"
+#include <QFlags>
 
-class Ui_PortalTestQt;
-
-class PortalTestQt : public QMainWindow
+namespace Xdp
 {
-    Q_OBJECT
-public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~PortalTestQt();
 
-    void updateLastOpenedFile(const QString &file);
-private Q_SLOTS:
-    void onUserInformationReceived(const Xdp::Response &response);
-    void onFileOpened(const Xdp::Response &response);
-    void onSessionInhibited(const Xdp::Response &response);
+enum class InhibitFlag
+{
+    None = 0x0,
+    Logout = 0x1,
+    UserSwitch = 0x2,
+    Suspend = 0x4,
+    Idle = 0x8
+};
+Q_DECLARE_FLAGS(InhibitFlags, InhibitFlag)
 
-private:
-    Ui_PortalTestQt *m_mainWindow;
-    int m_inhibitorId = -1;
-    QString m_fileToPrint;
-    int m_printToken;
+enum class LoginSessionState
+{
+    Running = 1,
+    QueryEnd = 2,
+    Ending = 3
 };
 
-#endif // PORTAL_TEST_QT_H
+enum class SessionMonitorFlag
+{
+    None = 0x0
+};
+Q_DECLARE_FLAGS(SessionMonitorFlags, SessionMonitorFlag)
+
+}
+Q_DECLARE_OPERATORS_FOR_FLAGS(Xdp::InhibitFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Xdp::SessionMonitorFlags)
+
+#endif // LIBPORTALQT_INHIBIT_H
+
+
+
+

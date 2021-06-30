@@ -154,7 +154,7 @@ endif
 if 'qt5' in backends
   add_languages('cpp', required : true)
 
-  qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'X11Extras', 'Widgets'])
+  qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'Widgets'])
   qt5_headers = ['portal-qt5.h']
   qt5_sources = files('portal-qt5.cpp')
 

@@ -28,8 +28,17 @@ libportal_inc = include_directories('libportal')
 
 subdir('libportal')
 
+if get_option('qt5')
+  libportalqt_inc = include_directories('libportal-qt')
+  subdir('libportal-qt')
+endif
+
 if get_option('portal-tests')
   subdir('portal-test')
+endif
+
+if get_option('tests')
+  subdir('tests')
 endif
 
 if get_option('gtk_doc')

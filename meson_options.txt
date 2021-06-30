@@ -2,5 +2,9 @@ option('backends', type: 'array', choices: ['gtk3', 'gtk4', 'qt5'], value: ['gtk
   description : 'A list of portal backends to build')
 option('portal-tests', type: 'boolean', value: false,
   description : 'Build portal tests of each backend')
+option('tests', type: 'boolean', value: false,
+  description : 'Build portal unit tests')
+option('qt5', type: 'boolean', value: true,
+  description : 'Build the Qt bindings')
 option('gtk_doc', type: 'boolean', value: true,
   description : 'Build API reference with gtk-doc')

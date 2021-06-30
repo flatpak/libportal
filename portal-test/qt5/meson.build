@@ -1,6 +1,8 @@
 
 add_languages('cpp', required : true)
 
+qt_dep = dependency('qt5', modules: ['Core', 'Gui', 'Widgets'])
+
 src = [
   'main.cpp',
   'portal-test-qt.h',
@@ -17,7 +19,8 @@ prep = qt.preprocess(
 executable('portal-test-qt',
   [src, prep],
   include_directories: [top_inc, libportal_inc],
-  dependencies: [libportal_qt5_dep],
+  dependencies: [libportal_qt5_dep, libportalqt_dep],
+  link_with: [libportalqt],
   cpp_args : '-std=c++11',
   install : true,
 )

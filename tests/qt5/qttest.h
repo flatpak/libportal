@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021, Jan Grulich
+ * Copyright (C) 2021, Jan Grulich
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -17,32 +17,17 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#ifndef PORTAL_TEST_QT_H
-#define PORTAL_TEST_QT_H
+#ifndef QT_TEST_H
+#define QT_TEST_H
 
-#include <QMainWindow>
-#include "portal.h"
+#include <QObject>
 
-class Ui_PortalTestQt;
-
-class PortalTestQt : public QMainWindow
+class QtTest : public QObject
 {
     Q_OBJECT
-public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~PortalTestQt();
-
-    void updateLastOpenedFile(const QString &file);
 private Q_SLOTS:
-    void onUserInformationReceived(const Xdp::Response &response);
-    void onFileOpened(const Xdp::Response &response);
-    void onSessionInhibited(const Xdp::Response &response);
-
-private:
-    Ui_PortalTestQt *m_mainWindow;
-    int m_inhibitorId = -1;
-    QString m_fileToPrint;
-    int m_printToken;
+    void testFileChooserPortal();
+    void testNotificationPortal();
 };
 
-#endif // PORTAL_TEST_QT_H
+#endif // QT_TEST_H

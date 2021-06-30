@@ -1,58 +1,224 @@
-
+/*
+ * Copyright (C) 2020-2021, Jan Grulich
+ *
+ * This file is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, version 3.0 of the
+ * License.
+ *
+ * This file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-only
+ */
 #include "portal-test-qt.h"
 #include "ui_portal-test-qt.h"
 
 #include <QStringLiteral>
+#include <QMessageBox>
+#include <QStandardPaths>
+#include <QPrinter>
+#include <QUrl>
+#include <QTextDocument>
 
 PortalTestQt::PortalTestQt(QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
     , m_mainWindow(new Ui_PortalTestQt)
-    , m_portal(xdp_portal_new())
 {
     m_mainWindow->setupUi(this);
 
-    connect(m_mainWindow->openFileButton, &QPushButton::clicked, [=] (bool clicked) {
-        XdpParent *parent;
-        XdpOpenFileFlags flags = XDP_OPEN_FILE_FLAG_NONE;
-
-        parent = xdp_parent_new_qt(windowHandle());
-        xdp_portal_open_file (m_portal, parent, "Portal Test Qt", nullptr /*filters*/, nullptr /*current_filters*/,
-                              nullptr /*choices*/, flags, nullptr /*cancellable*/, openedFile, this);
-        xdp_parent_free (parent);
+    // Account portal
+    connect(m_mainWindow->getUserInformationButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::getUserInformation(xdpParent, QStringLiteral("Testing libportal"), Xdp::UserInformationFlag::None);
+        connect(Xdp::notifier(), &Xdp::Notifier::getUserInformationResponse, this, &PortalTestQt::onUserInformationReceived);
     });
+
+    // Background portal
+    connect(m_mainWindow->requestBackgroundButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        QStringList commandline = {QStringLiteral("/usr/bin/portal-test-qt"), QStringLiteral("some parameter"), QStringLiteral("--some-option")};
+        Xdp::requestBackground(xdpParent, QStringLiteral("Testing libportal"), commandline, Xdp::BackgroundFlag::Autostart);
+        connect(Xdp::notifier(), &Xdp::Notifier::requestBackgroundResponse, this, [=] (const Xdp::Response &response) {
+            if (response.isSuccess()) {
+                QMessageBox::information(this, QStringLiteral("Background Portal"), QStringLiteral("This application will successfully autostart"));
+            }
+        });
+    });
+
+    // Camera portal
+    connect(m_mainWindow->accessCameraButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::accessCamera(xdpParent, Xdp::CameraFlag::None);
+    });
+
+    // Email portal
+    connect(m_mainWindow->composeEmailButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        const QStringList addresses = {QStringLiteral("foo@bar.org"), QStringLiteral("bar@foo.org")};
+        const QStringList cc = {QStringLiteral("foo@bar.org"), QStringLiteral("bar@foo.org")};
+        const QStringList bcc = {QStringLiteral("foo@bar.org"), QStringLiteral("bar@foo.org")};
+        const QString subject = QStringLiteral("Hello");
+        const QString body = QStringLiteral("This is a portal test");
+
+        Xdp::composeEmail(xdpParent, addresses, cc, bcc, subject, body, QStringList(), Xdp::EmailFlag::None);
+    });
+
+    // FileChooser portal
+    connect(m_mainWindow->openFileButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::FileChooserFilterRule rule(Xdp::FileChooserFilterRule::Type::Mimetype, QStringLiteral("image/jpeg"));
+        Xdp::FileChooserFilterRule rule2;
+        rule2.setType(Xdp::FileChooserFilterRule::Type::Pattern);
+        rule2.setRule(QStringLiteral("*.png"));
+        Xdp::FileChooserFilter filter(QStringLiteral("Images"), {rule});
+        filter.addRule(rule2);
+        Xdp::FileChooserChoice choice(QStringLiteral("choice-id"), QStringLiteral("choice-label"),
+                                      QMap<QString, QString>{{QStringLiteral("option1-id"), QStringLiteral("option1-value")}}, QStringLiteral("option1-id"));
+        choice.addOption(QStringLiteral("option2-id"), QStringLiteral("option2-value"));
+
+        Xdp::openFile(xdpParent, QStringLiteral("Portal Test Qt"), {filter}, filter, {choice}, Xdp::OpenFileFlag::Multiple);
+        connect(Xdp::notifier(), &Xdp::Notifier::openFileResponse, this, &PortalTestQt::onFileOpened);
+    });
+    connect(m_mainWindow->saveFileButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::saveFile(xdpParent, QStringLiteral("Portal Test Qt "), QStringLiteral("name.txt"), QStringLiteral("/tmp"), QStringLiteral("name_old.txt"),
+                      {}, Xdp::FileChooserFilter(), {}, Xdp::SaveFileFlag::None);
+    });
+    connect(m_mainWindow->saveFilesButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::saveFiles(xdpParent, QStringLiteral("Portal Test Qt "), QStringLiteral("/tmp"), QStringList{QStringLiteral("foo.txt"), QStringLiteral("bar.txt")}, {}, Xdp::SaveFileFlag::None);
+    });
+
+    // Inhbit portal
+    connect(m_mainWindow->inhibitButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::sessionInhibit(xdpParent, QStringLiteral("Portal-test: testing inhibit portal"), Xdp::InhibitFlag::Suspend);
+        connect(Xdp::notifier(), &Xdp::Notifier::sessionInhibitResponse, this, &PortalTestQt::onSessionInhibited);
+    });
+    connect(m_mainWindow->uninhibitButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::sessionUninhibit(m_inhibitorId);
+    });
+
+    // Notification portal
+    connect(m_mainWindow->addNotificationButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Notification notification(QStringLiteral("Test notification"), QStringLiteral("Testing notification portal"));
+        // notification.setIcon(QStringLiteral("applications-development"));
+        QPixmap pixmap(QSize(64, 64));
+        pixmap.fill(Qt::red);
+        notification.setPixmap(pixmap);
+        Xdp::NotificationButton button(QStringLiteral("Some label"), QStringLiteral("Some action"));
+        notification.addButton(button);
+        Xdp::addNotification(QStringLiteral("id1"), notification, Xdp::NotificationFlag::None);
+    });
+
+    connect(Xdp::notifier(), &Xdp::Notifier::notificationActionInvoked, [=] (const QString &id, const QString &action, const QVariant &parameter) {
+        m_mainWindow->addNotificationButton->setText(QStringLiteral("Invoked action: ") + action);
+    });
+
+    connect(m_mainWindow->removeNotificationButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::removeNotification(QStringLiteral("id1"));
+    });
+
+    // Location portal
+    connect(m_mainWindow->startLocationMonitorButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::locationMonitorStart(xdpParent, 5, 5, Xdp::LocationAccuracy::Exact, Xdp::LocationMonitorFlag::None);
+        connect(Xdp::notifier(), &Xdp::Notifier::locationMonitorStartResponse, this, [=] (const Xdp::Response &response) {
+            if (response.isSuccess()) {
+                QMessageBox::information(this, QStringLiteral("Location monitor"), QStringLiteral("Location monitor successfully started"));
+                connect(Xdp::notifier(), &Xdp::Notifier::locationUpdated, this, [=] (double latitude, double longitude, double altitude, double accuracy, double speed,
+                                                                                     double heading, QString description, qint64 timestamp_s, qint64 timestamp_ms) {
+                    QMessageBox::information(this, QStringLiteral("Location updated"),
+                                             QStringLiteral("Latitude: %1 | Longitude %2 | Altitude %3 | Accuracy %4 | Description %5 | Timestamp_s %6").arg(latitude).arg(longitude).arg(altitude).arg(accuracy).arg(description).arg(timestamp_s));
+                });
+            }
+        });
+    });
+    connect(m_mainWindow->stopLocationMonitorButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::locationMonitorStop();
+    });
+
+    // OpenURI portal
+    connect(m_mainWindow->openLinkButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::openUri(xdpParent, QStringLiteral("https://github.com/flatpak/libportal"), Xdp::OpenUriFlag::None);
+    });
+    connect(m_mainWindow->openDirectoryButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::openDirectory(xdpParent, QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first()).toDisplayString(), Xdp::OpenUriFlag::None);
+    });
+
+    // Print portal
+    connect(m_mainWindow->preparePrintButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        QPrinter printer;
+        Xdp::preparePrint(xdpParent, QStringLiteral("Print file"), printer, Xdp::PrintFlag::None);
+        connect(Xdp::notifier(), &Xdp::Notifier::preparePrintResponse, this, [=] (const Xdp::Response &response) {
+            if (response.isSuccess()) {
+                QMessageBox::information(this, QStringLiteral("Prepare print token"), QStringLiteral("Token: %1").arg(response.result().value(QStringLiteral("token")).toUInt()));
+
+                QPrinter printer(QPrinter::PrinterResolution);
+                // Here we should set everything we got back from the result
+                // For simplicity just set output filename
+                printer.setOutputFormat(QPrinter::PdfFormat);
+                printer.setOutputFileName(QUrl(response.result().value(QStringLiteral("settings")).toMap().value(QStringLiteral("output-uri")).toString()).toDisplayString(QUrl::RemoveScheme));
+                printer.setPageSize(QPageSize(QPageSize::A4));
+
+                QTextDocument doc;
+                doc.setPlainText(QStringLiteral("Hello world"));
+                doc.print(&printer);
+
+                m_fileToPrint = printer.outputFileName();
+                m_printToken = response.result().value(QStringLiteral("token")).toUInt();
+            }
+        });
+    });
+
+    connect(m_mainWindow->printFileButton, &QPushButton::clicked, [=] (bool clicked) {
+        Xdp::Parent xdpParent(windowHandle());
+        Xdp::printFile(xdpParent, QStringLiteral("Print file"), m_printToken, m_fileToPrint, Xdp::PrintFlag::None);
+    });
+
 }
 
 PortalTestQt::~PortalTestQt()
 {
     delete m_mainWindow;
-    g_object_unref( m_portal);
 }
 
-void PortalTestQt::updateLastOpenedFile(const QString &file)
+void PortalTestQt::onUserInformationReceived(const Xdp::Response &response)
 {
-    if (!file.isEmpty()) {
-        m_mainWindow->openedFileLabel->setText(QStringLiteral("Opened file: %1").arg(file));
-    } else {
-        m_mainWindow->openedFileLabel->setText(QStringLiteral("Failed to open a file!!!"));
+    if (response.isSuccess()) {
+        QString id = response.result().contains(QStringLiteral("id")) ? response.result().value(QStringLiteral("id")).toString() : QString();
+        QString name = response.result().contains(QStringLiteral("name")) ? response.result().value(QStringLiteral("name")).toString() : QString();
+        QString image = response.result().contains(QStringLiteral("image")) ? response.result().value(QStringLiteral("image")).toString() : QString();
+
+        QMessageBox::information(this, QStringLiteral("User Information"), QStringLiteral("User ID: %1 | User Name: %2 | User Picture: %3").arg(id).arg(name).arg(image));
     }
 }
 
-void PortalTestQt::openedFile(GObject *object, GAsyncResult *result, gpointer data)
+void PortalTestQt::onFileOpened(const Xdp::Response &response)
 {
-    Q_UNUSED(data);
-    XdpPortal *portal = XDP_PORTAL (object);
-    PortalTestQt *win = static_cast<PortalTestQt*>(data);
-    g_autoptr(GError) error = nullptr;
-    g_autoptr(GVariant) ret = nullptr;
-
-    ret = xdp_portal_open_file_finish(portal, result, &error);
-
-    if (ret) {
-        const char **uris;
-        if (g_variant_lookup(ret, "uris", "^a&s", &uris)) {
-            win->updateLastOpenedFile(uris[0]);
+    if (response.isSuccess()) {
+        QStringList uris = response.result().value(QStringLiteral("uris")).toStringList();
+        if (!uris.isEmpty()) {
+            Xdp::Parent xdpParent(windowHandle());
+            Xdp::openUri(xdpParent, uris.at(0), Xdp::OpenUriFlag::Ask);
         }
-    } else {
-            win->updateLastOpenedFile(QString());
+    }
+}
+
+void PortalTestQt::onSessionInhibited(const Xdp::Response &response)
+{
+    if (response.isSuccess()) {
+        m_inhibitorId = response.result().value(QStringLiteral("id")).toInt();
     }
 }

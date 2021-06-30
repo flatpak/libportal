@@ -19,10 +19,13 @@ jobs:
         sudo add-apt-repository ppa:alexlarsson/glib260
         sudo add-apt-repository 'deb https://download.mono-project.com/repo/ubuntu stable-bionic main' # Needed for updates to work
         sudo apt-get update
-        sudo apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson
+        sudo apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson qt5-default libqt5gui5 cmake qtbase5-dev qtbase5-private-dev
     - name: Check out libportal
       uses: actions/checkout@v1
     - name: Configure libportal
-      run: meson setup --prefix=/usr _build -Dbackends=
+      run: meson setup --prefix=/usr _build -Dbackends=qt5 -Dtests=true
     - name: Build libportal
       run: ninja -C_build
+    - name: Run tests
+      run: meson test -C_build
+
