@@ -17,30 +17,37 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#ifndef PORTAL_TEST_QT_H
-#define PORTAL_TEST_QT_H
+#ifndef LIBPORTALQT_RESPONSE_H
+#define LIBPORTALQT_RESPONSE_H
 
-#include <QMainWindow>
-#include "portal.h"
+#include <QVariantMap>
 
-class Ui_PortalTestQt;
+#include "libportalqt_export.h"
 
-class PortalTestQt : public QMainWindow
+namespace Xdp {
+
+class ResponsePrivate;
+
+class LIBPORTALQT_EXPORT Response
 {
-    Q_OBJECT
 public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~PortalTestQt();
+    explicit Response(bool success, const QString &errorMessage, const QVariantMap &result = QVariantMap());
+    ~Response();
 
-    void updateLastOpenedFile(const QString &file);
-private Q_SLOTS:
-    void onUserInformationReceived(const Xdp::Response &response);
-    void onFileOpened(const Xdp::Response &response);
-    void onSessionInhibited(const Xdp::Response &response);
+    bool isError() const;
+
+    bool isSuccess() const;
+
+    QString errorMessage() const;
+
+    QVariantMap result() const;
 
 private:
-    Ui_PortalTestQt *m_mainWindow;
-    int m_inhibitorId = -1;
-};
+    Q_DECLARE_PRIVATE(Response)
 
-#endif // PORTAL_TEST_QT_H
+    const QScopedPointer<ResponsePrivate> d_ptr;
+};
+} // namespace Xdp
+
+#endif // LIBPORTALQT_RESPONSE_H
+

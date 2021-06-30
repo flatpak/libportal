@@ -118,18 +118,27 @@ location_updated (GDBusConnection *bus,
                   gpointer data)
 {
   XdpPortal *portal = data;
-  int latitude, longitude, altitude;
-  int accuracy, speed, heading;
+  g_autoptr(GVariant) variant = NULL;
+  const char *handle = NULL;
+  double latitude, longitude, altitude;
+  double accuracy, speed, heading;
+  const char *description = NULL;
   gint64 timestamp_s, timestamp_ms;
 
-  g_variant_get (parameters, "(ddddddtt)",
-                 &latitude, &longitude, &altitude,
-                 &accuracy, &speed, &heading,
-                 &timestamp_s, &timestamp_ms);
+  g_variant_get (parameters, "(o@a{sv})", &handle, &variant);
+  g_variant_lookup (variant, "Latitude", "d", &latitude);
+  g_variant_lookup (variant, "Longitude", "d", &longitude);
+  g_variant_lookup (variant, "Accuracy", "d", &accuracy);
+  g_variant_lookup (variant, "Altitude", "d", &altitude);
+  g_variant_lookup (variant, "Speed", "d", &speed);
+  g_variant_lookup (variant, "Heading", "d", &heading);
+  g_variant_lookup (variant, "Description", "&s", &description);
+  g_variant_lookup (variant, "Timestamp", "(tt)", &timestamp_s, &timestamp_ms);
+
   g_signal_emit_by_name (portal, "location-updated",
                          latitude, longitude, altitude,
                          accuracy, speed, heading,
-                         timestamp_s, timestamp_ms);
+                         description, timestamp_s, timestamp_ms);
 }
 
 static void
@@ -141,7 +150,7 @@ ensure_location_updated_connected (XdpPortal *portal)
                                             PORTAL_BUS_NAME,
                                             "org.freedesktop.portal.Location",
                                             "LocationUpdated",
-                                            portal->location_monitor_handle,
+                                            PORTAL_OBJECT_PATH,
                                             NULL,
                                             G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
                                             location_updated,

@@ -21,14 +21,14 @@
 
 #include <libportal/portal.h>
 
-#include <QX11Info>
+#include <QGuiApplication>
 #include <QWindow>
 
 static inline gboolean _xdp_parent_export_qt (XdpParent *parent,
                                               XdpParentExported callback,
                                               gpointer data)
 {
-  if (QX11Info::isPlatformX11 ())
+  if (QGuiApplication::platformName() == QStringLiteral("xcb"))
     {
       QWindow *w = (QWindow *) parent->data;
       if (w) {

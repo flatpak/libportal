@@ -30,6 +30,12 @@ subdir('libportal')
 if get_option('gtk_doc')
   subdir('doc')
 endif
+
+if get_option('build-libportal-qt')
+  libportalqt_inc = include_directories('libportal-qt')
+  subdir('libportal-qt')
+endif
+
 if get_option('build-portal-test')
   subdir('portal-test')
 endif
