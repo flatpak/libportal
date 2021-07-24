@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkDialog" id="update_dialog">
+    <property name="transient-for">PortalTestWin</property>
+    <property name="modal">1</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">false</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">This application has been updated!</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="ok">
+        <property name="label">Restart Now</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="close">
+        <property name="label">Close</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">close</action-widget>
+      <action-widget response="ok">ok</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="update_dialog2">
+    <property name="transient-for">PortalTestWin</property>
+    <property name="modal">1</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">false</property>
+        <child>
+          <object class="GtkLabel" id="update_label">
+            <property name="label">Update available!</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="update_progressbar"/>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="ok2">
+        <property name="label">Install now</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="close2">
+        <property name="label">Close</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">close2</action-widget>
+      <action-widget response="ok">ok2</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileChooserDialog" id="filechooser">
+    <property name="modal">1</property>
+    <child type="action">
+      <object class="GtkButton" id="button_cancel">
+        <property name="label">_Cancel</property>
+        <property name="use-underline">1</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="button_ok">
+        <property name="label">_Open</property>
+        <property name="use-underline">1</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">button_cancel</action-widget>
+      <action-widget response="ok" default="true">button_ok</action-widget>
+    </action-widgets>
+  </object>
+  <template class="PortalTestWin" parent="GtkApplicationWindow">
+    <property name="default-width">600</property>
+    <property name="default-height">400</property>
+    <property name="title">Portal Test (GTK4)</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" />
+    </child>
+    <child>
+      <object class="GtkGrid">
+        <property name="margin-start">20</property>
+        <property name="margin-end">20</property>
+        <property name="margin-top">20</property>
+        <property name="margin-bottom">20</property>
+        <property name="row-spacing">10</property>
+        <property name="column-spacing">10</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Sandbox</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="sandbox_status">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkComboBoxText" id="save_how">
+            <items>
+              <item id="atomically">Atomic</item>
+              <item id="posix">POSIX</item>
+              <item id="gio">GIO</item>
+            </items>
+            <property name="active-id">atomically</property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">File Chooser</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Save as…</property>
+            <signal name="clicked" handler="save_dialog"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="encoding">
+            <layout>
+              <property name="column">2</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Open Local</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">4</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">test.txt</property>
+            <signal name="clicked" handler="open_local"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">4</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkCheckButton" id="open_local_ask">
+                <property name="label">Ask</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="open_local_dir">
+                <property name="label">Open Folder</property>
+              </object>
+            </child>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">4</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Links</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">5</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLinkButton">
+            <property name="uri">http://www.gnome.org</property>
+            <property name="label">GNOME</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">5</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Screenshot</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">6</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">0</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkButton">
+                <property name="hexpand">1</property>
+                <property name="label">Screenshot</property>
+                <signal name="clicked" handler="take_screenshot"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="interactive">
+                <property name="tooltip-text">Show options</property>
+              </object>
+            </child>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">6</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkImage" id="image">
+            <property name="icon-name">image-missing</property>
+            <property name="icon-size">1</property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">6</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Screencast</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">7</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkToggleButton" id="screencast_toggle">
+            <property name="label">Screencast</property>
+            <signal name="toggled" handler="screencast_toggled"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">7</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="screencast_label">
+            <property name="halign">end</property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">7</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Network</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">8</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="monitor_name">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">8</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="network_status">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">8</property>
+              <property name="column-span">2</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Proxy</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">9</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="resolver_name">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">9</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="proxies">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">9</property>
+              <property name="column-span">2</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Notification</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">10</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Notify me!</property>
+            <signal name="clicked" handler="notify_me" swapped="yes"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">10</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkImage" id="ack_image">
+            <property name="visible">false</property>
+            <property name="icon-name">object-select-symbolic</property>
+            <property name="icon-size">2</property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">10</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Printing</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">11</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Print</property>
+            <signal name="clicked" handler="print_cb"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">11</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Inhibit</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">12</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <child>
+              <object class="GtkCheckButton" id="inhibit_idle">
+                <property name="label">Idle</property>
+                <signal name="toggled" handler="inhibit_changed"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="inhibit_logout">
+                <property name="label">Logout</property>
+                <signal name="toggled" handler="inhibit_changed"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="inhibit_suspend">
+                <property name="label">Suspend</property>
+                <signal name="toggled" handler="inhibit_changed"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="inhibit_switch">
+                <property name="label">Switch</property>
+                <signal name="toggled" handler="inhibit_changed"/>
+              </object>
+            </child>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">12</property>
+              <property name="column-span">2</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Sound</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">13</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Play</property>
+            <signal name="clicked" handler="play_clicked"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">13</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Account</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">14</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Update</property>
+            <signal name="clicked" handler="get_user_information" swapped="yes"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">14</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="username">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">15</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkImage" id="avatar">
+            <layout>
+              <property name="column">2</property>
+              <property name="row">14</property>
+              <property name="row-span">2</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="realname">
+            <property name="xalign">0</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">16</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Email</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">17</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Compose</property>
+            <signal name="clicked" handler="compose_email" swapped="yes"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">17</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Background</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">18</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Request</property>
+            <signal name="clicked" handler="request_background" swapped="yes"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">18</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">end</property>
+            <property name="label">Wallpaper</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">19</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">Set</property>
+            <signal name="clicked" handler="set_wallpaper" swapped="yes"/>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">19</property>
+            </layout>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

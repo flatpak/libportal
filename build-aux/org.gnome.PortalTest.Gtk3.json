@@ -1,9 +1,9 @@
 {
-    "app-id": "org.gnome.PortalTest",
+    "app-id": "org.gnome.PortalTest.Gtk3",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "3.34",
+    "runtime-version": "40",
     "sdk": "org.gnome.Sdk",
-    "command": "portal-test",
+    "command": "portal-test-gtk3",
     "finish-args": [
         "--socket=wayland",
         "--socket=x11",
@@ -15,11 +15,9 @@
             "disabled": true,
             "buildsystem": "meson",
             "builddir": true,
-            "build-options": {
-                "config-opts": [
-                    "-Dgtk_doc=false"
-                ]
-            },
+            "config-opts": [
+                "-Dgtk_doc=false"
+            ],
             "sources": [
                 {
                     "type": "git",
@@ -29,15 +27,13 @@
             ]
         },
         {
-            "name": "portal-test",
+            "name": "portal-test-gtk3",
             "buildsystem": "meson",
             "builddir": true,
-            "build-options": {
-                "config-opts": [
-                  "-Dbuild-portal-test=true",
-                  "-Dgtk_doc=false"
-                ]
-            },
+            "config-opts": [
+              "-Dportal-tests=gtk3",
+              "-Dgtk_doc=false"
+            ],
             "sources": [
                 {
                     "type": "git",

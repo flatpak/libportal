@@ -8,7 +8,7 @@ main (int argc, char *argv[])
 {
   gst_init (&argc, &argv);
 
-  g_message ("Starting org.gnome.PortalTest");
+  g_message ("Starting org.gnome.PortalTest.Gtk4");
 
   if (g_strv_contains ((const char * const *)argv, "--replace"))
     portal_test_app_stop_running_instance ();
