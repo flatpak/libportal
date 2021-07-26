@@ -141,7 +141,7 @@ ensure_location_updated_connected (XdpPortal *portal)
                                             PORTAL_BUS_NAME,
                                             "org.freedesktop.portal.Location",
                                             "LocationUpdated",
-                                            portal->location_monitor_handle,
+                                            PORTAL_OBJECT_PATH,
                                             NULL,
                                             G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
                                             location_updated,
