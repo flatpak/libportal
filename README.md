@@ -40,13 +40,13 @@ meson configure _build
 To change an option, re-configure the project:
 
 ```
-meson configure _build -Dbuild-portal-test=true
+meson configure _build -Dportal-tests=gtk3
 ```
 
 You can also pass in options right from the start, e.g. with:
 
 ```
-meson _build -Dbuild-portal-test=true
+meson _build -Dportal-tests=gtk3
 ```
 
 Then build:
