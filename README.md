@@ -57,19 +57,20 @@ ninja -C _build
 
 ## Optional components
 
-### `portal-test` and `portal-test-qt`
+### `portal-tests`
 
-Set the `build-portal-test` or `build-portal-test-qt` option to `true` and build
-the project to compile the corresponding binary. Then run the binary, e.g.:
+To generate test binaries, set the `portal-tests` option to any combination of
+`gtk3`, `gtk4`, or `qt` e.g. `-Dportal-tests=gtk3,gtk4,qt`. Then run the desired 
+test binary, e.g.:
 
 ```
-./_build/portal-test/portal-test
+./_build/portal-test/portal-test/gtk3/portal-test-gtk3
 ```
 
 or
 
 ```
-./_build/portal-test/portal-test-qt
+./_build/portal-test/portal-test/qt/portal-test-qt
 ```
 
 [1]: https://mesonbuild.com/Getting-meson.html
