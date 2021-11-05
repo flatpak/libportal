@@ -28,25 +28,25 @@ portal_enums = gnome.mkenums('portal-enums',
                              install_header: true)
 
 src = [
-	'account.c',
+        'account.c',
         'background.c',
         'camera.c',
-	'email.c',
+        'email.c',
         'filechooser.c',
-	'inhibit.c',
+        'inhibit.c',
         'location.c',
-	'notification.c',
-	'openuri.c',
-	'portal.c',
+        'notification.c',
+        'openuri.c',
+        'portal.c',
         'print.c',
         'remote.c',
-	'screenshot.c',
+        'screenshot.c',
         'session.c',
         'spawn.c',
         'trash.c',
         'updates.c',
         'wallpaper.c',
-	'utils.c',
+        'utils.c',
         portal_enums
 ]
 
