@@ -2,7 +2,6 @@ generated_files = []
 
 headers = files(
   'portal.h',
-  'portal-qt5.h',
   'portal-helpers.h',
   'account.h',
   'background.h',
@@ -142,5 +141,40 @@ if 'gtk4' in backends
   libportal_gtk4_dep = declare_dependency(
     dependencies: [libportal_dep, gtk4_dep],
     link_with: libportal_gtk4,
+  )
+endif
+
+########
+# Qt 5 #
+########
+
+if 'qt5' in backends
+  add_languages('cpp', required : true)
+
+  qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'X11Extras', 'Widgets'])
+  qt5_headers = ['portal-qt5.h']
+  qt5_sources = files('portal-qt5.cpp')
+
+  install_headers(qt5_headers, subdir: 'libportal-qt5')
+
+  libportal_qt5 = library('portal-qt5',
+    qt5_sources,
+    version: '1.0.0',
+    include_directories: [top_inc, libportal_inc],
+    c_args: visibility_args,
+    cpp_args : '-std=c++11',
+    install: true,
+    dependencies: [libportal_dep, qt5_dep],
+  )
+
+  pkgconfig.generate(libportal_qt5,
+    description: 'Portal API wrappers (Qt 5)',
+    name: 'libportal-qt5',
+    requires: [qt5_dep, libportal],
+  )
+
+  libportal_qt5_dep = declare_dependency(
+    dependencies: [libportal_dep, qt5_dep],
+    link_with: libportal_qt5,
   )
 endif
