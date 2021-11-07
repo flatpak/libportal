@@ -1,5 +1,4 @@
 
-gtk4_dep = dependency('gtk4')
 gst_dep = dependency('gstreamer-audio-1.0')
 
 resources = gnome.compile_resources(
@@ -20,7 +19,7 @@ executable(
   'portal-test-gtk4',
   src,
   include_directories: [top_inc, libportal_inc],
-  dependencies: [gtk4_dep, gst_dep, libportal_dep],
+  dependencies: [gst_dep, libportal_gtk4_dep],
   install : true,
 )
 
@@ -31,5 +30,5 @@ install_data('org.gnome.PortalTest.Gtk4.service', install_dir: 'share/dbus-1/ser
 executable('portal-linking-test-gtk4',
   [ 'portal-linking-test.c' ],
   include_directories: [libportal_inc],
-  dependencies: [gtk4_dep, libportal_dep],
+  dependencies: [libportal_gtk4_dep],
 )

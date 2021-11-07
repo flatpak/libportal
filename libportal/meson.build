@@ -2,7 +2,6 @@ generated_files = []
 
 headers = files(
   'portal.h',
-  'portal-gtk4.h',
   'portal-qt5.h',
   'portal-helpers.h',
   'account.h',
@@ -111,5 +110,37 @@ if 'gtk3' in backends
   libportal_gtk3_dep = declare_dependency(
     dependencies: [libportal_dep, gtk3_dep],
     link_with: libportal_gtk3,
+  )
+endif
+
+########
+# GTK4 #
+########
+
+if 'gtk4' in backends
+  gtk4_dep = dependency('gtk4')
+  gtk4_headers = ['portal-gtk4.h']
+  gtk4_sources = files('portal-gtk4.c')
+
+  install_headers(gtk4_headers, subdir: 'libportal-gtk4')
+
+  libportal_gtk4 = library('portal-gtk4',
+    gtk4_sources,
+    version: '1.0.0',
+    include_directories: [top_inc, libportal_inc],
+    c_args: visibility_args,
+    install: true,
+    dependencies: [libportal_dep, gtk4_dep],
+  )
+
+  pkgconfig.generate(libportal_gtk4,
+    description: 'Portal API wrappers (GTK4)',
+    name: 'libportal-gtk4',
+    requires: [gtk4_dep, libportal],
+  )
+
+  libportal_gtk4_dep = declare_dependency(
+    dependencies: [libportal_dep, gtk4_dep],
+    link_with: libportal_gtk4,
   )
 endif
