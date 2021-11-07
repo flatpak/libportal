@@ -1,4 +1,4 @@
-option('portal-tests', type: 'array', choices: ['gtk3', 'gtk4', 'qt'], value: [],
+option('portal-tests', type: 'array', choices: ['gtk3', 'gtk4', 'qt5'], value: [],
   description : 'A list of portal tests to build')
 option('gtk_doc', type: 'boolean', value: true,
   description : 'Build API reference with gtk-doc')
