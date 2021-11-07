@@ -23,10 +23,17 @@
 
 G_BEGIN_DECLS
 
+#define XDP_TYPE_PARENT (xdp_parent_get_type ())
+
+XDP_PUBLIC
+GType xdp_parent_get_type (void) G_GNUC_CONST;
+
 XDP_PUBLIC
 XdpParent *xdp_parent_copy (XdpParent *source);
 
 XDP_PUBLIC
 void xdp_parent_free (XdpParent *parent);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (XdpParent, xdp_parent_free)
 
 G_END_DECLS

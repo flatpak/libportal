@@ -20,6 +20,8 @@
 #include "config.h"
 #include "parent-private.h"
 
+G_DEFINE_BOXED_TYPE (XdpParent, xdp_parent, xdp_parent_copy, xdp_parent_free)
+
 /**
  * xdp_parent_copy:
  * @source: a #XdpParent
