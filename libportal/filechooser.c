@@ -300,7 +300,7 @@ xdp_portal_open_file (XdpPortal *portal,
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->method = "OpenFile";
@@ -394,7 +394,7 @@ xdp_portal_save_file (XdpPortal *portal,
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->method = "SaveFile";
@@ -490,7 +490,7 @@ xdp_portal_save_files (XdpPortal *portal,
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->method = "SaveFiles";

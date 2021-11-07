@@ -255,7 +255,7 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
   call = g_new0 (InhibitCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->inhibit = flags;
@@ -588,7 +588,7 @@ xdp_portal_session_monitor_start (XdpPortal *portal,
   call = g_new0 (CreateMonitorCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->task = g_task_new (portal, cancellable, callback, data);

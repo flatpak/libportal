@@ -24,6 +24,9 @@
 G_BEGIN_DECLS
 
 XDP_PUBLIC
+XdpParent *xdp_parent_copy (XdpParent *source);
+
+XDP_PUBLIC
 void xdp_parent_free (XdpParent *parent);
 
 G_END_DECLS

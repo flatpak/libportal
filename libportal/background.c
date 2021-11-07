@@ -250,7 +250,7 @@ xdp_portal_request_background (XdpPortal *portal,
   call = g_new0 (BackgroundCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
 

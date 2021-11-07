@@ -304,7 +304,7 @@ xdp_portal_set_wallpaper (XdpPortal           *portal,
   call = g_new0 (WallpaperCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->uri = g_strdup (uri);

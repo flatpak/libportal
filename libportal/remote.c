@@ -661,7 +661,7 @@ xdp_session_start (XdpSession *session,
   call->portal = g_object_ref (session->portal);
   call->session = g_object_ref (session);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->task = g_task_new (session, cancellable, callback, data);

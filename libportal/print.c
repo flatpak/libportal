@@ -307,7 +307,7 @@ xdp_portal_prepare_print (XdpPortal *portal,
   call = g_new0 (PrintCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->title = g_strdup (title);
@@ -387,7 +387,7 @@ xdp_portal_print_file (XdpPortal *portal,
   call = g_new0 (PrintCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->title = g_strdup (title);
