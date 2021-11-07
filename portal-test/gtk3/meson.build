@@ -1,5 +1,4 @@
 
-gtk_dep = dependency('gtk+-3.0')
 gst_dep = dependency('gstreamer-audio-1.0')
 
 resources = gnome.compile_resources('resources',
@@ -19,7 +18,7 @@ src = [
 executable('portal-test-gtk3',
   src,
   include_directories: [top_inc, libportal_inc],
-  dependencies: [gtk_dep, gst_dep, libportal_dep],
+  dependencies: [gst_dep, libportal_gtk3_dep],
   install : true,
 )
 
@@ -30,5 +29,5 @@ install_data('org.gnome.PortalTest.Gtk3.service', install_dir: 'share/dbus-1/ser
 executable('portal-linking-test-gtk3',
   [ 'portal-linking-test.c' ],
   include_directories: [libportal_inc],
-  dependencies: [gtk_dep, libportal_dep],
+  dependencies: [libportal_gtk3_dep],
 )
