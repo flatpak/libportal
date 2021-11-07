@@ -36,10 +36,3 @@ _xdp_parent_copy (XdpParent *source)
 
   return parent;
 }
-
-void
-_xdp_parent_free (XdpParent *parent)
-{
-  g_clear_object (&parent->object);
-  g_free (parent);
-}
