@@ -1,3 +1,5 @@
+generated_files = []
+
 headers = files(
   'portal.h',
   'portal-gtk3.h',
@@ -29,6 +31,7 @@ portal_enums = gnome.mkenums('portal-enums',
   install_dir: join_paths (get_option('includedir'), 'libportal'),
   install_header: true,
 )
+generated_files += portal_enums
 
 src = [
   'account.c',
@@ -50,7 +53,7 @@ src = [
   'updates.c',
   'wallpaper.c',
   'utils.c',
-  portal_enums,
+  generated_files,
 ]
 
 gio_dep = dependency('gio-2.0', version: '>= 2.58')
@@ -74,7 +77,7 @@ pkgconfig.generate(libportal,
 )
 
 libportal_dep = declare_dependency(
-  sources: src,
+  sources: generated_files,
   include_directories: top_inc,
   dependencies: [gio_dep, gio_unix_dep],
   link_with: libportal,
