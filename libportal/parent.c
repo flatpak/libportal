@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018, Matthias Clasen
+ * Copyright (C) 2021, Georges Basile Stavracas Neto
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -17,26 +17,18 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#pragma once
+#include "config.h"
+#include "parent-private.h"
 
-#include <gio/gio.h>
-
-G_BEGIN_DECLS
-
-#define XDP_TYPE_PORTAL (xdp_portal_get_type ())
-
-G_DECLARE_FINAL_TYPE (XdpPortal, xdp_portal, XDP, PORTAL, GObject)
-
-#ifndef __GTK_DOC_IGNORE__
-#ifndef XDP_PUBLIC
-#define XDP_PUBLIC extern
-#endif
-#endif /* __GTK_DOC_IGNORE__ */
-
-XDP_PUBLIC
-GType      xdp_portal_get_type               (void) G_GNUC_CONST;
-
-XDP_PUBLIC
-XdpPortal *xdp_portal_new                    (void);
-
-G_END_DECLS
+/**
+ * xdp_parent_free:
+ * @parent: an #XdpParent
+ *
+ * Frees @parent.
+ */
+void
+xdp_parent_free (XdpParent *parent)
+{
+  g_clear_object (&parent->object);
+  g_free (parent);
+}

@@ -20,6 +20,8 @@
 #include "config.h"
 #include "portal-gtk3.h"
 
+#include "parent-private.h"
+
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif

@@ -29,10 +29,12 @@
 #include <libportal/location.h>
 #include <libportal/notification.h>
 #include <libportal/openuri.h>
+#include <libportal/parent.h>
 #include <libportal/print.h>
 #include <libportal/remote.h>
 #include <libportal/screenshot.h>
 #include <libportal/spawn.h>
 #include <libportal/trash.h>
+#include <libportal/types.h>
 #include <libportal/updates.h>
 #include <libportal/wallpaper.h>
