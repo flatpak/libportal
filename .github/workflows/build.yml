@@ -23,6 +23,6 @@ jobs:
     - name: Check out libportal
       uses: actions/checkout@v1
     - name: Configure libportal
-      run: meson setup --prefix=/usr _build
+      run: meson setup --prefix=/usr _build -Dbackends=
     - name: Build libportal
       run: ninja -C_build
