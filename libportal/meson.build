@@ -90,7 +90,7 @@ libportal_dep = declare_dependency(
 if 'gtk3' in backends
   gtk3_dep = dependency('gtk+-3.0')
   gtk3_headers = ['portal-gtk3.h']
-  gtk3_sources = files('portal-gtk3.c')
+  gtk3_sources = ['portal-gtk3.c']
 
   install_headers(gtk3_headers, subdir: 'libportal-gtk3')
 
@@ -122,7 +122,7 @@ endif
 if 'gtk4' in backends
   gtk4_dep = dependency('gtk4')
   gtk4_headers = ['portal-gtk4.h']
-  gtk4_sources = files('portal-gtk4.c')
+  gtk4_sources = ['portal-gtk4.c']
 
   install_headers(gtk4_headers, subdir: 'libportal-gtk4')
 
@@ -156,7 +156,7 @@ if 'qt5' in backends
 
   qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'X11Extras', 'Widgets'])
   qt5_headers = ['portal-qt5.h']
-  qt5_sources = files('portal-qt5.cpp')
+  qt5_sources = ['portal-qt5.cpp']
 
   install_headers(qt5_headers, subdir: 'libportal-qt5')
 
