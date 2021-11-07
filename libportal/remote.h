@@ -25,10 +25,8 @@ G_BEGIN_DECLS
 
 #define XDP_TYPE_SESSION (xdp_session_get_type ())
 
-G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
-
 XDP_PUBLIC
-GType xdp_session_get_type (void) G_GNUC_CONST;
+G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
 
 /**
  * XdpOutputType:
