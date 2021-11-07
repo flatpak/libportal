@@ -21,6 +21,8 @@
 #include "config.h"
 #include "portal-qt5.h"
 
+#include "parent-private.h"
+
 #include <QX11Info>
 
 static gboolean

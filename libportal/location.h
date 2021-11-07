@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <libportal/portal-helpers.h>
+#include <libportal/types.h>
 
 G_BEGIN_DECLS
 

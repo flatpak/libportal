@@ -19,6 +19,7 @@
 
 #include "config.h"
 
+#include "parent-private.h"
 #include "utils-private.h"
 
 XdpParent *
