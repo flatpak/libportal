@@ -21,7 +21,6 @@
 
 #include "updates.h"
 #include "portal-private.h"
-#include "utils-private.h"
 
 /**
  * SECTION:updates

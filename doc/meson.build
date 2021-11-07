@@ -2,7 +2,6 @@ private_headers = [
 	'parent-private.h',
 	'portal-private.h',
 	'session-private.h',
-	'utils-private.h',
 ]
 
 version_conf = configuration_data()

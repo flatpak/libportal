@@ -20,6 +20,21 @@
 #include "config.h"
 #include "parent-private.h"
 
+XdpParent *
+_xdp_parent_copy (XdpParent *source)
+{
+  XdpParent *parent;
+
+  parent = g_new0 (XdpParent, 1);
+
+  parent->parent_export = source->parent_export;
+  parent->parent_unexport = source->parent_unexport;
+  g_set_object (&parent->object, source->object);
+  parent->data = source->data;
+
+  return parent;
+}
+
 /**
  * xdp_parent_free:
  * @parent: an #XdpParent

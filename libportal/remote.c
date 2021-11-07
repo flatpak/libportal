@@ -24,7 +24,6 @@
 #include "remote.h"
 #include "portal-private.h"
 #include "session-private.h"
-#include "utils-private.h"
 
 /**
  * SECTION:screencast

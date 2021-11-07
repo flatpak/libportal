@@ -40,4 +40,6 @@ struct _XdpParent {
   gpointer data;
 };
 
+XdpParent *_xdp_parent_copy (XdpParent *source);
+
 G_END_DECLS
