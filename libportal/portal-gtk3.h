@@ -26,70 +26,9 @@
 #error "To use libportal with GTK4, include portal-gtk4.h"
 #endif
 
-#ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
-#endif
-#ifdef GDK_WINDOWING_WAYLAND
-#include <gdk/gdkwayland.h>
-#endif
-
 G_BEGIN_DECLS
 
-static inline void _xdp_parent_exported_wayland (GdkWindow *window,
-                                                 const char *handle,
-                                                 gpointer data)
-
-{
-  XdpParent *parent = data;
-  g_autofree char *handle_str = g_strdup_printf ("wayland:%s", handle);
-  parent->callback (parent, handle_str, parent->data);
-}
-
-static inline gboolean _xdp_parent_export_gtk (XdpParent *parent,
-                                               XdpParentExported callback,
-                                               gpointer data)
-{
-#ifdef GDK_WINDOWING_X11
-  if (GDK_IS_X11_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
-    {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
-      guint32 xid = (guint32) gdk_x11_window_get_xid (w);
-      g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
-      callback (parent, handle, data);
-      return TRUE;
-    }
-#endif
-#ifdef GDK_WINDOWING_WAYLAND
-  if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
-    {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
-      parent->callback = callback;
-      parent->data = data;
-      return gdk_wayland_window_export_handle (w, _xdp_parent_exported_wayland, parent, NULL);
-    }
-#endif
-  g_warning ("Couldn't export handle, unsupported windowing system");
-  return FALSE;
-}
-
-static inline void _xdp_parent_unexport_gtk (XdpParent *parent)
-{
-#ifdef GDK_WINDOWING_WAYLAND
-  if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
-    {
-      GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
-      gdk_wayland_window_unexport_handle (w);
-    }
-#endif
-}
-
-static inline XdpParent *xdp_parent_new_gtk (GtkWindow *window)
-{
-  XdpParent *parent = g_new0 (XdpParent, 1);
-  parent->parent_export = _xdp_parent_export_gtk;
-  parent->parent_unexport = _xdp_parent_unexport_gtk;
-  parent->object = (GObject *) g_object_ref (window);
-  return parent;
-}
+XDP_PUBLIC
+XdpParent *xdp_parent_new_gtk (GtkWindow *window);
 
 G_END_DECLS

@@ -2,7 +2,6 @@ generated_files = []
 
 headers = files(
   'portal.h',
-  'portal-gtk3.h',
   'portal-gtk4.h',
   'portal-qt5.h',
   'portal-helpers.h',
@@ -82,3 +81,35 @@ libportal_dep = declare_dependency(
   dependencies: [gio_dep, gio_unix_dep],
   link_with: libportal,
 )
+
+########
+# GTK3 #
+########
+
+if 'gtk3' in backends
+  gtk3_dep = dependency('gtk+-3.0')
+  gtk3_headers = ['portal-gtk3.h']
+  gtk3_sources = files('portal-gtk3.c')
+
+  install_headers(gtk3_headers, subdir: 'libportal-gtk3')
+
+  libportal_gtk3 = library('portal-gtk3',
+    gtk3_sources,
+    version: '1.0.0',
+    include_directories: [top_inc, libportal_inc],
+    c_args: visibility_args,
+    install: true,
+    dependencies: [libportal_dep, gtk3_dep],
+  )
+
+  pkgconfig.generate(libportal_gtk3,
+    description: 'Portal API wrappers (GTK3)',
+    name: 'libportal-gtk3',
+    requires: [gtk3_dep, libportal],
+  )
+
+  libportal_gtk3_dep = declare_dependency(
+    dependencies: [libportal_dep, gtk3_dep],
+    link_with: libportal_gtk3,
+  )
+endif
