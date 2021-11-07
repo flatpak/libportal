@@ -1,4 +1,5 @@
 generated_files = []
+version = '1.0.0'
 
 headers = files(
   'portal.h',
@@ -62,7 +63,7 @@ install_headers(headers, subdir: 'libportal')
 
 libportal = library('portal',
   src,
-  version: '1.0.0',
+  version: version,
   include_directories: [top_inc, libportal_inc],
   c_args: visibility_args,
   install: true,
@@ -95,7 +96,7 @@ if 'gtk3' in backends
 
   libportal_gtk3 = library('portal-gtk3',
     gtk3_sources,
-    version: '1.0.0',
+    version: version,
     include_directories: [top_inc, libportal_inc],
     c_args: visibility_args,
     install: true,
@@ -127,7 +128,7 @@ if 'gtk4' in backends
 
   libportal_gtk4 = library('portal-gtk4',
     gtk4_sources,
-    version: '1.0.0',
+    version: version,
     include_directories: [top_inc, libportal_inc],
     c_args: visibility_args,
     install: true,
@@ -161,7 +162,7 @@ if 'qt5' in backends
 
   libportal_qt5 = library('portal-qt5',
     qt5_sources,
-    version: '1.0.0',
+    version: version,
     include_directories: [top_inc, libportal_inc],
     c_args: visibility_args,
     cpp_args : '-std=c++11',
