@@ -1,7 +1,7 @@
 generated_files = []
 version = '1.0.0'
 
-headers = files(
+headers = [
   'portal.h',
   'portal-helpers.h',
   'account.h',
@@ -22,7 +22,7 @@ headers = files(
   'types.h',
   'updates.h',
   'wallpaper.h',
-)
+]
 
 portal_enums = gnome.mkenums('portal-enums',
   sources: headers,
