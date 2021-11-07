@@ -52,7 +52,6 @@ src = [
   'trash.c',
   'updates.c',
   'wallpaper.c',
-  'utils.c',
   generated_files,
 ]
 

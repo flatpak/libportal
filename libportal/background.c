@@ -22,7 +22,6 @@
 
 #include "background.h"
 #include "portal-private.h"
-#include "utils-private.h"
 
 /**
  * SECTION:background

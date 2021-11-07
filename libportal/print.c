@@ -21,7 +21,6 @@
 
 #include "print.h"
 #include "portal-private.h"
-#include "utils-private.h"
 
 /**
  * SECTION:print
