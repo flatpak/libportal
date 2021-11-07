@@ -65,9 +65,9 @@ libportal = library('portal',
   src,
   version: version,
   include_directories: [top_inc, libportal_inc],
-  c_args: visibility_args,
   install: true,
   dependencies: [gio_dep, gio_unix_dep],
+  gnu_symbol_visibility: 'hidden',
 )
 
 pkgconfig.generate(libportal,
@@ -98,9 +98,9 @@ if 'gtk3' in backends
     gtk3_sources,
     version: version,
     include_directories: [top_inc, libportal_inc],
-    c_args: visibility_args,
     install: true,
     dependencies: [libportal_dep, gtk3_dep],
+    gnu_symbol_visibility: 'hidden',
   )
 
   pkgconfig.generate(libportal_gtk3,
@@ -130,9 +130,9 @@ if 'gtk4' in backends
     gtk4_sources,
     version: version,
     include_directories: [top_inc, libportal_inc],
-    c_args: visibility_args,
     install: true,
     dependencies: [libportal_dep, gtk4_dep],
+    gnu_symbol_visibility: 'hidden',
   )
 
   pkgconfig.generate(libportal_gtk4,
@@ -164,10 +164,10 @@ if 'qt5' in backends
     qt5_sources,
     version: version,
     include_directories: [top_inc, libportal_inc],
-    c_args: visibility_args,
     cpp_args : '-std=c++11',
     install: true,
     dependencies: [libportal_dep, qt5_dep],
+    gnu_symbol_visibility: 'hidden',
   )
 
   pkgconfig.generate(libportal_qt5,
