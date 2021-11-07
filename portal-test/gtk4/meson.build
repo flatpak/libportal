@@ -29,6 +29,7 @@ install_data('org.gnome.PortalTest.Gtk4.desktop', install_dir: 'share/applicatio
 install_data('org.gnome.PortalTest.Gtk4.service', install_dir: 'share/dbus-1/services')
 
 executable('portal-linking-test-gtk4',
-           [ 'portal-linking-test.c' ],
-           include_directories: [libportal_inc],
-           dependencies: [gtk4_dep, libportal_dep])
+  [ 'portal-linking-test.c' ],
+  include_directories: [libportal_inc],
+  dependencies: [gtk4_dep, libportal_dep],
+)
