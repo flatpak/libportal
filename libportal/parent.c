@@ -20,8 +20,16 @@
 #include "config.h"
 #include "parent-private.h"
 
+/**
+ * xdp_parent_copy:
+ * @source: a #XdpParent
+ *
+ * Copies @source into a new #XdpParent.
+ *
+ * Returns: (transfer full): an #XdpParent that is a copy of @source
+ */
 XdpParent *
-_xdp_parent_copy (XdpParent *source)
+xdp_parent_copy (XdpParent *source)
 {
   XdpParent *parent;
 

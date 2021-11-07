@@ -358,7 +358,7 @@ xdp_portal_location_monitor_start (XdpPortal *portal,
   call = g_new0 (CreateCall, 1);
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->distance = distance_threshold;

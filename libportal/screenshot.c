@@ -249,7 +249,7 @@ xdp_portal_take_screenshot (XdpPortal *portal,
   call->color = FALSE;
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->interactive = (flags & XDP_SCREENSHOT_FLAG_INTERACTIVE) != 0;
@@ -310,7 +310,7 @@ xdp_portal_pick_color (XdpPortal *portal,
   call->color = TRUE;
   call->portal = g_object_ref (portal);
   if (parent)
-    call->parent = _xdp_parent_copy (parent);
+    call->parent = xdp_parent_copy (parent);
   else
     call->parent_handle = g_strdup ("");
   call->task = g_task_new (portal, cancellable, callback, data);
