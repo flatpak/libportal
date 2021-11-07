@@ -16,7 +16,8 @@
             "buildsystem": "meson",
             "builddir": true,
             "config-opts": [
-              "-Dportal-tests=gtk4",
+              "-Dbackends=gtk4",
+              "-Dportal-tests=true",
               "-Dgtk_doc=false"
             ],
             "sources": [

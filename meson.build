@@ -23,11 +23,16 @@ endif
 
 configure_file(output : 'config.h', configuration : conf)
 
+backends = get_option('backends')
+
 top_inc = include_directories('.')
 libportal_inc = include_directories('libportal')
 
 subdir('libportal')
-subdir('portal-test')
+
+if get_option('portal-tests')
+  subdir('portal-test')
+endif
 
 if get_option('gtk_doc')
   subdir('doc')
