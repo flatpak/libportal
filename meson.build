@@ -1,6 +1,6 @@
 project('libportal','c',
         version: '0.4',
-        meson_version: '>= 0.48.0')
+        meson_version: '>= 0.49.0')
 
 cc = meson.get_compiler('c')
 
@@ -22,6 +22,7 @@ endif
 configure_file(output : 'config.h', configuration : conf)
 
 backends = get_option('backends')
+introspection = get_option('introspection')
 
 top_inc = include_directories('.')
 libportal_inc = include_directories('libportal')
