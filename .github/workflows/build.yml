@@ -1,5 +1,8 @@
 name: libportal CI
 
+env:
+  DEBIAN_FRONTEND: noninteractive
+
 on:
   push:
     branches:
