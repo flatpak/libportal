@@ -62,3 +62,19 @@ jobs:
         run: meson setup --prefix=/usr _build -Dbackends=gtk3,gtk4
       - name: Build libportal
         run: ninja -C_build
+
+  fedora-35:
+    name: Fedora 35
+    runs-on: ubuntu-latest
+    container: fedora:35
+
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y meson gcc gtk-doc gobject-introspection-devel gtk3-devel gtk4-devel
+      - name: Check out libportal
+        uses: actions/checkout@v1
+      - name: Configure libportal
+        run: meson setup --prefix=/usr _build -Dbackends=gtk3,gtk4
+      - name: Build libportal
+        run: ninja -C_build
