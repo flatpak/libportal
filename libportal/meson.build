@@ -1,5 +1,6 @@
 generated_files = []
 version = '1.0.0'
+gir_version = '1.0'
 
 headers = [
   'portal.h',
@@ -83,6 +84,19 @@ libportal_dep = declare_dependency(
   link_with: libportal,
 )
 
+if introspection
+  libportal_gir = gnome.generate_gir(libportal,
+    sources: generated_files + headers + src,
+    nsversion: gir_version,
+    namespace: 'Xdp',
+    symbol_prefix: 'xdp',
+    identifier_prefix: 'Xdp',
+    link_with: libportal,
+    includes: ['Gio-2.0'],
+    install: true,
+   )
+endif
+
 ########
 # GTK3 #
 ########
@@ -113,6 +127,19 @@ if 'gtk3' in backends
     dependencies: [libportal_dep, gtk3_dep],
     link_with: libportal_gtk3,
   )
+
+  if introspection
+    gnome.generate_gir(libportal_gtk3,
+      sources: gtk3_sources + gtk3_headers,
+      nsversion: gir_version,
+      namespace: 'XdpGtk3',
+      symbol_prefix: 'xdp',
+      identifier_prefix: 'Xdp',
+      link_with: [libportal_gtk3],
+      includes: [libportal_gir[0], 'Gtk-3.0'],
+      install: true,
+     )
+  endif
 endif
 
 ########
@@ -145,6 +172,19 @@ if 'gtk4' in backends
     dependencies: [libportal_dep, gtk4_dep],
     link_with: libportal_gtk4,
   )
+
+  if introspection
+    gnome.generate_gir(libportal_gtk4,
+      sources: gtk4_sources + gtk4_headers,
+      nsversion: gir_version,
+      namespace: 'XdpGtk4',
+      symbol_prefix: 'xdp',
+      identifier_prefix: 'Xdp',
+      link_with: [libportal_gtk4],
+      includes: [libportal_gir[0], 'Gtk-4.0'],
+      install: true,
+     )
+  endif
 endif
 
 ########
