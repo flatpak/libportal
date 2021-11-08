@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <object class="GtkDialog" id="update_dialog">
+  <object class="GtkDialog" id="updateDialog">
     <property name="transient-for">PortalTestWin</property>
     <property name="modal">1</property>
+    <signal name="response" handler="_updateDialogResponse" />
     <child>
       <object class="GtkBox">
         <property name="visible">false</property>
@@ -29,19 +30,19 @@
       <action-widget response="ok">ok</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkDialog" id="update_dialog2">
+  <object class="GtkDialog" id="updateDialog2">
     <property name="transient-for">PortalTestWin</property>
     <property name="modal">1</property>
     <child>
       <object class="GtkBox">
         <property name="visible">false</property>
         <child>
-          <object class="GtkLabel" id="update_label">
+          <object class="GtkLabel" id="updateLabel">
             <property name="label">Update available!</property>
           </object>
         </child>
         <child>
-          <object class="GtkProgressBar" id="update_progressbar"/>
+          <object class="GtkProgressBar" id="updateProgressbar"/>
         </child>
       </object>
     </child>
@@ -105,7 +106,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="sandbox_status">
+          <object class="GtkLabel" id="sandboxStatus">
             <property name="xalign">0</property>
             <layout>
               <property name="column">1</property>
@@ -114,10 +115,9 @@
           </object>
         </child>
         <child>
-          <object class="GtkComboBoxText" id="save_how">
+          <object class="GtkComboBoxText" id="saveHow">
             <items>
               <item id="atomically">Atomic</item>
-              <item id="posix">POSIX</item>
               <item id="gio">GIO</item>
             </items>
             <property name="active-id">atomically</property>
@@ -140,7 +140,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Save as…</property>
-            <signal name="clicked" handler="save_dialog"/>
+            <signal name="clicked" handler="_saveDialog"/>
             <layout>
               <property name="column">1</property>
               <property name="row">1</property>
@@ -168,7 +168,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">test.txt</property>
-            <signal name="clicked" handler="open_local"/>
+            <signal name="clicked" handler="_openLocal"/>
             <layout>
               <property name="column">1</property>
               <property name="row">4</property>
@@ -179,12 +179,12 @@
           <object class="GtkBox">
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkCheckButton" id="open_local_ask">
+              <object class="GtkCheckButton" id="openLocalAsk">
                 <property name="label">Ask</property>
               </object>
             </child>
             <child>
-              <object class="GtkCheckButton" id="open_local_dir">
+              <object class="GtkCheckButton" id="openLocalDir">
                 <property name="label">Open Folder</property>
               </object>
             </child>
@@ -232,7 +232,7 @@
               <object class="GtkButton">
                 <property name="hexpand">1</property>
                 <property name="label">Screenshot</property>
-                <signal name="clicked" handler="take_screenshot"/>
+                <signal name="clicked" handler="_takeScreenshot"/>
               </object>
             </child>
             <child>
@@ -267,9 +267,9 @@
           </object>
         </child>
         <child>
-          <object class="GtkToggleButton" id="screencast_toggle">
+          <object class="GtkToggleButton" id="screencastToggle">
             <property name="label">Screencast</property>
-            <signal name="toggled" handler="screencast_toggled"/>
+            <signal name="toggled" handler="_screencastToggled"/>
             <layout>
               <property name="column">1</property>
               <property name="row">7</property>
@@ -277,7 +277,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="screencast_label">
+          <object class="GtkLabel" id="screencastLabel">
             <property name="halign">end</property>
             <layout>
               <property name="column">2</property>
@@ -296,7 +296,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="monitor_name">
+          <object class="GtkLabel" id="monitorName">
             <property name="xalign">0</property>
             <layout>
               <property name="column">1</property>
@@ -305,7 +305,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="network_status">
+          <object class="GtkLabel" id="networkStatus">
             <property name="xalign">0</property>
             <layout>
               <property name="column">2</property>
@@ -325,7 +325,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="resolver_name">
+          <object class="GtkLabel" id="resolverName">
             <property name="xalign">0</property>
             <layout>
               <property name="column">1</property>
@@ -356,7 +356,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Notify me!</property>
-            <signal name="clicked" handler="notify_me" swapped="yes"/>
+            <signal name="clicked" handler="_notifyMe"/>
             <layout>
               <property name="column">1</property>
               <property name="row">10</property>
@@ -364,7 +364,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkImage" id="ack_image">
+          <object class="GtkImage" id="ackImage">
             <property name="visible">false</property>
             <property name="icon-name">object-select-symbolic</property>
             <property name="icon-size">2</property>
@@ -387,7 +387,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Print</property>
-            <signal name="clicked" handler="print_cb"/>
+            <signal name="clicked" handler="_printCb"/>
             <layout>
               <property name="column">1</property>
               <property name="row">11</property>
@@ -407,27 +407,27 @@
         <child>
           <object class="GtkBox">
             <child>
-              <object class="GtkCheckButton" id="inhibit_idle">
+              <object class="GtkCheckButton" id="inhibitIdle">
                 <property name="label">Idle</property>
-                <signal name="toggled" handler="inhibit_changed"/>
+                <signal name="toggled" handler="_inhibitChanged"/>
               </object>
             </child>
             <child>
-              <object class="GtkCheckButton" id="inhibit_logout">
+              <object class="GtkCheckButton" id="inhibitLogout">
                 <property name="label">Logout</property>
-                <signal name="toggled" handler="inhibit_changed"/>
+                <signal name="toggled" handler="_inhibitChanged"/>
               </object>
             </child>
             <child>
-              <object class="GtkCheckButton" id="inhibit_suspend">
+              <object class="GtkCheckButton" id="inhibitSuspend">
                 <property name="label">Suspend</property>
-                <signal name="toggled" handler="inhibit_changed"/>
+                <signal name="toggled" handler="_inhibitChanged"/>
               </object>
             </child>
             <child>
-              <object class="GtkCheckButton" id="inhibit_switch">
+              <object class="GtkCheckButton" id="inhibitSwitch">
                 <property name="label">Switch</property>
-                <signal name="toggled" handler="inhibit_changed"/>
+                <signal name="toggled" handler="_inhibitChanged"/>
               </object>
             </child>
             <layout>
@@ -450,7 +450,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Play</property>
-            <signal name="clicked" handler="play_clicked"/>
+            <signal name="clicked" handler="_playClicked"/>
             <layout>
               <property name="column">1</property>
               <property name="row">13</property>
@@ -470,7 +470,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Update</property>
-            <signal name="clicked" handler="get_user_information" swapped="yes"/>
+            <signal name="clicked" handler="_getUserInformation"/>
             <layout>
               <property name="column">1</property>
               <property name="row">14</property>
@@ -517,7 +517,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Compose</property>
-            <signal name="clicked" handler="compose_email" swapped="yes"/>
+            <signal name="clicked" handler="_composeEmail"/>
             <layout>
               <property name="column">1</property>
               <property name="row">17</property>
@@ -537,7 +537,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Request</property>
-            <signal name="clicked" handler="request_background" swapped="yes"/>
+            <signal name="clicked" handler="_requestBackground"/>
             <layout>
               <property name="column">1</property>
               <property name="row">18</property>
@@ -557,7 +557,7 @@
         <child>
           <object class="GtkButton">
             <property name="label">Set</property>
-            <signal name="clicked" handler="set_wallpaper" swapped="yes"/>
+            <signal name="clicked" handler="_setWallpaper"/>
             <layout>
               <property name="column">1</property>
               <property name="row">19</property>

@@ -1,5 +1,5 @@
 [Desktop Entry]
 Name=Portal test (GTK4)
-Exec=portal-test-gtk4
+Exec=org.gnome.PortalTest.Gtk4
 Type=Application
 DBusActivatable=true

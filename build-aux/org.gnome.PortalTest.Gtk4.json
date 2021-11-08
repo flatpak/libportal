@@ -3,7 +3,7 @@
     "runtime": "org.gnome.Platform",
     "runtime-version": "40",
     "sdk": "org.gnome.Sdk",
-    "command": "portal-test-gtk4",
+    "command": "org.gnome.PortalTest.Gtk4",
     "finish-args": [
         "--device=dri",
         "--socket=wayland",
