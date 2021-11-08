@@ -1,0 +1,63 @@
+---
+
+name: PortalTest Flatpak
+
+on:
+  push:
+    paths-ignore: ['**.md']
+    branches: [master]
+  pull_request:
+    paths-ignore: ['**.md']
+    branches: [master]
+
+jobs:
+  build-flatpak-gtk3:
+    name: GTK3
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-41
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build GTK3 portal test
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
+        with:
+          bundle: portal-test-gtk3.flatpak
+          manifest-path: build-aux/org.gnome.PortalTest.Gtk3.json
+          cache-key: gtk3-${{ github.sha }}
+
+  build-flatpak-gtk4:
+    name: GTK4
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-41
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build GTK4 portal test
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
+        with:
+          bundle: portal-test-gtk4.flatpak
+          manifest-path: build-aux/org.gnome.PortalTest.Gtk4.json
+          cache-key: gtk4-${{ github.sha }}
+
+  build-flatpak-qt5:
+    name: Qt5
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-5.15
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Qt5 portal test
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
+        with:
+          bundle: portal-test-qt.flatpak
+          manifest-path: build-aux/org.gnome.PortalTest.Qt5.json
+          cache-key: qt-${{ github.sha }}
