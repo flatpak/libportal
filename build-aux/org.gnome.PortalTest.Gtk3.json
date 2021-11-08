@@ -37,8 +37,8 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://github.com/flatpak/libportal"
+                    "type": "dir",
+                    "path": "../"
                 }
             ]
         }
