@@ -302,12 +302,12 @@ compose_email (EmailCall *call)
  * xdp_portal_compose_email:
  * @portal: a #XdpPortal
  * @parent: (nullable): parent window information
- * @addresses: (nullable): the email addresses to send to
- * @cc: (nullable): the email addresses to cc
- * @bcc: (nullable): the email addresses to bcc
+ * @addresses: (array zero-terminated=1) (nullable): the email addresses to send to
+ * @cc: (array zero-terminated=1) (nullable): the email addresses to cc
+ * @bcc: (array zero-terminated=1) (nullable): the email addresses to bcc
  * @subject: (nullable): the subject for the email
  * @body: (nullable): the body for the email
- * @attachments: (nullable): an array of paths for files to attach
+ * @attachments: (array zero-terminated=1) (nullable): an array of paths for files to attach
  * @flags: options for this call
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
