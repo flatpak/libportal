@@ -565,8 +565,13 @@ var PortalTestWindow = GObject.registerClass({
                         let label = '';
                         const streams =this._session.get_streams().deepUnpack();
                         for (const [streamId, streamData] of streams) {
-                            const [x, y] = streamData['position'].deepUnpack();
-                            const [w, h] = streamData['size'].deepUnpack();
+                            let x = 0, y = 0;
+                            if (streamData['position'])
+                                [x, y] = streamData['position'].deepUnpack();
+
+                            let w = 0, h = 0;
+                            if (streamData['size'])
+                                [w, h] = streamData['size'].deepUnpack();
 
                             if (label !== '')
                                 label += '\n';
