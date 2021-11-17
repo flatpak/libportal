@@ -32,12 +32,14 @@ G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
  * XdpOutputType:
  * @XDP_OUTPUT_MONITOR: allow selecting monitors
  * @XDP_OUTPUT_WINDOW: allow selecting individual application windows
+ * @XDP_OUTPUT_VIRTUAL: allow creating new virtual displays
  *
  * Flags to specify what kind of sources to offer for a screencast session.
  */
 typedef enum {
   XDP_OUTPUT_MONITOR = 1 << 0,
-  XDP_OUTPUT_WINDOW  = 1 << 1
+  XDP_OUTPUT_WINDOW  = 1 << 1,
+  XDP_OUTPUT_VIRTUAL = 1 << 2,
 } XdpOutputType;
 
 /**
