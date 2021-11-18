@@ -110,11 +110,27 @@ typedef enum {
   XDP_CURSOR_MODE_METADATA = 1 << 2,
 } XdpCursorMode;
 
+/**
+ * XdpPersistMode:
+ * @XDP_PERSIST_MODE_NONE: do not persist
+ * @XDP_PERSIST_MODE_TRANSIENT: persist as long as the application is alive
+ * @XDP_PERSIST_MODE_PERSISTENT: persist until the user revokes this permission
+ *
+ * Options for how the screencast session should persist.
+ */
+typedef enum {
+  XDP_PERSIST_MODE_NONE,
+  XDP_PERSIST_MODE_TRANSIENT,
+  XDP_PERSIST_MODE_PERSISTENT,
+} XdpPersistMode;
+
 XDP_PUBLIC
 void        xdp_portal_create_screencast_session            (XdpPortal            *portal,
                                                              XdpOutputType         outputs,
                                                              XdpScreencastFlags    flags,
                                                              XdpCursorMode         cursor_mode,
+                                                             XdpPersistMode        persist_mode,
+                                                             const char           *restore_token,
                                                              GCancellable         *cancellable,
                                                              GAsyncReadyCallback   callback,
                                                              gpointer              data);
@@ -269,5 +285,12 @@ void      xdp_session_touch_position (XdpSession *session,
 XDP_PUBLIC
 void      xdp_session_touch_up       (XdpSession *session,
                                       guint       slot);
+
+
+XDP_PUBLIC
+XdpPersistMode  xdp_session_get_persist_mode  (XdpSession *session);
+
+XDP_PUBLIC
+char           *xdp_session_get_restore_token (XdpSession *session);
 
 G_END_DECLS

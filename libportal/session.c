@@ -55,6 +55,7 @@ xdp_session_finalize (GObject *object)
     g_dbus_connection_signal_unsubscribe (session->portal->bus, session->signal_id);
 
   g_clear_object (&session->portal);
+  g_free (session->restore_token);
   g_free (session->id);
   g_clear_pointer (&session->streams, g_variant_unref);
 

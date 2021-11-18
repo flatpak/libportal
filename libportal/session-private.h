@@ -31,6 +31,9 @@ struct _XdpSession {
   XdpDeviceType devices;
   GVariant *streams;
 
+  XdpPersistMode persist_mode;
+  char *restore_token;
+
   guint signal_id;
 };
 
