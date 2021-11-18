@@ -722,7 +722,7 @@ xdp_session_close (XdpSession *session)
  * a pw_remote object, by using pw_remote_connect_fd(). Only the
  * screencast stream nodes will be available from this pipewire node.
  *
- * Returns: the file ddescriptor
+ * Returns: the file descriptor
  */
 int
 xdp_session_open_pipewire_remote (XdpSession *session)
