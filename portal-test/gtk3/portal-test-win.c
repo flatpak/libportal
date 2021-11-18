@@ -621,6 +621,8 @@ start_screencast (PortalTestWin *win)
                                         XDP_OUTPUT_MONITOR | XDP_OUTPUT_WINDOW,
                                         XDP_SCREENCAST_FLAG_NONE,
                                         XDP_CURSOR_MODE_HIDDEN,
+                                        XDP_PERSIST_MODE_NONE,
+                                        NULL,
                                         NULL,
                                         session_created,
                                         win);

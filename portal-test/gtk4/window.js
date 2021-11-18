@@ -38,6 +38,8 @@ var PortalTestWindow = GObject.registerClass({
 
         this._portal = new Xdp.Portal();
 
+        this._restoreToken = null;
+
         // Sandbox status
         const path = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'flatpak-info']);
         this._sandboxStatus.label =
@@ -539,6 +541,8 @@ var PortalTestWindow = GObject.registerClass({
                 Xdp.OutputType.WINDOW | Xdp.OutputType.MONITOR,
                 Xdp.ScreencastFlags.NONE,
                 Xdp.CursorMode.HIDDEN,
+                Xdp.PersistMode.TRANSIENT,
+                this._restoreToken,
                 null,
                 (portal, result) => {
                     try {
@@ -578,6 +582,11 @@ var PortalTestWindow = GObject.registerClass({
 
                             label += `Stream ${streamId}: ${w}x${h} @ ${x},${y}`;
                         }
+
+                        this._restoreToken = session.get_restore_token();
+                        if (this._restoreToken)
+                            label += `\nRestore token: ${this._restoreToken}`;
+
                         this._screencastLabel.label = label;
                     });
                 });

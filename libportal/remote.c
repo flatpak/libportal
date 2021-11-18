@@ -53,6 +53,8 @@ typedef struct {
   XdpDeviceType devices;
   XdpOutputType outputs;
   XdpCursorMode cursor_mode;
+  XdpPersistMode persist_mode;
+  char *restore_token;
   gboolean multiple;
   guint signal_id;
   GTask *task;
@@ -70,6 +72,7 @@ create_call_free (CreateCall *call)
     g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
 
   g_free (call->request_path);
+  g_free (call->restore_token);
 
   g_object_unref (call->portal);
   g_object_unref (call->task);
@@ -151,6 +154,12 @@ select_sources (CreateCall *call)
   g_variant_builder_add (&options, "{sv}", "types", g_variant_new_uint32 (call->outputs));
   g_variant_builder_add (&options, "{sv}", "multiple", g_variant_new_boolean (call->multiple));
   g_variant_builder_add (&options, "{sv}", "cursor_mode", g_variant_new_uint32 (call->cursor_mode));
+  if (call->portal->screencast_interface_version >= 4)
+    {
+      g_variant_builder_add (&options, "{sv}", "persist_mode", g_variant_new_uint32 (call->persist_mode));
+      if (call->restore_token)
+        g_variant_builder_add (&options, "{sv}", "restore_token", g_variant_new_string (call->restore_token));
+    }
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
@@ -385,6 +394,8 @@ get_screencast_interface_version (CreateCall *call)
  * @outputs: which kinds of source to offer in the dialog
  * @flags: options for this call
  * @cursor_mode: the cursor mode of the session
+ * @persist_mode: the persist mode of the session
+ * @restore_token: (nullable): the token of a previous screencast session to restore
  * @cancellable: (nullable): optional #GCancellable
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -399,6 +410,8 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
                                       XdpOutputType outputs,
                                       XdpScreencastFlags flags,
                                       XdpCursorMode cursor_mode,
+                                      XdpPersistMode persist_mode,
+                                      const char *restore_token,
                                       GCancellable *cancellable,
                                       GAsyncReadyCallback  callback,
                                       gpointer data)
@@ -414,6 +427,8 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
   call->devices = XDP_DEVICE_NONE;
   call->outputs = outputs;
   call->cursor_mode = cursor_mode;
+  call->persist_mode = persist_mode;
+  call->restore_token = g_strdup (restore_token);
   call->multiple = (flags & XDP_SCREENCAST_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
@@ -487,6 +502,8 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
   call->devices = devices;
   call->outputs = outputs;
   call->cursor_mode = cursor_mode;
+  call->persist_mode = XDP_PERSIST_MODE_NONE;
+  call->restore_token = NULL;
   call->multiple = (flags & XDP_REMOTE_DESKTOP_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
@@ -581,6 +598,10 @@ session_started (GDBusConnection *bus,
       guint32 devices;
       GVariant *streams;
 
+      if (!g_variant_lookup (ret, "persist_mode", "u", &call->session->persist_mode))
+        call->session->persist_mode = XDP_PERSIST_MODE_NONE;
+      if (!g_variant_lookup (ret, "restore_token", "s", &call->session->restore_token))
+        call->session->restore_token = NULL;
       if (g_variant_lookup (ret, "devices", "u", &devices))
         _xdp_session_set_devices (call->session, devices);
       if (g_variant_lookup (ret, "streams", "@a(ua{sv})", &streams))
@@ -1123,4 +1144,50 @@ xdp_session_touch_up (XdpSession *session,
                           "NotifyTouchMotion",
                           g_variant_new ("(oa{sv}u)", session->id, &options, slot),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
+}
+
+/**
+ * xdp_session_get_persist_mode:
+ * @session: a #XdpSession
+ *
+ * Retrieves the effective persist mode of @session.
+ *
+ * May only be called after @session is successfully started, i.e. after
+ * xdp_session_start_finish().
+ *
+ * Returns: the effective persist mode of @session
+ */
+XdpPersistMode
+xdp_session_get_persist_mode (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_PERSIST_MODE_NONE);
+  g_return_val_if_fail (session->state == XDP_SESSION_ACTIVE, XDP_PERSIST_MODE_NONE);
+
+  return session->persist_mode;
+}
+
+/**
+ * xdp_session_get_restore_token:
+ * @session: a #XdpSession
+ *
+ * Retrieves the restore token of @session.
+ *
+ * A restore token will only be available if #XDP_PERSIST_MODE_TRANSIENT
+ * or #XDP_PERSIST_MODE_PERSISTENT was passed when creating the screencast
+ * session.
+ *
+ * Remote desktop sessions cannot be restored.
+ *
+ * May only be called after @session is successfully started, i.e. after
+ * xdp_session_start_finish().
+ *
+ * Returns: (nullable): the restore token of @session
+ */
+char *
+xdp_session_get_restore_token (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
+  g_return_val_if_fail (session->state == XDP_SESSION_ACTIVE, NULL);
+
+  return g_strdup (session->restore_token);
 }
