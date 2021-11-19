@@ -102,9 +102,9 @@ sources_selected (GDBusConnection *bus,
        g_task_return_pointer (call->task, session, g_object_unref);
     }
   else if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Remote desktop canceled");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Screencast SelectSources() canceled");
   else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Remote desktop failed");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Screencast SelectSources() failed");
 
   create_call_free (call);
 }
@@ -194,9 +194,9 @@ devices_selected (GDBusConnection *bus,
        }
     }
   else if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Remote desktop canceled");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Remote desktop SelectDevices() canceled");
   else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Remote desktop failed");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Remote desktop SelectDevices() failed");
 
   if (response != 0)
     create_call_free (call);
@@ -545,9 +545,13 @@ session_started (GDBusConnection *bus,
       g_task_return_boolean (call->task, TRUE);
     }
   else if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Screencast canceled");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                             call->session->type == XDP_SESSION_REMOTE_DESKTOP ?
+                             "Remote desktop canceled" : "Screencast canceled");
   else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Screencast failed");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                             call->session->type == XDP_SESSION_REMOTE_DESKTOP ?
+                             "Remote desktop failed" : "Screencast failed");
 
   start_call_free (call);
 }
