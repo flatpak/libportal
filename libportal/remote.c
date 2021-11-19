@@ -498,7 +498,7 @@ start_call_free (StartCall *call)
       xdp_parent_free (call->parent);
     }
   g_free (call->parent_handle);
-  
+
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
@@ -531,7 +531,7 @@ session_started (GDBusConnection *bus,
 
   _xdp_session_set_session_state (call->session, response == 0 ? XDP_SESSION_ACTIVE
                                                                : XDP_SESSION_CLOSED);
- 
+
   if (response == 0)
     {
       guint32 devices;
@@ -642,10 +642,10 @@ start_session (StartCall *call)
  * @data: (closure): data to pass to @callback
  *
  * Starts the session.
- * 
+ *
  * When the request is done, @callback will be called. You can then
  * call xdp_session_start_finish() to get the results.
- */ 
+ */
 void
 xdp_session_start (XdpSession *session,
                    XdpParent *parent,
@@ -722,7 +722,7 @@ xdp_session_close (XdpSession *session)
  * a pw_remote object, by using pw_remote_connect_fd(). Only the
  * screencast stream nodes will be available from this pipewire node.
  *
- * Returns: the file ddescriptor
+ * Returns: the file descriptor
  */
 int
 xdp_session_open_pipewire_remote (XdpSession *session)
@@ -767,7 +767,7 @@ xdp_session_open_pipewire_remote (XdpSession *session)
  * @dy: relative vertical movement
  *
  * Moves the pointer from its current position.
- * 
+ *
  * May only be called on a remote desktop session
  * with %XDP_DEVICE_POINTER access.
  */
@@ -836,7 +836,7 @@ xdp_session_pointer_position (XdpSession *session,
  * @state: the new state
  *
  * Changes the state of the button to @state.
- * 
+ *
  * May only be called on a remote desktop session
  * with %XDP_DEVICE_POINTER access.
  */
@@ -939,7 +939,7 @@ xdp_session_pointer_axis_discrete (XdpSession *session,
  * @keysym: whether to interpret @key as a keysym instead of a keycode
  * @key: the keysym or keycode to change
  * @state: the new state
- * 
+ *
  * Changes the state of the key to @state.
  *
  * May only be called on a remote desktop session
