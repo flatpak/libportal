@@ -48,6 +48,9 @@ struct _XdpPortal {
 
   /* notification */
   guint action_invoked_signal;
+
+  /* screencast */
+  guint screencast_interface_version;
 };
 
 #define PORTAL_BUS_NAME "org.freedesktop.portal.Desktop"
