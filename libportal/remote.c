@@ -338,6 +338,47 @@ create_session (CreateCall *call)
                           call);
 }
 
+static void
+get_version_returned (GObject *object,
+                      GAsyncResult *result,
+                      gpointer data)
+{
+  CreateCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) version_variant = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      create_call_free (call);
+      return;
+    }
+
+  g_variant_get_child (ret, 0, "v", &version_variant);
+  call->portal->screencast_interface_version = g_variant_get_uint32 (version_variant);
+
+  create_session (call);
+}
+
+static void
+get_screencast_interface_version (CreateCall *call)
+{
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.DBus.Properties",
+                          "Get",
+                          g_variant_new ("(ss)", "org.freedesktop.portal.ScreenCast", "version"),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (call->task),
+                          get_version_returned,
+                          call);
+}
+
 /**
  * xdp_portal_create_screencast_session:
  * @portal: a #XdpPortal
@@ -376,7 +417,10 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
   call->multiple = (flags & XDP_SCREENCAST_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
-  create_session (call);
+  if (portal->screencast_interface_version == 0)
+    get_screencast_interface_version (call);
+  else
+    create_session (call);
 }
 
 /**
