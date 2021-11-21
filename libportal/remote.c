@@ -233,7 +233,7 @@ select_devices (CreateCall *call)
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
-  g_variant_builder_add (&options, "{sv}", "type", g_variant_new_uint32 (call->devices));
+  g_variant_builder_add (&options, "{sv}", "types", g_variant_new_uint32 (call->devices));
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
