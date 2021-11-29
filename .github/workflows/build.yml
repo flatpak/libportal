@@ -22,11 +22,11 @@ jobs:
           sudo add-apt-repository ppa:alexlarsson/glib260
           sudo add-apt-repository 'deb https://download.mono-project.com/repo/ubuntu stable-bionic main' # Needed for updates to work
           sudo apt-get update
-          sudo apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson libgirepository1.0-dev libgtk-3-dev valac
+          sudo apt-get install -y libglib2.0 gettext dbus meson libgirepository1.0-dev libgtk-3-dev valac
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackends=gtk3
+        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Dgtk_doc=false
       - name: Build libportal
         run: ninja -C_build
 
@@ -38,11 +38,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson libgirepository1.0-dev libgtk-3-dev valac
+          sudo apt-get install -y libglib2.0 gettext dbus meson libgirepository1.0-dev libgtk-3-dev valac
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackends=gtk3
+        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Dgtk_doc=false
       - name: Build libportal
         run: ninja -C_build
 
@@ -55,7 +55,9 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson libgirepository1.0-dev libgtk-3-dev libgtk-4-dev valac
+          apt-get install -y libglib2.0 gettext dbus meson libgirepository1.0-dev libgtk-3-dev libgtk-4-dev valac python3-pip
+          pip3 install gi-docgen
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Configure libportal
@@ -71,10 +73,17 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          dnf install -y meson gcc gtk-doc gobject-introspection-devel gtk3-devel gtk4-devel vala
+          dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel gi-docgen vala git
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Configure libportal
         run: meson setup --prefix=/usr _build -Dbackends=gtk3,gtk4
       - name: Build libportal
         run: ninja -C_build
+      - name: Deploy Docs
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/doc/libportal-1/
+          destination_dir: ./
