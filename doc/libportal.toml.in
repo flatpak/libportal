@@ -37,6 +37,9 @@ file_format = "{filename}#L{line}"
 
 [extra]
 urlmap_file = "urlmap.js"
+content_files = [
+  "libportal.md",
+]
 content_images = [
   "libportal.svg",
 ]
