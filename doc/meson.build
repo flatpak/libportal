@@ -1,26 +1,36 @@
-private_headers = [
-	'parent-private.h',
-	'portal-private.h',
-	'session-private.h',
-]
+toml_data = configuration_data()
+toml_data.set('VERSION', meson.project_version())
 
-version_conf = configuration_data()
-version_conf.set('VERSION', meson.project_version())
-configure_file(
-  input: 'version.xml.in',
-  output: 'version.xml',
-  configuration: version_conf,
+libportal_toml = configure_file(
+  input: 'libportal.toml.in',
+  output: 'libportal.toml',
+  configuration: toml_data
 )
 
-gnome.gtkdoc('libportal',
-  main_xml: 'libportal.xml',
-  namespace: 'xdp',
-  mode: 'none',
-  scan_args: [
-    '--ignore-headers=' + ' '.join(private_headers),
+dependency('gi-docgen', version: '>= 2021.1',
+           fallback: ['gi-docgen', 'dummy_dep'],
+           native: true,
+           required: get_option('gtk_doc'))
+
+gidocgen = find_program('gi-docgen')
+
+docs_dir = get_option('datadir') / 'doc'
+
+custom_target('libportal-doc',
+  input: [ libportal_toml, libportal_gir[0] ],
+  output: 'libportal-1',
+  command: [
+    gidocgen,
+    'generate',
+    '--quiet',
+    '--add-include-path=@0@'.format(meson.current_build_dir() / '../../libportal'),
+    '--config=@INPUT0@',
+    '--output-dir=@OUTPUT@',
+    '--no-namespace-dir',
+    '--content-dir=@0@'.format(meson.current_source_dir()),
+    '@INPUT1@',
   ],
-  src_dir: [ 'libportal' ],
-  dependencies: libportal_dep,
-  gobject_typesfile: 'libportal.types',
+  build_by_default: true,
   install: true,
+  install_dir: docs_dir,
 )
