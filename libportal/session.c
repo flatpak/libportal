@@ -23,19 +23,19 @@
 #include "portal-private.h"
 
 /**
- * SECTION:session
- * @title: XdpSession
- * @short_description: a representation of long-lived screencast portal interactions
+ * XdpSession
+ *
+ * A representation of long-lived screencast portal interactions.
  *
  * The XdpSession object is used to represent portal interactions with the
  * screencast or remote desktop portals that extend over multiple portal calls.
  *
  * To find out what kind of session an XdpSession object represents and whether
- * it is still active, you can use xdp_session_get_session_type() and
- * xdp_session_get_session_state().
+ * it is still active, you can use [method@Session.get_session_type] and
+ * [method@Session.get_session_state].
  *
  * All sessions start in an initial state. They can be made active by calling
- * xdp_session_start(), and ended by calling xdp_session_close().
+ * [method@Session.start], and ended by calling [method@Session.close].
  */
 enum {
   CLOSED,
@@ -131,7 +131,7 @@ _xdp_session_new (XdpPortal *portal,
 
 /**
  * xdp_session_get_session_type:
- * @session: an #XdpSession
+ * @session: an [class@Session]
  *
  * Obtains information about the type of session that is represented
  * by @session.
@@ -148,7 +148,7 @@ xdp_session_get_session_type (XdpSession *session)
 
 /**
  * xdp_session_get_session_state:
- * @session: an #XdpSession
+ * @session: an [class@Session]
  *
  * Obtains information about the state of the session that is represented
  * by @session.
@@ -186,11 +186,11 @@ _xdp_session_set_session_state (XdpSession *session,
 
 /**
  * xdp_session_get_devices:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  *
  * Obtains the devices that the user selected.
  *
- * Unless the session is active, this function returns %XDP_DEVICE_NONE.
+ * Unless the session is active, this function returns `XDP_DEVICE_NONE`.
  *
  * Returns: the selected devices
  */
@@ -214,13 +214,14 @@ _xdp_session_set_devices (XdpSession *session,
 
 /**
  * xdp_session_get_streams:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  *
  * Obtains the streams that the user selected. The information in the
- * returned #GVariant has the format `a(ua{sv})`. Each item in the array
+ * returned [struct@GLib.Variant] has the format `a(ua{sv})`. Each item in the array
  * is describing a stream. The first member is the pipewire node ID, the
  * second is a dictionary of stream properties, including:
- * - position, `(ii)`: a tuple consisting of the position (x, y) in the compositor
+ *
+ * - position, `(ii)`: a tuple consisting of the position `(x, y)` in the compositor
  *     coordinate space. Note that the position may not be equivalent to a
  *     position in a pixel coordinate space. Only available for monitor streams.
  * - size, `(ii)`: a tuple consisting of (width, height). The size represents the size
@@ -228,7 +229,7 @@ _xdp_session_set_devices (XdpSession *session,
  *     Note that this size may not be equivalent to a size in a pixel coordinate
  *     space. The size may differ from the size of the stream.
  *
- * Unless the session is active, this function returns %NULL.
+ * Unless the session is active, this function returns `NULL`.
  *
  * Returns: the selected streams
  */

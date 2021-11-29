@@ -22,10 +22,9 @@
 #include "account.h"
 #include "portal-private.h"
 
-/**
- * SECTION:account
- * @title: Accounts
- * @short_description: basic user information
+/*
+ * Accounts
+ * Basic user information.
  *
  * These functions let applications query basic information about
  * the user, such as user ID, name and avatar picture.
@@ -204,19 +203,19 @@ get_user_information (AccountCall *call)
 
 /**
  * xdp_portal_get_user_information:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @reason: (nullable): a string that can be shown in the dialog to explain
  *    why the information is needed
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Gets information about the user.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_get_user_information_finish() to get the results.
+ * call [method@Portal.get_user_information_finish] to get the results.
  */
 void
 xdp_portal_get_user_information (XdpPortal *portal,
@@ -247,18 +246,19 @@ xdp_portal_get_user_information (XdpPortal *portal,
 
 /**
  * xdp_portal_get_user_information_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the get-user-information request, and returns
- * the result in the form of a #GVariant dictionary containing
+ * the result in the form of a [struct@GLib.Variant] dictionary containing
  * the following fields:
+ *
  * - id `s`: the user ID
  * - name `s`: the users real name
  * - image `s`: the uri of an image file for the users avatar picture
  *
- * Returns: (transfer full): a #GVariant dictionary with user information
+ * Returns: (transfer full): a [struct@GLib.Variant] dictionary with user information
  */
 GVariant *
 xdp_portal_get_user_information_finish (XdpPortal *portal,

@@ -23,13 +23,13 @@
 #include "portal-private.h"
 
 
-/**
- * SECTION:location
- * @title: Location
- * @short_description: access to location information
+/*
+ * Location
+ *
+ * Access to location information.
  *
  * Location monitoring makes location information available
- * via the #XdpPortal::location-updated signal.
+ * via the [signal@Portal::location-updated] signal.
  */
 
 typedef struct {
@@ -316,27 +316,27 @@ create_session (CreateCall *call)
 
 /**
  * xdp_portal_location_monitor_start:
- * @portal: a #XdpPortal
- * @parent: (nullable): a #XdpParent, or %NULL
+ * @portal: a [class@Portal]
+ * @parent: (nullable): a [struct@Parent], or `NULL`
  * @distance_threshold: distance threshold, in meters
  * @time_threshold: time threshold, in seconds
  * @accuracy: desired accuracy
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Makes XdpPortal start monitoring location changes.
  *
- * When the location changes, the #XdpPortal::location-updated.
+ * When the location changes, the [signal@Portal::location-updated].
  * signal is emitted.
  *
- * Use xdp_portal_location_monitor_stop() to stop monitoring.
+ * Use [method@Portal.location_monitor_stop] to stop monitoring.
  *
- * Note that #XdpPortal only maintains a single location monitor
+ * Note that [class@Portal] only maintains a single location monitor
  * at a time. If you want to change the @distance_threshold,
  * @time_threshold or @accuracy of the current monitor, you
- * first have to call xdp_portal_location_monitor_stop() to
+ * first have to call [method@Portal.location_monitor_stop] to
  * stop monitoring. 
  */
 void
@@ -372,14 +372,14 @@ xdp_portal_location_monitor_start (XdpPortal *portal,
 
 /**
  * xdp_portal_location_monitor_start_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes a location-monitor request, and returns
  * the result in the form of boolean.
  *
- * Returns: %TRUE if the request succeeded
+ * Returns: `TRUE` if the request succeeded
  */
 gboolean
 xdp_portal_location_monitor_start_finish (XdpPortal *portal,
@@ -395,10 +395,10 @@ xdp_portal_location_monitor_start_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_location_monitor_stop:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  *
  * Stops location monitoring that was started with
- * xdp_portal_location_monitor_start().
+ * [method@Portal.location_monitor_start].
  */
 void
 xdp_portal_location_monitor_stop (XdpPortal *portal)

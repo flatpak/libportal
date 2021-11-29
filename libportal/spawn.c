@@ -32,15 +32,15 @@
 
 #include "portal-private.h"
 
-/**
- * SECTION:spawn
- * @title: Spawn
- * @short_description: launch another sandbox
+/*
+ * Spawn
+ *
+ * Launch another sandbox.
  *
  * These functions let applications spawn a process in another
  * copy of their sandbox.
  *
- * To monitor spawned processes, use the #XdpPortal::spawn-exited
+ * To monitor spawned processes, use the [signal@Portal::spawn-exited]
  * signal.
  *
  * The underlying portal is org.freedesktop.portal.Flatpak.
@@ -199,18 +199,18 @@ do_spawn (SpawnCall *call)
 
 /**
  * xdp_portal_spawn:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @cwd: the cwd for the new process
  * @argv: (array zero-terminated): the argv for the new process
- * @fds: (array length=n_fds) (nullable): an array of open fds to pass to the new process, or %NULL
- * @map_to: (array length=n_fds) (nullable): an array of integers to map the @fds to, or %NULL. Must be the same
+ * @fds: (array length=n_fds) (nullable): an array of open fds to pass to the new process, or `NULL`
+ * @map_to: (array length=n_fds) (nullable): an array of integers to map the @fds to, or `NULL`. Must be the same
  *     length as @fds
  * @n_fds: the length of @fds and @map_to arrays
- * @env: (array zero-terminated) (nullable): an array of KEY=VALUE environment settings, or %NULL
+ * @env: (array zero-terminated) (nullable): an array of KEY=VALUE environment settings, or `NULL`
  * @flags: flags influencing the spawn operation
- * @sandbox_expose: (array zero-terminated) (nullable): paths to expose rw in the new sandbox, or %NULL
- * @sandbox_expose_ro: (array zero-terminated) (nullable): paths to expose ro in the new sandbox, or %NULL
- * @cancellable: (nullable): optional #GCancellable
+ * @sandbox_expose: (array zero-terminated) (nullable): paths to expose rw in the new sandbox, or `NULL`
+ * @sandbox_expose_ro: (array zero-terminated) (nullable): paths to expose ro in the new sandbox, or `NULL`
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
@@ -218,7 +218,7 @@ do_spawn (SpawnCall *call)
  * a process in, with the given arguments.
  *
  * The learn when the spawned process exits, connect to the
- * #XdpPortal::spawn-exited signal.
+ * [signal@Portal::spawn-exited] signal.
  */
 void
 xdp_portal_spawn (XdpPortal            *portal,
@@ -263,8 +263,8 @@ xdp_portal_spawn (XdpPortal            *portal,
 
 /**
  * xdp_portal_spawn_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the spawn request, and returns
@@ -287,14 +287,14 @@ xdp_portal_spawn_finish (XdpPortal     *portal,
 
 /**
  * xdp_portal_spawn_signal:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @pid: the pid of the process to send a signal to
  * @signal: the Unix signal to send (see signal(7))
  * @to_process_group: whether to send the signal to the process
  *     group of the process
  *
  * Sends a Unix signal to a process that has been spawned
- * by xdp_portal_spawn().
+ * by [method@Portal.spawn].
  */
 void
 xdp_portal_spawn_signal (XdpPortal *portal,

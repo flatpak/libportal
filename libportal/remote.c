@@ -25,10 +25,10 @@
 #include "portal-private.h"
 #include "session-private.h"
 
-/**
- * SECTION:screencast
- * @title: Screencast
- * @short_description: create screencast sessions
+/*
+ * Screencast
+ *
+ * Create screencast sessions.
  *
  * A screencast session makes the content of a monitor or window
  * available as a pipewire stream.
@@ -36,10 +36,10 @@
  * The underlying portal is org.freedesktop.portal.ScreenCast.
  */
 
-/**
- * SECTION:remote
- * @title: Remote desktop
- * @short_description: allow remote control of the session
+/*
+ * Remote Desktop
+ *
+ * Allow remote control of the session.
  *
  * A remote desktop session allows to inject events into the input stream.
  *
@@ -390,20 +390,20 @@ get_screencast_interface_version (CreateCall *call)
 
 /**
  * xdp_portal_create_screencast_session:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @outputs: which kinds of source to offer in the dialog
  * @flags: options for this call
  * @cursor_mode: the cursor mode of the session
  * @persist_mode: the persist mode of the session
  * @restore_token: (nullable): the token of a previous screencast session to restore
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Creates a session for a screencast.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_create_screencast_session_finish() to get the results.
+ * call [method@Portal.create_screencast_session_finish] to get the results.
  */
 void
 xdp_portal_create_screencast_session (XdpPortal *portal,
@@ -440,13 +440,13 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
 
 /**
  * xdp_portal_create_screencast_session_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the create-screencast request, and returns an #XdpSession.
+ * Finishes the create-screencast request, and returns an [class@Session].
  *
- * Returns: (transfer full): a #XdpSession
+ * Returns: (transfer full): a [class@Session]
  */
 XdpSession *
 xdp_portal_create_screencast_session_finish (XdpPortal *portal,
@@ -467,19 +467,19 @@ xdp_portal_create_screencast_session_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_create_remote_desktop_session:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @devices: which kinds of input devices to ofer in the new dialog
  * @outputs: which kinds of source to offer in the dialog
  * @flags: options for this call
  * @cursor_mode: the cursor mode of the session
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Creates a session for remote desktop.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_create_remote_desktop_session_finish() to get the results.
+ * call [method@Portal.create_remote_desktop_session_finish] to get the results.
  */
 void
 xdp_portal_create_remote_desktop_session (XdpPortal *portal,
@@ -512,13 +512,13 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
 
 /**
  * xdp_portal_create_remote_desktop_session_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the create-remote-desktop request, and returns an #XdpSession.
+ * Finishes the create-remote-desktop request, and returns an [class@Session].
  *
- * Returns: (transfer full): a #XdpSession
+ * Returns: (transfer full): a [class@Session]
  */
 XdpSession *
 xdp_portal_create_remote_desktop_session_finish (XdpPortal *portal,
@@ -704,16 +704,16 @@ start_session (StartCall *call)
 
 /**
  * xdp_session_start:
- * @session: a #XdpSession in initial state
+ * @session: a [class@Session] in initial state
  * @parent: (nullable): parent window information
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Starts the session.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_session_start_finish() to get the results.
+ * call [method@Session.start_finish] to get the results.
  */
 void
 xdp_session_start (XdpSession *session,
@@ -740,13 +740,13 @@ xdp_session_start (XdpSession *session,
 
 /**
  * xdp_session_start_finish:
- * @session: a #XdpSession
- * @result: a #GAsyncResult
+ * @session: a [class@Session]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the session-start request.
  *
- * Returns: %TRUE if the session was started successfully.
+ * Returns: `TRUE` if the session was started successfully.
  */
 gboolean
 xdp_session_start_finish (XdpSession *session,
@@ -761,7 +761,7 @@ xdp_session_start_finish (XdpSession *session,
 
 /**
  * xdp_session_close:
- * @session: an active #XdpSession
+ * @session: an active [class@Session]
  *
  * Closes the session.
  */
@@ -784,7 +784,7 @@ xdp_session_close (XdpSession *session)
 
 /**
  * xdp_session_open_pipewire_remote:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  *
  * Opens a file descriptor to the pipewire remote where the screencast
  * streams are available. The file descriptor should be used to create
@@ -831,14 +831,14 @@ xdp_session_open_pipewire_remote (XdpSession *session)
 
 /**
  * xdp_session_pointer_motion:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @dx: relative horizontal movement
  * @dy: relative vertical movement
  *
  * Moves the pointer from its current position.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_POINTER access.
+ * with `XDP_DEVICE_POINTER` access.
  */
 void
 xdp_session_pointer_motion (XdpSession *session,
@@ -864,7 +864,7 @@ xdp_session_pointer_motion (XdpSession *session,
 
 /**
  * xdp_session_pointer_position:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @stream: the node ID of the pipewire stream the position is relative to
  * @x: new X position
  * @y: new Y position
@@ -873,7 +873,7 @@ xdp_session_pointer_motion (XdpSession *session,
  * coordinate space.
  * 
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_POINTER access.
+ * with `XDP_DEVICE_POINTER` access.
  */
 void
 xdp_session_pointer_position (XdpSession *session,
@@ -900,14 +900,14 @@ xdp_session_pointer_position (XdpSession *session,
 
 /**
  * xdp_session_pointer_button:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @button: the button
  * @state: the new state
  *
  * Changes the state of the button to @state.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_POINTER access.
+ * with `XDP_DEVICE_POINTER` access.
  */
 void
 xdp_session_pointer_button (XdpSession *session,
@@ -933,7 +933,7 @@ xdp_session_pointer_button (XdpSession *session,
 
 /**
  * xdp_session_pointer_axis:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @finish: whether this is the last in a series of related events
  * @dx: relative axis movement on the X axis
  * @dy: relative axis movement on the Y axis
@@ -943,7 +943,7 @@ xdp_session_pointer_button (XdpSession *session,
  * the motion vector of a pointer motion done using the same advice.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_POINTER access.
+ * with `XDP_DEVICE_POINTER` access.
  */
 void
 xdp_session_pointer_axis (XdpSession *session,
@@ -971,14 +971,14 @@ xdp_session_pointer_axis (XdpSession *session,
 
 /**
  * xdp_session_pointer_axis_discrete:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @axis: the axis to change
  * @steps: number of steps scrolled
  *
  * The axis movement from a discrete scroll device.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_POINTER access.
+ * with `XDP_DEVICE_POINTER` access.
  */
 void
 xdp_session_pointer_axis_discrete (XdpSession *session,
@@ -1004,7 +1004,7 @@ xdp_session_pointer_axis_discrete (XdpSession *session,
 
 /**
  * xdp_session_keyboard_key:
- * @session: a remote desktop #XdpSession
+ * @session: a remote desktop [class@Session]
  * @keysym: whether to interpret @key as a keysym instead of a keycode
  * @key: the keysym or keycode to change
  * @state: the new state
@@ -1012,7 +1012,7 @@ xdp_session_pointer_axis_discrete (XdpSession *session,
  * Changes the state of the key to @state.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_KEYBOARD access.
+ * with `XDP_DEVICE_KEYBOARD` access.
  */
 void
 xdp_session_keyboard_key (XdpSession *session,
@@ -1039,18 +1039,18 @@ xdp_session_keyboard_key (XdpSession *session,
 
 /**
  * xdp_session_touch_down:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @stream: the node ID of the pipewire stream the position is relative to
  * @slot: touch slot where the touch point appeared
  * @x: new X position
  * @y: new Y position
  *
- * Notify about a new touch down event. The (x, y) position
+ * Notify about a new touch down event. The `(x, y)` position
  * represents the new touch point position in the streams logical
  * coordinate space.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_TOUCHSCREEN access.
+ * with `XDP_DEVICE_TOUCHSCREEN` access.
  */
 void
 xdp_session_touch_down (XdpSession *session,
@@ -1078,18 +1078,18 @@ xdp_session_touch_down (XdpSession *session,
 
 /**
  * xdp_session_touch_position:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @stream: the node ID of the pipewire stream the position is relative to
  * @slot: touch slot that is changing position
  * @x: new X position
  * @y: new Y position
  *
- * Notify about a new touch motion event. The (x, y) position
+ * Notify about a new touch motion event. The `(x, y)` position
  * represents where the touch point position in the streams logical
  * coordinate space moved.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_TOUCHSCREEN access.
+ * with `XDP_DEVICE_TOUCHSCREEN` access.
  */
 void
 xdp_session_touch_position (XdpSession *session,
@@ -1117,13 +1117,13 @@ xdp_session_touch_position (XdpSession *session,
 
 /**
  * xdp_session_touch_up:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  * @slot: touch slot that changed
  *
  * Notify about a new touch up event.
  *
  * May only be called on a remote desktop session
- * with %XDP_DEVICE_TOUCHSCREEN access.
+ * with `XDP_DEVICE_TOUCHSCREEN` access.
  */
 void
 xdp_session_touch_up (XdpSession *session,
@@ -1148,12 +1148,12 @@ xdp_session_touch_up (XdpSession *session,
 
 /**
  * xdp_session_get_persist_mode:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  *
  * Retrieves the effective persist mode of @session.
  *
  * May only be called after @session is successfully started, i.e. after
- * xdp_session_start_finish().
+ * [method@Session.start_finish].
  *
  * Returns: the effective persist mode of @session
  */
@@ -1168,18 +1168,18 @@ xdp_session_get_persist_mode (XdpSession *session)
 
 /**
  * xdp_session_get_restore_token:
- * @session: a #XdpSession
+ * @session: a [class@Session]
  *
  * Retrieves the restore token of @session.
  *
- * A restore token will only be available if #XDP_PERSIST_MODE_TRANSIENT
- * or #XDP_PERSIST_MODE_PERSISTENT was passed when creating the screencast
+ * A restore token will only be available if `XDP_PERSIST_MODE_TRANSIENT`
+ * or `XDP_PERSIST_MODE_PERSISTENT` was passed when creating the screencast
  * session.
  *
  * Remote desktop sessions cannot be restored.
  *
  * May only be called after @session is successfully started, i.e. after
- * xdp_session_start_finish().
+ * [method@Session.start_finish].
  *
  * Returns: (nullable): the restore token of @session
  */

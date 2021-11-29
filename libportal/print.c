@@ -22,10 +22,10 @@
 #include "print.h"
 #include "portal-private.h"
 
-/**
- * SECTION:print
- * @title: Print
- * @short_description: send documents to a printer
+/*
+ * Print
+ *
+ * Send documents to a printer.
  *
  * These functions let applications print.
  *
@@ -273,20 +273,20 @@ do_print (PrintCall *call)
 
 /**
  * xdp_portal_prepare_print:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @title: tile for the print dialog
  * @settings: (nullable): Serialized print settings
  * @page_setup: (nullable): Serialized page setup
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  * 
  * Presents a print dialog to the user and returns print settings and page setup.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_prepare_print_finish() to get the results.
+ * call [method@Portal.prepare_print_finish] to get the results.
  */
 void
 xdp_portal_prepare_print (XdpPortal *portal,
@@ -322,18 +322,19 @@ xdp_portal_prepare_print (XdpPortal *portal,
 
 /**
  * xdp_portal_prepare_print_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the prepare-print request, and returns #GVariant dictionary
+ * Finishes the prepare-print request, and returns [struct@GLib.Variant] dictionary
  * with the following information:
+ *
  * - settings `a{sv}`: print settings as set up by the user in the print dialog
  * - page-setup `a{sv}: page setup as set up by the user in the print dialog
- * - token u: a token that can by used in a xdp_portal_print_file() call to
+ * - token u: a token that can by used in a [method@Portal.print_file] call to
  *     avoid the print dialog
  *
- * Returns: (transfer full): a #GVariant dictionary with print information
+ * Returns: (transfer full): a [struct@GLib.Variant] dictionary with print information
  */
 GVariant *
 xdp_portal_prepare_print_finish (XdpPortal *portal,
@@ -349,13 +350,13 @@ xdp_portal_prepare_print_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_print_file:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @title: tile for the print dialog
- * @token: token that was returned by a previous xdp_portal_prepare_print() call, or 0
+ * @token: token that was returned by a previous [method@Portal.prepare_print] call, or 0
  * @file: path of the document to print
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  * 
@@ -366,7 +367,7 @@ xdp_portal_prepare_print_finish (XdpPortal *portal,
  * no token is present, then a print dialog will be presented to the user.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_print_file_finish() to get the results.
+ * call [method@Portal.print_file_finish] to get the results.
  */
 void
 xdp_portal_print_file (XdpPortal *portal,
@@ -402,13 +403,13 @@ xdp_portal_print_file (XdpPortal *portal,
 
 /**
  * xdp_portal_print_file_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the print request.
  *
- * Returns: %TRUE if the request was successful
+ * Returns: `TRUE` if the request was successful
  */
 gboolean
 xdp_portal_print_file_finish (XdpPortal *portal,

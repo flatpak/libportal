@@ -24,15 +24,15 @@
 #include "portal-enums.h"
 
 /**
- * SECTION:portal
- * @title: XdpPortal
- * @short_description: context for portal calls
+ * XdpPortal
+ *
+ * Context for portal calls.
  *
  * The XdpPortal object provides the main context object
  * for the portal operations of libportal.
  *
  * Typically, an application will create a single XdpPortal
- * object with xdp_portal_new() and use it throughout its lifetime.
+ * object with [ctor@Portal.new] and use it throughout its lifetime.
  */
 
 enum {
@@ -98,12 +98,12 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::spawn-exited:
-   * @portal: the #XdpPortal object
+   * @portal: the [class@Portal] object
    * @pid: the pid of the process
    * @exit_status: the exit status of the process
    *
    * This signal is emitted when a process that was spawned
-   * with xdp_portal_spawn() exits.
+   * with [method@Portal.spawn] exits.
    */
   signals[SPAWN_EXITED] = g_signal_new ("spawn-exited",
                                         G_TYPE_FROM_CLASS (object_class),
@@ -117,7 +117,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::session-state-changed:
-   * @portal: the #XdpPortal object
+   * @portal: the [class@Portal] object
    * @screensaver_active: whether the screensaver is active
    * @session_state: the current state of the login session
    *
@@ -137,7 +137,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::update-available:
-   * @portal: the #XdpPortal object
+   * @portal: the [class@Portal] object
    * @running_commit: the commit that the sandbox is running with
    * @local_commit: the commit that is currently deployed. Restarting
    *     the app will use this commit
@@ -162,7 +162,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::update-progress:
-   * @portal: the #XdpPortal object
+   * @portal: the [class@Portal] object
    * @n_ops: the number of operations that the update consists of
    * @op: the position of the currently active operation
    * @progress: the progress of the currently active operation, as
@@ -194,7 +194,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
  /**
    * XdpPortal::location-updated:
-   * @portal: the #XdpPortal
+   * @portal: the [class@Portal]
    * @latitude: the latitude, in degrees
    * @longitude: the longitude, in degrees
    * @altitude: the altitude, in meters
@@ -228,7 +228,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
 
   /**
    * XdpPortal::notification-action-invoked:
-   * @portal: the #XdpPortal
+   * @portal: the [class@Portal]
    * @id: the notification ID
    * @action: the action name
    * @parameter: (nullable): the target parameter for the action
@@ -264,9 +264,9 @@ xdp_portal_init (XdpPortal *portal)
 /**
  * xdp_portal_new:
  *
- * Creates a new #XdpPortal object.
+ * Creates a new [class@Portal] object.
  *
- * Returns: a newly created #XdpPortal object
+ * Returns: a newly created [class@Portal] object
  */
 XdpPortal *
 xdp_portal_new (void)

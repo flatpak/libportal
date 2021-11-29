@@ -20,15 +20,30 @@
 #include "config.h"
 #include "parent-private.h"
 
+
+/**
+ * XdpParent
+ *
+ * Parent window abstraction.
+ *
+ * The [struct@Parent] struct provides an abstract way to represent
+ * a window, without introducing a dependency on a toolkit
+ * library.
+ *
+ * An XdpParent implementation for GTK+ is included in the
+ * portal-gtk.h header file, in the form of inline functions.
+ * To create a XdpParent for a GTK+ window, use
+ * [ctor@Parent.new_gtk()].
+ */
 G_DEFINE_BOXED_TYPE (XdpParent, xdp_parent, xdp_parent_copy, xdp_parent_free)
 
 /**
  * xdp_parent_copy:
- * @source: a #XdpParent
+ * @source: a [struct@Parent]
  *
- * Copies @source into a new #XdpParent.
+ * Copies @source into a new [struct@Parent].
  *
- * Returns: (transfer full): an #XdpParent that is a copy of @source
+ * Returns: (transfer full): an [struct@Parent] that is a copy of @source
  */
 XdpParent *
 xdp_parent_copy (XdpParent *source)
@@ -47,7 +62,7 @@ xdp_parent_copy (XdpParent *source)
 
 /**
  * xdp_parent_free:
- * @parent: an #XdpParent
+ * @parent: an [struct@Parent]
  *
  * Frees @parent.
  */

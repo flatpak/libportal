@@ -32,10 +32,10 @@
 
 #include "portal-private.h"
 
-/**
- * SECTION:wallpaper
- * @title: Wallpaper
- * @short_description: Set desktop backgrounds
+/*
+ * Wallpaper
+ *
+ * Set desktop backgrounds.
  *
  * These functions let applications set desktop backgrounds.
  *
@@ -275,11 +275,11 @@ set_wallpaper (WallpaperCall *call)
 
 /**
  * xdp_portal_set_wallpaper:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: parent window information
  * @uri: the URI to use
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
@@ -318,14 +318,14 @@ xdp_portal_set_wallpaper (XdpPortal           *portal,
 
 /**
  * xdp_portal_set_wallpaper_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the open-uri request, and returns
  * the result in the form of a boolean.
  *
- * Returns: %TRUE if the call succeeded
+ * Returns: `TRUE` if the call succeeded
  */
 gboolean
 xdp_portal_set_wallpaper_finish (XdpPortal *portal,

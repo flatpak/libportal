@@ -22,10 +22,10 @@
 #include "notification.h"
 #include "portal-private.h"
 
-/**
- * SECTION:notification
- * @title: Notification
- * @short_description: send notifications
+/*
+ * Notification
+ *
+ * Send notifications.
  * 
  * These functions let applications send desktop notifications.
  *
@@ -91,20 +91,21 @@ call_done (GObject *source,
 
 /**
  * xdp_portal_add_notification:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @id: unique ID for the notification
- * @notification: a #GVariant dictionary with the content of the notification
+ * @notification: a [struct@GLib.Variant] dictionary with the content of the notification
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Sends a desktop notification.
  *
  * The following keys may be present in @notification:
+ *
  * - title `s`: a user-visible string to display as title
  * - body `s`: a user-visible string to display as body
- * - icon `v`: a serialized icon (in the format produced by g_icon_serialize())
+ * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize])
  * - priority `s`: "low", "normal", "high" or "urgent"
  * - default-action `s`: name of an action that
  *     will be activated when the user clicks on the notification
@@ -113,6 +114,7 @@ call_done (GObject *source,
  * - buttons `aa{sv}`: array of serialized buttons
  *
  * Each serialized button is a dictionary with the following supported keys:
+ *
  * - label `s`: user-visible lable for the button. Mandatory
  * - action `s`: name of an action that will be activated when
  *     the user clicks on the button. Mandatory
@@ -122,12 +124,12 @@ call_done (GObject *source,
  * Actions with a prefix of "app." are assumed to be exported by the
  * application and will be activated via the org.freedesktop.Application
  * interface, others are activated by emitting the
- * #XdpPortal::notification-action-invoked signal.
+ * [signal@Portal::notification-action-invoked] signal.
  *
  * It is the callers responsibility to ensure that the ID is unique
  * among all notifications.
  *
- * To withdraw a notification, use xdp_portal_remove_notification().
+ * To withdraw a notification, use [method@Portal.remove_notification].
  */
 void
 xdp_portal_add_notification (XdpPortal *portal,
@@ -171,14 +173,14 @@ xdp_portal_add_notification (XdpPortal *portal,
 
 /**
  * xdp_portal_add_notification_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the notification request, and returns the result
  * as a boolean.
  *
- * Returns: %TRUE if the notification was added
+ * Returns: `TRUE` if the notification was added
  */
 gboolean
 xdp_portal_add_notification_finish (XdpPortal     *portal,
@@ -194,7 +196,7 @@ xdp_portal_add_notification_finish (XdpPortal     *portal,
 
 /**
  * xdp_portal_remove_notification:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @id: the ID of an notification
  *
  * Withdraws a desktop notification.
