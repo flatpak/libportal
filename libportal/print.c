@@ -22,16 +22,6 @@
 #include "print.h"
 #include "portal-private.h"
 
-/*
- * Print
- *
- * Send documents to a printer.
- *
- * These functions let applications print.
- *
- * The underlying portal is org.freedesktop.portal.Print.
- */
-
 #define GNU_SOURCE 1
 
 #include <sys/types.h>

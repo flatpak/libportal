@@ -32,17 +32,6 @@
 
 #include "portal-private.h"
 
-/*
- * Open
- *
- * Handle URIs.
- *
- * These functions let applications open URIs in external handlers.
- * A typical example is to open a pdf file in a document viewer.
- *
- * The underlying portal is org.freedesktop.portal.OpenURI.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

@@ -32,16 +32,6 @@
 
 #include "portal-private.h"
 
-/*
- * Wallpaper
- *
- * Set desktop backgrounds.
- *
- * These functions let applications set desktop backgrounds.
- *
- * The underlying portal is org.freedesktop.portal.Wallpaper.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

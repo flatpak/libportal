@@ -22,16 +22,6 @@
 #include "account.h"
 #include "portal-private.h"
 
-/*
- * Accounts
- * Basic user information.
- *
- * These functions let applications query basic information about
- * the user, such as user ID, name and avatar picture.
- *
- * The underlying portal is org.freedesktop.portal.Account.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

@@ -23,15 +23,6 @@
 #include "portal-private.h"
 
 
-/*
- * Location
- *
- * Access to location information.
- *
- * Location monitoring makes location information available
- * via the [signal@Portal::location-updated] signal.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

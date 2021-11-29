@@ -32,20 +32,6 @@
 
 #include "portal-private.h"
 
-/*
- * Spawn
- *
- * Launch another sandbox.
- *
- * These functions let applications spawn a process in another
- * copy of their sandbox.
- *
- * To monitor spawned processes, use the [signal@Portal::spawn-exited]
- * signal.
- *
- * The underlying portal is org.freedesktop.portal.Flatpak.
- */
-
 typedef struct {
   XdpPortal *portal;
   GTask *task;

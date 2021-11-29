@@ -22,16 +22,6 @@
 #include "notification.h"
 #include "portal-private.h"
 
-/*
- * Notification
- *
- * Send notifications.
- * 
- * These functions let applications send desktop notifications.
- *
- * The underlying portal is org.freedesktop.portal.Notification.
- */
-
 static void
 action_invoked (GDBusConnection *bus,
                 const char *sender_name,

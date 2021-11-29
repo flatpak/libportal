@@ -22,21 +22,6 @@
 #include "inhibit.h"
 #include "portal-private.h"
 
-/*
- * Session
- *
- * Session state changes.
- *
- * These functions let applications inhibit certain login session
- * state changes, and be informed about the impending end of the
- * session.
- *
- * A typical use for this functionality is to prevent the session
- * from locking while a video is playing.
- *
- * The underlying portal is org.freedesktop.portal.Inhibit.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

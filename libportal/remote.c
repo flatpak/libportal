@@ -25,27 +25,6 @@
 #include "portal-private.h"
 #include "session-private.h"
 
-/*
- * Screencast
- *
- * Create screencast sessions.
- *
- * A screencast session makes the content of a monitor or window
- * available as a pipewire stream.
- *
- * The underlying portal is org.freedesktop.portal.ScreenCast.
- */
-
-/*
- * Remote Desktop
- *
- * Allow remote control of the session.
- *
- * A remote desktop session allows to inject events into the input stream.
- *
- * The underlying portal is org.freedesktop.portal.RemoteDesktop.
- */
-
 typedef struct {
   XdpPortal *portal;
   char *id;
