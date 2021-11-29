@@ -24,16 +24,6 @@
 #include "session-private.h"
 #include "portal-private.h"
 
-/*
- * Camera
- * Access camera devices.
- *
- * These functions lets applications access cameras and
- * open pipewire remotes for them.
- *
- * The underlying portal is org.freedesktop.portal.Camera.
- */
-
 /**
  * xdp_portal_is_camera_present:
  * @portal: a [class@Portal]

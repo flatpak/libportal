@@ -31,18 +31,6 @@
 #include "portal-private.h"
 #include "email.h"
 
-/*
- * Email
- *
- * Composing email messages.
- *
- * These functions let applications send email, by prompting
- * the user to compose a message. The email may already have
- * an address, subject, body or attachments.
- *
- * The underlying portal is org.freedesktop.portal.Email.
- */
-
 #ifndef O_PATH
 #define O_PATH 0
 #endif

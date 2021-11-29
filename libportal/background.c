@@ -23,17 +23,6 @@
 #include "background.h"
 #include "portal-private.h"
 
-/*
- * Background
- *
- * Request background permissions.
- *
- * These functions let the application request background permissions
- * such as enabling autostart.
- *
- * The underlying portal is org.freedesktop.portal.Background.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

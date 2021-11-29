@@ -22,17 +22,6 @@
 #include "updates.h"
 #include "portal-private.h"
 
-/*
- * Updates
- *
- * Installing software updates.
- *
- * These functions let applications be informed about available
- * software updates (for themselves) and install those updates.
- *
- * The underlying portal is org.freedesktop.portal.Flatpak.
- */
-
 #define UPDATE_MONITOR_INTERFACE "org.freedesktop.portal.Flatpak.UpdateMonitor"
 #define UPDATE_MONITOR_PATH_PREFIX "/org/freedesktop/portal/Flatpak/update_monitor/"
 

@@ -22,21 +22,6 @@
 #include "filechooser.h"
 #include "portal-private.h"
 
-/*
- * File
- *
- * Access to files outside the sandbox.
- *
- * These functions let applications ask the user for access to
- * files outside the sandbox, by presenting a file chooser dialog.
- *
- * The selected files will be made accessible to the application
- * via the document portal, and the returned URI will point
- * into the document portal fuse filesystem in /run/user/$UID/doc/.
- *
- * The underlying portal is org.freedesktop.portal.FileChooser.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;

@@ -32,16 +32,6 @@
 
 #include "portal-private.h"
 
-/*
- * Trash
- *
- * Send files to the trash.
- *
- * This function lets applications send a file to the trash can.
- *
- * The underlying portal is org.freedesktop.portal.Trash.
- */
-
 typedef struct {
   XdpPortal *portal;
   char *path;

@@ -22,16 +22,6 @@
 #include "screenshot.h"
 #include "portal-private.h"
 
-/*
- * Screenshot
- *
- * Take a screenshot.
- *
- * These functions let the application take a screenshot or pick a color.
- * 
- * The underlying portal is org.freedesktop.portal.Screenshot.
- */
-
 typedef struct {
   XdpPortal *portal;
   XdpParent *parent;
