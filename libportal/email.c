@@ -31,10 +31,10 @@
 #include "portal-private.h"
 #include "email.h"
 
-/**
- * SECTION:email
- * @title: Email
- * @short_description: composing email messages
+/*
+ * Email
+ *
+ * Composing email messages.
  *
  * These functions let applications send email, by prompting
  * the user to compose a message. The email may already have
@@ -300,7 +300,7 @@ compose_email (EmailCall *call)
 
 /**
  * xdp_portal_compose_email:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @addresses: (array zero-terminated=1) (nullable): the email addresses to send to
  * @cc: (array zero-terminated=1) (nullable): the email addresses to cc
@@ -309,7 +309,7 @@ compose_email (EmailCall *call)
  * @body: (nullable): the body for the email
  * @attachments: (array zero-terminated=1) (nullable): an array of paths for files to attach
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
@@ -317,7 +317,7 @@ compose_email (EmailCall *call)
  * with some pre-filled information.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_compose_email_finish() to get the results.
+ * call [method@Portal.compose_email_finish] to get the results.
  */
 void
 xdp_portal_compose_email (XdpPortal *portal,
@@ -358,13 +358,13 @@ xdp_portal_compose_email (XdpPortal *portal,
 
 /**
  * xdp_portal_compose_email_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the compose-email request.
  *
- * Returns: %TRUE if the request was handled successfully
+ * Returns: `TRUE` if the request was handled successfully
  */
 gboolean
 xdp_portal_compose_email_finish (XdpPortal *portal,

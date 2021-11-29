@@ -24,10 +24,9 @@
 #include "session-private.h"
 #include "portal-private.h"
 
-/**
- * SECTION:camera
- * @title: Camera
- * @short_description: access camera devices
+/*
+ * Camera
+ * Access camera devices.
  *
  * These functions lets applications access cameras and
  * open pipewire remotes for them.
@@ -37,11 +36,11 @@
 
 /**
  * xdp_portal_is_camera_present:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  *
  * Returns whether any camera are present.
  *
- * Returns: %TRUE if the system has cameras
+ * Returns: `TRUE` if the system has cameras
  */
 gboolean
 xdp_portal_is_camera_present (XdpPortal *portal)
@@ -215,17 +214,17 @@ g_debug ("Calling AccessCamera");
 
 /**
  * xdp_portal_access_camera:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Request access to a camera.
  *
  * When the request is done, @callback will be called.
- * You can then call xdp_portal_access_camera_finished()
+ * You can then call [method@Portal.access_camera_finish]
  * to get the results.
  */
 void
@@ -253,18 +252,18 @@ xdp_portal_access_camera (XdpPortal           *portal,
 
 /**
  * xdp_portal_access_camera_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes a camera acess request, and returns
  * the result as a boolean.
  *
  * If the access was granted, you can then call
- * xdp_portal_open_pipewire_remote_for_camera()
+ * [method@Portal.open_pipewire_remote_for_camera]
  * to obtain a pipewire remote.
  *
- * Returns: %TRUE if access to a camera was granted
+ * Returns: `TRUE` if access to a camera was granted
  */
 gboolean
 xdp_portal_access_camera_finish (XdpPortal     *portal,
@@ -280,7 +279,7 @@ xdp_portal_access_camera_finish (XdpPortal     *portal,
 
 /**
  * xdp_portal_open_pipewire_remote_for_camera:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  *
  * Opens a file descriptor to the pipewire remote where the camera
  * nodes are available. The file descriptor should be used to create

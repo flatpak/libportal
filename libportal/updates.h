@@ -31,7 +31,7 @@ G_BEGIN_DECLS
  * @XDP_UPDATE_STATUS_FAILED: Installation failed
  *
  * The values of this enum are returned in the
- * #XdpPortal::update-progress signal to indicate
+ * [signal@Portal::update-progress] signal to indicate
  * the current progress of an installation.
  */
 typedef enum {

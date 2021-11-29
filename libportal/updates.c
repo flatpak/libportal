@@ -22,10 +22,10 @@
 #include "updates.h"
 #include "portal-private.h"
 
-/**
- * SECTION:updates
- * @title: Updates
- * @short_description: installing software updates
+/*
+ * Updates
+ *
+ * Installing software updates.
  *
  * These functions let applications be informed about available
  * software updates (for themselves) and install those updates.
@@ -213,18 +213,18 @@ create_monitor (CreateMonitorCall *call)
 
 /**
  * xdp_portal_update_monitor_start:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @flags: options for this cal..
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Makes XdpPortal start monitoring for available software updates.
  *
- * When a new update is available, the #XdpPortal::update-available.
+ * When a new update is available, the [signal@Portal::update-available].
  * signal is emitted.
  *
- * Use xdp_portal_update_monitor_stop() to stop monitoring.
+ * Use [method@Portal.update_monitor_stop] to stop monitoring.
  */
 void
 xdp_portal_update_monitor_start (XdpPortal *portal,
@@ -248,14 +248,14 @@ xdp_portal_update_monitor_start (XdpPortal *portal,
 
 /**
  * xdp_portal_update_monitor_start_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes an update-monitor request, and returns
  * the result in the form of boolean.
  *
- * Returns: %TRUE if the request succeeded
+ * Returns: `TRUE` if the request succeeded
  */
 gboolean
 xdp_portal_update_monitor_start_finish (XdpPortal *portal,
@@ -271,10 +271,10 @@ xdp_portal_update_monitor_start_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_update_monitor_stop:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  *
  * Stops update monitoring that was started with
- * xdp_portal_update_monitor_start().
+ * [method@Portal.update_monitor_start].
  */
 void
 xdp_portal_update_monitor_stop (XdpPortal *portal)
@@ -394,17 +394,17 @@ install_update (InstallUpdateCall *call)
 
 /**
  * xdp_portal_update_install:
- * @portal: a #XdpPortal
- * @parent: a #XdpParent
+ * @portal: a [class@Portal]
+ * @parent: a [struct@Parent]
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Installs an available software update. This should be
- * called in response to a #XdpPortal::update-available signal.
+ * called in response to a [signal@Portal::update-available] signal.
  *
- * During the update installation, the #XdpPortal::update-progress
+ * During the update installation, the [signal@Portal::update-progress]
  * signal will be emitted to provide progress information.
  */
 void
@@ -434,8 +434,8 @@ xdp_portal_update_install (XdpPortal *portal,
 
 /**
  * xdp_portal_update_install_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes an update-installation request, and returns
@@ -443,10 +443,10 @@ xdp_portal_update_install (XdpPortal *portal,
  *
  * Note that the update may not be completely installed
  * by the time this function is called. You need to
- * listen to the #XdpPortal::update-progress signal
+ * listen to the [signal@Portal::update-progress] signal
  * to learn when the installation is complete.
  *
- * Returns: %TRUE if the update is being installed
+ * Returns: `TRUE` if the update is being installed
  */
 gboolean
 xdp_portal_update_install_finish (XdpPortal *portal,

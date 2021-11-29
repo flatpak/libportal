@@ -22,10 +22,10 @@
 #include "inhibit.h"
 #include "portal-private.h"
 
-/**
- * SECTION:inhibit
- * @title: Session
- * @short_description: session state changes
+/*
+ * Session
+ *
+ * Session state changes.
  *
  * These functions let applications inhibit certain login session
  * state changes, and be informed about the impending end of the
@@ -212,20 +212,20 @@ do_inhibit (InhibitCall *call)
 
 /**
  * xdp_portal_session_inhibit:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @reason: (nullable): user-visible reason for the inhibition
  * @flags: information about what to inhibit
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Inhibits various session status changes.
  *
  * To obtain an ID that can be used to undo the inhibition, use
- * xdp_portal_session_inhibit_finish() in the callback.
+ * [method@Portal.session_inhibit_finish] in the callback.
  *
- * To remove an active inhibitor, call xdp_portal_session_uninhibit()
+ * To remove an active inhibitor, call [method@Portal.session_uninhibit]
  * with the same ID.
  */
 void
@@ -269,13 +269,13 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
 
 /**
  * xdp_portal_session_inhibit_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the inhbit request, and returns the ID of the
  * inhibition as a positive integer. The ID can be passed to
- * xdg_portal_session_uninhibit() to undo the inhibition.
+ * [method@Portal.session_uninhibit] to undo the inhibition.
  *
  * Returns: the ID of the inhibition, or -1 if there was an error
  */
@@ -293,11 +293,11 @@ xdp_portal_session_inhibit_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_session_uninhibit:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @id: unique ID for an active inhibition
  *
  * Removes an inhibitor that was created by a call
- * to xdp_portal_session_inhibit().
+ * to [method@Portal.session_inhibit].
  */
 void
 xdp_portal_session_uninhibit (XdpPortal *portal,
@@ -557,19 +557,19 @@ create_monitor (CreateMonitorCall *call)
 
 /**
  * xdp_portal_session_monitor_start:
- * @portal: a #XdpPortal
- * @parent: (nullable): a XdpParent, or %NULL
+ * @portal: a [class@Portal]
+ * @parent: (nullable): a XdpParent, or `NULL`
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Makes XdpPortal start monitoring the login session state.
+ * Makes [class@Portal] start monitoring the login session state.
  *
- * When the state changes, the #XdpPortal::session-state-changed
+ * When the state changes, the [signal@Portal::session-state-changed]
  * signal is emitted.
  *
- * Use xdp_portal_session_monitor_stop() to stop monitoring.
+ * Use [method@Portal.session_monitor_stop] to stop monitoring.
  */
 void
 xdp_portal_session_monitor_start (XdpPortal *portal,
@@ -599,14 +599,14 @@ xdp_portal_session_monitor_start (XdpPortal *portal,
 
 /**
  * xdp_portal_session_monitor_start_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes a session-monitor request, and returns
  * the result in the form of boolean.
  *
- * Returns: %TRUE if the request succeeded
+ * Returns: `TRUE` if the request succeeded
  */
 gboolean
 xdp_portal_session_monitor_start_finish (XdpPortal *portal,
@@ -622,10 +622,10 @@ xdp_portal_session_monitor_start_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_session_monitor_stop:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  *
  * Stops session state monitoring that was started with
- * xdp_portal_session_monitor_start().
+ * [method@Portal.session_monitor_start].
  */
 void
 xdp_portal_session_monitor_stop (XdpPortal *portal)
@@ -653,15 +653,15 @@ xdp_portal_session_monitor_stop (XdpPortal *portal)
 
 /**
  * xdp_portal_session_monitor_query_end_response:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  *
  * This method should be called within one second of
- * receiving a #XdpPortal::session-state-changed signal
+ * receiving a [signal@Portal::session-state-changed] signal
  * with the 'Query End' state, to acknowledge that they
  * have handled the state change.
  *
  * Possible ways to handle the state change are either
- * to call xdp_portal_session_inhibit() to prevent the
+ * to call [method@Portal.session_inhibit] to prevent the
  * session from ending, or to save your state and get
  * ready for the session to end.
  */

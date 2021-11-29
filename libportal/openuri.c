@@ -32,10 +32,10 @@
 
 #include "portal-private.h"
 
-/**
- * SECTION:open
- * @title: Open
- * @short_description: handle URIs
+/*
+ * Open
+ *
+ * Handle URIs.
  *
  * These functions let applications open URIs in external handlers.
  * A typical example is to open a pdf file in a document viewer.
@@ -265,11 +265,11 @@ do_open (OpenCall *call)
 
 /**
  * xdp_portal_open_uri:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: parent window information
  * @uri: the URI to open
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
@@ -308,14 +308,14 @@ xdp_portal_open_uri (XdpPortal *portal,
 
 /**
  * xdp_portal_open_uri_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the open-uri request, and returns
  * the result in the form of a boolean.
  *
- * Returns: %TRUE if the call succeeded
+ * Returns: `TRUE` if the call succeeded
  */
 gboolean
 xdp_portal_open_uri_finish (XdpPortal *portal,
@@ -331,11 +331,11 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_open_directory:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: parent window information
  * @uri: the URI to open
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
@@ -375,14 +375,14 @@ xdp_portal_open_directory (XdpPortal *portal,
 
 /**
  * xdp_portal_open_directory_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the open-directory request, and returns
  * the result in the form of a boolean.
  *
- * Returns: %TRUE if the call succeeded
+ * Returns: `TRUE` if the call succeeded
  */
 gboolean
 xdp_portal_open_directory_finish (XdpPortal     *portal,

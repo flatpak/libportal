@@ -22,10 +22,10 @@
 #include "screenshot.h"
 #include "portal-private.h"
 
-/**
- * SECTION:screenshot
- * @title: Screenshot
- * @short_description: take a screenshot
+/*
+ * Screenshot
+ *
+ * Take a screenshot.
  *
  * These functions let the application take a screenshot or pick a color.
  * 
@@ -220,17 +220,17 @@ take_screenshot (ScreenshotCall *call)
 
 /**
  * xdp_portal_take_screenshot:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Takes a screenshot.
  * 
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_take_screenshot_finish() to get the results.
+ * call [method@Portal.take_screenshot_finish] to get the results.
  */
 void
 xdp_portal_take_screenshot (XdpPortal *portal,
@@ -261,8 +261,8 @@ xdp_portal_take_screenshot (XdpPortal *portal,
 
 /**
  * xdp_portal_take_screenshot_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes a screenshot request, and returns
@@ -284,16 +284,16 @@ xdp_portal_take_screenshot_finish (XdpPortal *portal,
 
 /**
  * xdp_portal_pick_color:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
  * Lets the user pick a color from the screen.
  * 
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_pick_color_finish() to get the results.
+ * call [method@Portal.pick_color_finish] to get the results.
  */
 void
 xdp_portal_pick_color (XdpPortal *portal,
@@ -321,8 +321,8 @@ xdp_portal_pick_color (XdpPortal *portal,
 
 /**
  * xdp_portal_pick_color_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes a pick-color request, and returns

@@ -32,10 +32,10 @@
 
 #include "portal-private.h"
 
-/**
- * SECTION:trash
- * @title: Trash
- * @short_description: send files to the trash
+/*
+ * Trash
+ *
+ * Send files to the trash.
  *
  * This function lets applications send a file to the trash can.
  *
@@ -131,9 +131,9 @@ trash_file (TrashCall *call)
 
 /**
  * xdp_portal_trash_file:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @path: the path for a local file
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
@@ -163,14 +163,14 @@ xdp_portal_trash_file (XdpPortal           *portal,
 
 /**
  * xdp_portal_trash_file_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
  * Finishes the trash-file request, and returns
  * the result in the form of a boolean.
  *
- * Returns: %TRUE if the call succeeded
+ * Returns: `TRUE` if the call succeeded
  */
 gboolean
 xdp_portal_trash_file_finish (XdpPortal *portal,

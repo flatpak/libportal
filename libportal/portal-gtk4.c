@@ -85,11 +85,11 @@ _xdp_parent_unexport_gtk (XdpParent *parent)
 
 /**
  * xdp_parent_new_gtk:
- * @window: a #GtkWindow
+ * @window: a [class@Gtk.Window]
  *
- * Creates a new #XdpParent from @window.
+ * Creates a new [struct@Parent] from @window.
  *
- * Returns: (transfer full): a #XdpParent
+ * Returns: (transfer full): a [struct@Parent]
  */
 XdpParent *
 xdp_parent_new_gtk (GtkWindow *window)

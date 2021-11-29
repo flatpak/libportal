@@ -23,10 +23,10 @@
 #include "background.h"
 #include "portal-private.h"
 
-/**
- * SECTION:background
- * @title: Background
- * @short_description: request background permissions
+/*
+ * Background
+ *
+ * Request background permissions.
  *
  * These functions let the application request background permissions
  * such as enabling autostart.
@@ -217,19 +217,19 @@ request_background (BackgroundCall *call)
 
 /**
  * xdp_portal_request_background:
- * @portal: a #XdpPortal
+ * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
  * @commandline: (element-type utf8) (transfer container): command line to autostart
  * @reason: (nullable): reason to present to user for request
  * @flags: options for this call
- * @cancellable: (nullable): optional #GCancellable
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @user_data: (closure): data to pass to @callback
  *
  * Requests background permissions.
  *
  * When the request is done, @callback will be called. You can then
- * call xdp_portal_request_background_finish() to get the results.
+ * call [method@Portal.request_background_finish] to get the results.
  */
 void
 xdp_portal_request_background (XdpPortal *portal,
@@ -267,13 +267,13 @@ xdp_portal_request_background (XdpPortal *portal,
 
 /**
  * xdp_portal_request_background_finish:
- * @portal: a #XdpPortal
- * @result: a #GAsyncResult
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the request, and returns %TRUE if successful.
+ * Finishes the request, and returns `TRUE` if successful.
  *
- * Returns: %TRUE if successful.
+ * Returns: `TRUE` if successful.
  */
 gboolean
 xdp_portal_request_background_finish (XdpPortal *portal,
