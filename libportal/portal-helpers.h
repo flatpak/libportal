@@ -33,6 +33,15 @@ XDP_PUBLIC
 G_DECLARE_FINAL_TYPE (XdpPortal, xdp_portal, XDP, PORTAL, GObject)
 
 XDP_PUBLIC
-XdpPortal *xdp_portal_new                    (void);
+XdpPortal *xdp_portal_new                   (void);
+
+XDP_PUBLIC
+gboolean   xdp_portal_running_under_flatpak (void);
+
+XDP_PUBLIC
+gboolean   xdp_portal_running_under_snap    (GError **error);
+
+XDP_PUBLIC
+gboolean   xdp_portal_running_under_sandbox (void);
 
 G_END_DECLS
