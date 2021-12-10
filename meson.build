@@ -23,6 +23,7 @@ configure_file(output : 'config.h', configuration : conf)
 
 backends = get_option('backends')
 introspection = get_option('introspection')
+vapi = get_option('vapi')
 
 top_inc = include_directories('.')
 libportal_inc = include_directories('libportal')

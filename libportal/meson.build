@@ -91,10 +91,20 @@ if introspection
     namespace: 'Xdp',
     symbol_prefix: 'xdp',
     identifier_prefix: 'Xdp',
+    header: 'libportal/portal.h',
     link_with: libportal,
     includes: ['Gio-2.0'],
     install: true,
+    export_packages: ['libportal'],
    )
+  if vapi
+    libportal_vapi = gnome.generate_vapi(
+      'libportal',
+      sources: [libportal_gir[0]],
+      packages: [ 'gio-2.0' ],
+      install: true,
+    )
+  endif
 endif
 
 ########
@@ -129,16 +139,28 @@ if 'gtk3' in backends
   )
 
   if introspection
-    gnome.generate_gir(libportal_gtk3,
+    libportal_gtk3_gir = gnome.generate_gir(libportal_gtk3,
       sources: gtk3_sources + gtk3_headers,
       nsversion: gir_version,
       namespace: 'XdpGtk3',
       symbol_prefix: 'xdp',
       identifier_prefix: 'Xdp',
+      header: 'libportal-gtk3/portal-gtk3.h',
       link_with: [libportal_gtk3],
       includes: [libportal_gir[0], 'Gtk-3.0'],
       install: true,
+      export_packages: ['libportal-gtk3'],
      )
+
+    if vapi
+      libportal_gtk3_vapi = gnome.generate_vapi('libportal-gtk3',
+        sources: libportal_gtk3_gir[0],
+        packages: ['gio-2.0', 'gtk+-3.0', 'libportal'],
+        gir_dirs: [meson.current_build_dir()],
+        vapi_dirs: [meson.current_build_dir()],
+        install: true,
+      )
+    endif
   endif
 endif
 
@@ -174,16 +196,29 @@ if 'gtk4' in backends
   )
 
   if introspection
-    gnome.generate_gir(libportal_gtk4,
+    libportal_gtk4_gir = gnome.generate_gir(
+      libportal_gtk4,
       sources: gtk4_sources + gtk4_headers,
       nsversion: gir_version,
       namespace: 'XdpGtk4',
       symbol_prefix: 'xdp',
       identifier_prefix: 'Xdp',
+      header: 'libportal-gtk4/portal-gtk4.h',
       link_with: [libportal_gtk4],
       includes: [libportal_gir[0], 'Gtk-4.0'],
       install: true,
+      export_packages: ['libportal-gtk4'],
      )
+
+    if vapi
+      libportal_gtk4_vapi = gnome.generate_vapi('libportal-gtk4',
+        sources: libportal_gtk4_gir[0],
+        packages: ['gio-2.0', 'gtk4', 'libportal'],
+        gir_dirs: [meson.current_build_dir()],
+        vapi_dirs: [meson.current_build_dir()],
+        install: true,
+      )
+    endif
   endif
 endif
 

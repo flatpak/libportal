@@ -17,6 +17,8 @@
             "config-opts": [
               "-Dbackends=qt5",
               "-Dportal-tests=true",
+              "-Dintrospection=false",
+              "-Dvapi=false",
               "-Dgtk_doc=false"
             ],
             "sources": [
