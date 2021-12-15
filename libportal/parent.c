@@ -30,10 +30,10 @@
  * a window, without introducing a dependency on a toolkit
  * library.
  *
- * An XdpParent implementation for GTK+ is included in the
- * portal-gtk.h header file, in the form of inline functions.
- * To create a XdpParent for a GTK+ window, use
- * [ctor@Parent.new_gtk()].
+ * An XdpParent implementation for GTK is included in the
+ * `portal-gtk3.h` and `portal-gtk4.h` header files, in the form of inline functions.
+ * To create a XdpParent for a GTK window, use
+ * `xdp_parent_new_gtk()`.
  */
 G_DEFINE_BOXED_TYPE (XdpParent, xdp_parent, xdp_parent_copy, xdp_parent_free)
 
