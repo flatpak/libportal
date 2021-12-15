@@ -7,7 +7,7 @@ libportal is a library that provides GIO-style async API wrappers
 for the D-Bus portal APIs in xdg-desktop-portal.
 
 Where possible, applications should prefer to use existing library
-APIs that have portal support. For example, a GTK+ application should
+APIs that have portal support. For example, a GTK application should
 use [class@Gtk.FileChooserNative] instead of [method@Portal.open_file].
 
 Some portal interfaces are not covered in libportal, since
