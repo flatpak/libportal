@@ -19,7 +19,7 @@
               "-Dportal-tests=true",
               "-Dintrospection=false",
               "-Dvapi=false",
-              "-Dgtk_doc=false"
+              "-Ddocs=false"
             ],
             "sources": [
                 {

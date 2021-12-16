@@ -6,5 +6,5 @@ option('introspection', type: 'boolean', value: true,
   description: 'Generate GObject introspection files')
 option('vapi', type: 'boolean', value: true,
   description : 'Generate Vala bindings')
-option('gtk_doc', type: 'boolean', value: true,
+option('docs', type: 'boolean', value: true,
   description : 'Build API reference with gtk-doc')
