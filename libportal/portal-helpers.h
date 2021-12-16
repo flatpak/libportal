@@ -23,11 +23,9 @@
 
 G_BEGIN_DECLS
 
-#ifndef __GTK_DOC_IGNORE__
 #ifndef XDP_PUBLIC
 #define XDP_PUBLIC extern
 #endif
-#endif /* __GTK_DOC_IGNORE__ */
 
 #define XDP_TYPE_PORTAL (xdp_portal_get_type ())
 

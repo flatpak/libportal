@@ -18,7 +18,7 @@
             "config-opts": [
               "-Dbackends=gtk4",
               "-Dportal-tests=true",
-              "-Dgtk_doc=false"
+              "-Ddocs=false"
             ],
             "sources": [
                 {

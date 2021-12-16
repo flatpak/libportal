@@ -33,7 +33,7 @@
             "config-opts": [
               "-Dbackends=gtk3",
               "-Dportal-tests=true",
-              "-Dgtk_doc=false"
+              "-Ddocs=false"
             ],
             "sources": [
                 {

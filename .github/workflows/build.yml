@@ -26,7 +26,7 @@ jobs:
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Dgtk_doc=false
+        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Ddocs=false
       - name: Build libportal
         run: ninja -C_build
 
@@ -42,7 +42,7 @@ jobs:
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Dgtk_doc=false
+        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Ddocs=false
       - name: Build libportal
         run: ninja -C_build
 

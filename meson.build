@@ -34,6 +34,6 @@ if get_option('portal-tests')
   subdir('portal-test')
 endif
 
-if get_option('gtk_doc')
+if get_option('docs')
   subdir('doc')
 endif
