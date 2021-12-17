@@ -1,0 +1,580 @@
+<!--
+SPDX-FileCopyrightText: 2021 GNOME Foundation
+
+SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
+-->
+
+<!--
+SPDX-FileCopyrightText: 2021 GNOME Foundation
+
+SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Xdp &ndash; 1.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta charset="utf-8" />
+
+  
+  <meta property="og:type" content="website"/>
+
+  
+  <meta property="og:image:width" content="256"/>
+  <meta property="og:image:height" content="256"/>
+  <meta property="og:image:secure_url" content="libportal.svg"/>
+  <meta property="og:image:alt" content="Xdp-1.0"/>
+  
+
+  
+  <meta property="og:title" content="Xdp-1.0"/>
+  <meta property="og:description" content="Reference for Xdp-1.0"/>
+  <meta name="twitter:title" content="Xdp-1.0"/>
+  <meta name="twitter:description" content="Reference for Xdp-1.0"/>
+
+
+  
+  <meta name="twitter:card" content="summary"/>
+
+  
+
+  <link rel="stylesheet" href="style.css" type="text/css" />
+
+  
+
+  
+  <script src="urlmap.js"></script>
+  
+  
+  <script src="fzy.js"></script>
+  <script src="search.js"></script>
+  
+  <script src="main.js"></script>
+  <!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+
+<body>
+  <div id="body-wrapper" tabindex="-1">
+
+    <nav class="sidebar devhelp-hidden">
+      
+      <div class="section">
+        <img src="libportal.svg" class="logo"/>
+      </div>
+      
+      
+      <div class="search section">
+        <form id="search-form" autocomplete="off">
+          <input id="search-input" type="text" name="do-not-autocomplete" placeholder="Click, or press 's' to search" autocomplete="off"/>
+        </form>
+      </div>
+      
+      <div class="section namespace">
+        <h3><a href="index.html">Xdp</a></h3>
+        <p>API Version: 1.0</p>
+        
+        <p>Library Version: 0.4</p>
+        
+      </div>
+      
+<div class="section">
+  <h5>Sections</h5>
+  <div class="links">
+  
+
+  
+    <a href="#classes">Classes</a>
+  
+  
+  
+    <a href="#structs">Structs</a>
+  
+  
+  
+  
+    <a href="#enums">Enumerations</a>
+  
+  
+    <a href="#bitfields">Bitfields</a>
+  
+  
+  
+  
+  
+  
+    <a href="#constants">Constants</a>
+  
+  </div>
+</div>
+
+<div class="section">
+  <h5>Dependencies</h5>
+  <div class="links">
+  
+    <a href="https://developer.gnome.org/gobject/stable" class="external">GObject</a>
+  
+    <a href="https://docs.gtk.org/gtk4/" class="external">GTK</a>
+  
+  </div>
+</div>
+
+
+    </nav>
+    
+    <button id="btn-to-top" class="hidden"><span class="up-arrow"></span></button>
+
+    
+<section id="main" class="content">
+  <header>
+    <h3>Namespace</h3>
+    <h1>Xdp &ndash; 1.0</h1>
+
+    <div class="description">
+      <p>Flatpak portal library</p>
+    </div>
+
+    <div class="meta info">
+      <table>
+        <tr><td><em>Version</em></td><td>0.4</td></tr>
+        <tr><td><em>Authors</em></td><td>Flatpak</td></tr>
+        <tr><td><em>License</em></td><td>LGPL-3.0-only</td></tr>
+        <tr><td><em>Website</em></td><td><a href="https://github.com/flatpak/libportal" class="external">https://github.com/flatpak/libportal</a></td></tr>
+        <tr><td><em>Source</em></td><td><a href="https://github.com/flatpak/libportal" class="external">https://github.com/flatpak/libportal</a></td></tr>
+      </table>
+    </div>
+
+    <div class="meta build toggle-wrapper">
+      <h4>Build</h4>
+
+      <div class="docblock">
+      <table>
+        <tr><td>C headers</td><td><code>libportal/portal.h</code></td></tr>
+        <tr><td>pkg-config files</td><td><code>libportal</code></td></tr>
+      </table>
+      </div>
+    </div>
+  </header>
+
+  
+  <section>
+    <div class="toggle-wrapper">
+      <h4 id="dependencies" style="display:flex;">
+        Dependencies
+        <a href="#dependencies" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table>
+        
+          <tr>
+            <td><strong>GObject</strong></td>
+            <td>The base type system library</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><a href="https://developer.gnome.org/gobject/stable" class="external">Browse documentation</a></td>
+          </tr>
+        
+          <tr>
+            <td><strong>GTK</strong></td>
+            <td>The GTK toolkit</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><a href="https://docs.gtk.org/gtk4/" class="external">Browse documentation</a></td>
+          </tr>
+        
+        </table>
+      </div>
+    </div>
+  </section>
+  
+
+  
+  <section>
+    <div class="toggle-wrapper">
+      <h4 id="extra" style="display:flex;">
+        Additional documentation
+        <a href="#extra" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <ul>
+        
+          <li><a href="libportal.html">libportal Reference Manual</a></li>
+        
+          <li><a href="classes_hierarchy.html">Classes Hierarchy</a></li>
+        
+        </ul>
+      </div>
+    </div>
+  </section>
+  
+
+  
+
+  
+  <section>
+    <div class="toggle-wrapper default-hide">
+      <h4 id="classes" class="section-header" style="display:flex;">
+        Classes
+        <a href="#classes" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table style="display:block;">
+          <tbody>
+          
+          <tr class="section-item">
+            <td><a title="Portal" class="symbol" href="class.Portal.html">Portal</a></td>
+            
+            <td class="docblock-summary"><p>Context for portal&nbsp;calls.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="Session" class="symbol" href="class.Session.html">Session</a></td>
+            
+            <td class="docblock-summary"><p>A representation of long-lived screencast portal&nbsp;interactions.</p></td>
+            
+          </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  
+  
+  
+  <section>
+    <div class="toggle-wrapper default-hide">
+      <h4 id="structs" class="section-header" style="display:flex;">
+        Structs
+        <a href="#structs" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table style="display:block;">
+          <tbody>
+          
+          <tr class="section-item">
+            <td><a title="Parent" class="symbol" href="struct.Parent.html">Parent</a></td>
+            
+            <td class="docblock-summary"><p>Parent window&nbsp;abstraction.</p></td>
+            
+          </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  
+  
+  
+  
+  <section>
+    <div class="toggle-wrapper default-hide">
+      <h4 id="enums" class="section-header" style="display:flex;">
+        Enumerations
+        <a href="#enums" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table style="display:block;">
+          <tbody>
+          
+          <tr class="section-item">
+            <td><a title="ButtonState" class="symbol" href="enum.ButtonState.html">ButtonState</a></td>
+            
+            <td class="docblock-summary"><p>The XdpButtonState enumeration is used to describe
+the state of&nbsp;buttons.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="CameraFlags" class="symbol" href="enum.CameraFlags.html">CameraFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="DiscreteAxis" class="symbol" href="enum.DiscreteAxis.html">DiscreteAxis</a></td>
+            
+            <td class="docblock-summary"><p>The XdpDiscreteAxis enumeration is used to describe
+the discrete scroll&nbsp;axes.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="EmailFlags" class="symbol" href="enum.EmailFlags.html">EmailFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="KeyState" class="symbol" href="enum.KeyState.html">KeyState</a></td>
+            
+            <td class="docblock-summary"><p>The XdpKeyState enumeration is used to describe
+the state of&nbsp;keys.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="LocationAccuracy" class="symbol" href="enum.LocationAccuracy.html">LocationAccuracy</a></td>
+            
+            <td class="docblock-summary"><p>The values of this enum indicate the desired level
+of accuracy for location&nbsp;information.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="LocationMonitorFlags" class="symbol" href="enum.LocationMonitorFlags.html">LocationMonitorFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="LoginSessionState" class="symbol" href="enum.LoginSessionState.html">LoginSessionState</a></td>
+            
+            <td class="docblock-summary"><p>The values of this enum are returned in the <code>XdpPortal::session-state-changed</code> signal
+to indicate the current state of the user&nbsp;session.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="NotificationFlags" class="symbol" href="enum.NotificationFlags.html">NotificationFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="PersistMode" class="symbol" href="enum.PersistMode.html">PersistMode</a></td>
+            
+            <td class="docblock-summary"><p>Options for how the screencast session should&nbsp;persist.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="PrintFlags" class="symbol" href="enum.PrintFlags.html">PrintFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="SaveFileFlags" class="symbol" href="enum.SaveFileFlags.html">SaveFileFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="SessionMonitorFlags" class="symbol" href="enum.SessionMonitorFlags.html">SessionMonitorFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="SessionState" class="symbol" href="enum.SessionState.html">SessionState</a></td>
+            
+            <td class="docblock-summary"><p>The state of a&nbsp;session.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="SessionType" class="symbol" href="enum.SessionType.html">SessionType</a></td>
+            
+            <td class="docblock-summary"><p>The type of a&nbsp;session.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="UpdateInstallFlags" class="symbol" href="enum.UpdateInstallFlags.html">UpdateInstallFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="UpdateMonitorFlags" class="symbol" href="enum.UpdateMonitorFlags.html">UpdateMonitorFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="UpdateStatus" class="symbol" href="enum.UpdateStatus.html">UpdateStatus</a></td>
+            
+            <td class="docblock-summary"><p>The values of this enum are returned in the
+<code>XdpPortal::update-progress</code> signal to indicate
+the current progress of an&nbsp;installation.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="UserInformationFlags" class="symbol" href="enum.UserInformationFlags.html">UserInformationFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  
+  
+  <section>
+    <div class="toggle-wrapper default-hide">
+      <h4 id="bitfields" class="section-header" style="display:flex;">
+        Bitfields
+        <a href="#bitfields" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table style="display:block;">
+          <tbody>
+          
+          <tr class="section-item">
+            <td><a title="BackgroundFlags" class="symbol" href="flags.BackgroundFlags.html">BackgroundFlags</a></td>
+            
+            <td class="docblock-summary"><p>Options to use when requesting&nbsp;background.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="CursorMode" class="symbol" href="flags.CursorMode.html">CursorMode</a></td>
+            
+            <td class="docblock-summary"><p>Options for how the cursor is&nbsp;handled.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="DeviceType" class="symbol" href="flags.DeviceType.html">DeviceType</a></td>
+            
+            <td class="docblock-summary"><p>Flags to specify what input devices to control for a remote desktop&nbsp;session.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="InhibitFlags" class="symbol" href="flags.InhibitFlags.html">InhibitFlags</a></td>
+            
+            <td class="docblock-summary"><p>Flags that determine what session status changes are&nbsp;inhibited.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="OpenFileFlags" class="symbol" href="flags.OpenFileFlags.html">OpenFileFlags</a></td>
+            
+            <td class="docblock-summary"><p>Options for opening&nbsp;files.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="OpenUriFlags" class="symbol" href="flags.OpenUriFlags.html">OpenUriFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="OutputType" class="symbol" href="flags.OutputType.html">OutputType</a></td>
+            
+            <td class="docblock-summary"><p>Flags to specify what kind of sources to offer for a screencast&nbsp;session.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="RemoteDesktopFlags" class="symbol" href="flags.RemoteDesktopFlags.html">RemoteDesktopFlags</a></td>
+            
+            <td class="docblock-summary"><p>Options for starting remote desktop&nbsp;sessions.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="ScreencastFlags" class="symbol" href="flags.ScreencastFlags.html">ScreencastFlags</a></td>
+            
+            <td class="docblock-summary"><p>Options for starting screen&nbsp;casts.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="ScreenshotFlags" class="symbol" href="flags.ScreenshotFlags.html">ScreenshotFlags</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="SpawnFlags" class="symbol" href="flags.SpawnFlags.html">SpawnFlags</a></td>
+            
+            <td class="docblock-summary"><p>Flags influencing the spawn operation and how the
+new sandbox is&nbsp;created.</p></td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="WallpaperFlags" class="symbol" href="flags.WallpaperFlags.html">WallpaperFlags</a></td>
+            
+            <td class="docblock-summary"><p>The values of this enumeration determine where the wallpaper is being&nbsp;set.</p></td>
+            
+          </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  
+  
+  
+  
+  
+  
+  <section>
+    <div class="toggle-wrapper default-hide">
+      <h4 id="constants" class="section-header" style="display:flex;">
+        Constants
+        <a href="#constants" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table style="display:block;">
+          <tbody>
+          
+          <tr class="section-item">
+            <td><a title="WALLPAPER_TARGET_BOTH" class="symbol" href="const.WALLPAPER_TARGET_BOTH.html">WALLPAPER_TARGET_BOTH</a></td>
+            
+            <td class="docblock-summary"></td>
+            
+          </tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  
+</section>
+
+
+    
+
+    <section id="search" class="content hidden"></section>
+
+    <footer>
+    
+    </footer>
+  </div>
+</body>
+</html>

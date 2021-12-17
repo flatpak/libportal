@@ -1,0 +1,534 @@
+<!--
+SPDX-FileCopyrightText: 2021 GNOME Foundation
+
+SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
+-->
+
+<!--
+SPDX-FileCopyrightText: 2021 GNOME Foundation
+
+SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Xdp.Session</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta charset="utf-8" />
+
+  
+  <meta property="og:type" content="website"/>
+
+  
+  <meta property="og:image:width" content="256"/>
+  <meta property="og:image:height" content="256"/>
+  <meta property="og:image:secure_url" content="libportal.svg"/>
+  <meta property="og:image:alt" content="Xdp-1.0"/>
+  
+
+  
+  <meta property="og:title" content="Xdp.Session"/>
+  <meta property="og:description" content="Reference for Xdp.Session"/>
+  <meta name="twitter:title" content="Xdp.Session"/>
+  <meta name="twitter:description" content="Reference for Xdp.Session"/>
+
+
+  
+  <meta name="twitter:card" content="summary"/>
+
+  
+
+  <link rel="stylesheet" href="style.css" type="text/css" />
+
+  
+
+  
+  <script src="urlmap.js"></script>
+  
+  
+  <script src="fzy.js"></script>
+  <script src="search.js"></script>
+  
+  <script src="main.js"></script>
+  <!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+
+<body>
+  <div id="body-wrapper" tabindex="-1">
+
+    <nav class="sidebar devhelp-hidden">
+      
+      <div class="section">
+        <img src="libportal.svg" class="logo"/>
+      </div>
+      
+      
+      <div class="search section">
+        <form id="search-form" autocomplete="off">
+          <input id="search-input" type="text" name="do-not-autocomplete" placeholder="Click, or press 's' to search" autocomplete="off"/>
+        </form>
+      </div>
+      
+      <div class="section namespace">
+        <h3><a href="index.html">Xdp</a></h3>
+        <p>API Version: 1.0</p>
+        
+        <p>Library Version: 0.4</p>
+        
+      </div>
+      
+<div class="section">
+  <h5>Type</h5>
+  <div class="links">
+    <a class="current" href="class.Session.html#description">Session</a>
+  </div>
+</div>
+
+
+
+
+<div class="section">
+  <h5>Instance methods</h5>
+  <div class="links">
+  
+    <a class="method" href="method.Session.close.html">close</a>
+  
+    <a class="method" href="method.Session.get_devices.html">get_devices</a>
+  
+    <a class="method" href="method.Session.get_persist_mode.html">get_persist_mode</a>
+  
+    <a class="method" href="method.Session.get_restore_token.html">get_restore_token</a>
+  
+    <a class="method" href="method.Session.get_session_state.html">get_session_state</a>
+  
+    <a class="method" href="method.Session.get_session_type.html">get_session_type</a>
+  
+    <a class="method" href="method.Session.get_streams.html">get_streams</a>
+  
+    <a class="method" href="method.Session.keyboard_key.html">keyboard_key</a>
+  
+    <a class="method" href="method.Session.open_pipewire_remote.html">open_pipewire_remote</a>
+  
+    <a class="method" href="method.Session.pointer_axis.html">pointer_axis</a>
+  
+    <a class="method" href="method.Session.pointer_axis_discrete.html">pointer_axis_discrete</a>
+  
+    <a class="method" href="method.Session.pointer_button.html">pointer_button</a>
+  
+    <a class="method" href="method.Session.pointer_motion.html">pointer_motion</a>
+  
+    <a class="method" href="method.Session.pointer_position.html">pointer_position</a>
+  
+    <a class="method" href="method.Session.start.html">start</a>
+  
+    <a class="method" href="method.Session.start_finish.html">start_finish</a>
+  
+    <a class="method" href="method.Session.touch_down.html">touch_down</a>
+  
+    <a class="method" href="method.Session.touch_position.html">touch_position</a>
+  
+    <a class="method" href="method.Session.touch_up.html">touch_up</a>
+  
+  </div>
+</div>
+
+
+
+
+
+<div class="section">
+  <h5>Signals</h5>
+  <div class="links">
+  
+    <a class="signal" href="signal.Session.closed.html">closed</a>
+  
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+    </nav>
+    
+    <button id="btn-to-top" class="hidden"><span class="up-arrow"></span></button>
+
+    
+<section id="main" class="content">
+  <header>
+    <h3>Class</h3>
+    <h1 aria-label="Name"><a href="index.html">Xdp</a><span class="sep" role="presentation"></span>Session</h1>
+  </header>
+
+  <section>
+    <summary>
+      <div class="toggle-wrapper">
+        <h4 id="description" style="display:flex;">
+          Description
+          <a href="#description" class="anchor"></a>
+          
+          <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/session.c#L25">[src]</a>
+          
+        </h4>
+
+        <pre><code>final class Xdp.Session : GObject.Object {
+  /* No available fields */
+}</pre></code>
+
+        <div class="docblock">
+          <p>A representation of long-lived screencast portal&nbsp;interactions.</p>
+<p>The XdpSession object is used to represent portal interactions with the
+screencast or remote desktop portals that extend over multiple portal&nbsp;calls.</p>
+<p>To find out what kind of session an XdpSession object represents and whether
+it is still active, you can use <a href="method.Session.get_session_type.html"><code>xdp_session_get_session_type()</code></a> and
+<a href="method.Session.get_session_state.html"><code>xdp_session_get_session_state()</code></a>.</p>
+<p>All sessions start in an initial state. They can be made active by calling
+<a href="method.Session.start.html"><code>xdp_session_start()</code></a>, and ended by calling <a href="method.Session.close.html"><code>xdp_session_close()</code></a>.</p>
+        </div>
+
+        <div class="docblock">
+          <table class="attributes">
+            
+            
+            
+          </table>
+        </div>
+
+        
+      </div>
+    </summary>
+
+    
+
+    
+    <div class="toggle-wrapper ancestors">
+      <h4 id="ancestors">
+        Ancestors
+        <a href="#ancestors" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <ul>
+        
+          
+          <li class="class">GObject</a></li>
+          
+        
+        </ul>
+      </div>
+    </div>
+    
+
+    
+
+    
+
+    
+    <div class="toggle-wrapper methods">
+      <h4 id="methods">
+        Instance methods
+        <a href="#methods" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+      
+        <div class="">
+          <h6><a href="method.Session.close.html">xdp_session_close</a></h6>
+          <div class="docblock">
+            <p>Closes the&nbsp;session.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.get_devices.html">xdp_session_get_devices</a></h6>
+          <div class="docblock">
+            <p>Obtains the devices that the user&nbsp;selected.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.get_persist_mode.html">xdp_session_get_persist_mode</a></h6>
+          <div class="docblock">
+            <p>Retrieves the effective persist mode of <code>session</code>.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.get_restore_token.html">xdp_session_get_restore_token</a></h6>
+          <div class="docblock">
+            <p>Retrieves the restore token of <code>session</code>.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.get_session_state.html">xdp_session_get_session_state</a></h6>
+          <div class="docblock">
+            <p>Obtains information about the state of the session that is represented
+by <code>session</code>.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.get_session_type.html">xdp_session_get_session_type</a></h6>
+          <div class="docblock">
+            <p>Obtains information about the type of session that is represented
+by <code>session</code>.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.get_streams.html">xdp_session_get_streams</a></h6>
+          <div class="docblock">
+            <p>Obtains the streams that the user selected. The information in the
+returned <code>GVariant</code> has the format <code>a(ua{sv})</code>. Each item in the array
+is describing a stream. The first member is the pipewire node <span class="caps">ID</span>, the
+second is a dictionary of stream properties,&nbsp;including:</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.keyboard_key.html">xdp_session_keyboard_key</a></h6>
+          <div class="docblock">
+            <p>Changes the state of the key to <code>state</code>.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.open_pipewire_remote.html">xdp_session_open_pipewire_remote</a></h6>
+          <div class="docblock">
+            <p>Opens a file descriptor to the pipewire remote where the screencast
+streams are available. The file descriptor should be used to create
+a pw_remote object, by using <code>pw_remote_connect_fd()</code>. Only the
+screencast stream nodes will be available from this pipewire&nbsp;node.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.pointer_axis.html">xdp_session_pointer_axis</a></h6>
+          <div class="docblock">
+            <p>The axis movement from a smooth scroll device, such as a touchpad.
+When applicable, the size of the motion delta should be equivalent to
+the motion vector of a pointer motion done using the same&nbsp;advice.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.pointer_axis_discrete.html">xdp_session_pointer_axis_discrete</a></h6>
+          <div class="docblock">
+            <p>The axis movement from a discrete scroll&nbsp;device.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.pointer_button.html">xdp_session_pointer_button</a></h6>
+          <div class="docblock">
+            <p>Changes the state of the button to <code>state</code>.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.pointer_motion.html">xdp_session_pointer_motion</a></h6>
+          <div class="docblock">
+            <p>Moves the pointer from its current&nbsp;position.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.pointer_position.html">xdp_session_pointer_position</a></h6>
+          <div class="docblock">
+            <p>Moves the pointer to a new position in the given streams logical
+coordinate&nbsp;space.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.start.html">xdp_session_start</a></h6>
+          <div class="docblock">
+            <p>Starts the&nbsp;session.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.start_finish.html">xdp_session_start_finish</a></h6>
+          <div class="docblock">
+            <p>Finishes the session-start&nbsp;request.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.touch_down.html">xdp_session_touch_down</a></h6>
+          <div class="docblock">
+            <p>Notify about a new touch down event. The <code>(x, y)</code> position
+represents the new touch point position in the streams logical
+coordinate&nbsp;space.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.touch_position.html">xdp_session_touch_position</a></h6>
+          <div class="docblock">
+            <p>Notify about a new touch motion event. The <code>(x, y)</code> position
+represents where the touch point position in the streams logical
+coordinate space&nbsp;moved.</p>
+          </div>
+          
+        </div>
+      
+        <div class="">
+          <h6><a href="method.Session.touch_up.html">xdp_session_touch_up</a></h6>
+          <div class="docblock">
+            <p>Notify about a new touch up&nbsp;event.</p>
+          </div>
+          
+        </div>
+      
+      </div>
+
+      
+        
+      
+
+      
+    </div>
+    
+
+    
+
+    
+    <div class="signals toggle-wrapper">
+      <h4 id="signals">
+        Signals
+        <a href="#signals" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+      
+        <div class="">
+          <h6><a href="signal.Session.closed.html">Xdp.Session::closed</a></h6>
+          <div class="docblock">
+            <p>The ::closed signal is emitted when a session is closed&nbsp;externally.</p>
+          </div>
+          
+        </div>
+      
+      </div>
+
+      
+        
+      
+
+      
+
+    </div>
+    
+
+    
+    <div class="class toggle-wrapper default-hide">
+      <h4 id="class-struct">
+        Class structure
+        <a href="#class-struct" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <pre><code>struct XdpSessionClass {
+  GObjectClass parent_class;
+  
+}</code></pre>
+      </div>
+
+      
+      <div class="docblock">
+        <h6>Class members</h6>
+
+        <table class="members">
+        
+        <tr>
+          <td style="vertical-align:top"><code>parent_class</code></td>
+          <td style="vertical-align:top"><pre><code>GObjectClass</code></pre></td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td style="vertical-align:top">No description available.</td>
+        </td>
+        
+        </table>
+      </div>
+      
+    </div>
+    
+
+    
+
+     
+
+    
+
+  </section>
+</section>
+
+
+    
+<div class="toc">
+  <nav aria-labelledby="toc-title">
+    <p id="toc-title">Content</p>
+    <ul class="toc-list">
+      <li class="toc-list-item"><a href="#description"><span class="link-text">Description</span></a></li>
+      
+      
+      <li class="toc-list-item"><a href="#ancestors"><span class="link-text">Ancestors</span></a></li>
+      
+      
+      
+
+      
+<li class="toc-list-item"><a href="#methods"><span class="link-text">Methods</span></a></li>
+
+
+      
+
+      
+<li class="toc-list-item"><a href="#signals"><span class="link-text">Signals</span></a></li>
+
+
+      
+
+      
+
+      
+
+    </ul>
+  </nav>
+</div>
+
+
+    <section id="search" class="content hidden"></section>
+
+    <footer>
+    
+    </footer>
+  </div>
+</body>
+</html>

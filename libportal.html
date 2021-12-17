@@ -1,0 +1,209 @@
+<!--
+SPDX-FileCopyrightText: 2021 GNOME Foundation
+
+SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
+-->
+
+<!--
+SPDX-FileCopyrightText: 2021 GNOME Foundation
+
+SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Xdp &ndash; 1.0: libportal Reference Manual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta charset="utf-8" />
+
+  
+  <meta property="og:type" content="website"/>
+
+  
+  <meta property="og:image:width" content="256"/>
+  <meta property="og:image:height" content="256"/>
+  <meta property="og:image:secure_url" content="libportal.svg"/>
+  <meta property="og:image:alt" content="Xdp-1.0"/>
+  
+
+  
+  <meta property="og:title" content="Xdp: libportal Reference Manual"/>
+  <meta property="og:description" content="Reference for Xdp-1.0: libportal Reference Manual"/>
+  <meta name="twitter:title" content="Xdp: libportal Reference Manual"/>
+  <meta name="twitter:description" content="Reference for Xdp-1.0: libportal Reference Manual"/>
+
+
+  
+  <meta name="twitter:card" content="summary"/>
+
+  
+
+  <link rel="stylesheet" href="style.css" type="text/css" />
+
+  
+
+  
+  <script src="urlmap.js"></script>
+  
+  
+  <script src="fzy.js"></script>
+  <script src="search.js"></script>
+  
+  <script src="main.js"></script>
+  <!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+
+<body>
+  <div id="body-wrapper" tabindex="-1">
+
+    <nav class="sidebar devhelp-hidden">
+      
+      <div class="section">
+        <img src="libportal.svg" class="logo"/>
+      </div>
+      
+      
+      <div class="search section">
+        <form id="search-form" autocomplete="off">
+          <input id="search-input" type="text" name="do-not-autocomplete" placeholder="Click, or press 's' to search" autocomplete="off"/>
+        </form>
+      </div>
+      
+      <div class="section namespace">
+        <h3><a href="index.html">Xdp</a></h3>
+        <p>API Version: 1.0</p>
+        
+        <p>Library Version: 0.4</p>
+        
+      </div>
+      
+      
+    </nav>
+    
+    <button id="btn-to-top" class="hidden"><span class="up-arrow"></span></button>
+
+    
+<section id="main" class="content">
+  <section>
+    <div class="docblock">
+    <h1 id="portals">Portals<a class="md-anchor" href="#portals" title="Permanent link"></a></h1>
+<p>libportal is a library that provides <span class="caps">GIO</span>-style async <span class="caps">API</span> wrappers
+for the D-Bus portal APIs in&nbsp;xdg-desktop-portal.</p>
+<p>Where possible, applications should prefer to use existing library
+APIs that have portal support. For example, a <span class="caps">GTK</span> application should
+use Gtk.FileChooserNative instead of <a href="method.Portal.open_file.html"><code>xdp_portal_open_file()</code></a>.</p>
+<p>Some portal interfaces are not covered in libportal, since
+they already have perfectly adequate APIs in GLib (which libportal depends on&nbsp;anyway).</p>
+<ul>
+<li>NetworkMonitor: Use <a href="javascript:void(0)" data-namespace="Gio" data-link="iface.NetworkMonitor.html" class="external"><code>GNetworkMonitor</code></a></li>
+<li>ProxyResolver: Use <a href="javascript:void(0)" data-namespace="Gio" data-link="iface.ProxyResolver.html" class="external"><code>GProxyResolver</code></a></li>
+<li>Settings: Use a plain <a href="javascript:void(0)" data-namespace="Gio" data-link="class.DBusProxy.html" class="external"><code>GDBusProxy</code></a></li>
+<li>GameMode: Not currently&nbsp;covered</li>
+<li>Secrets: Not currently&nbsp;covered</li>
+</ul>
+<h2 id="accounts">Accounts<a class="md-anchor" href="#accounts" title="Permanent link"></a></h2>
+<p>The Accounts portal lets applications query basic information about
+the user, such as user <span class="caps">ID</span>, name and avatar&nbsp;picture.</p>
+<p>See <a href="method.Portal.get_user_information.html"><code>xdp_portal_get_user_information()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Account">org.freedesktop.portal.Account</a>.</p>
+<h2 id="background">Background<a class="md-anchor" href="#background" title="Permanent link"></a></h2>
+<p>The Background portal lets applications request background permissions
+such as enabling&nbsp;autostart.</p>
+<p>See <a href="method.Portal.request_background.html"><code>xdp_portal_request_background()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Background">org.freedesktop.portal.Background</a>.</p>
+<h2 id="camera">Camera<a class="md-anchor" href="#camera" title="Permanent link"></a></h2>
+<p>The Camera portal lets applications access camera devices and open <a href="https://pipewire.org">PipeWire</a> remotes for&nbsp;them.</p>
+<p>To test if the Camera portal is available, you can use <a href="method.Portal.is_camera_present.html"><code>xdp_portal_is_camera_present()</code></a>.</p>
+<p>See <a href="method.Portal.access_camera.html"><code>xdp_portal_access_camera()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Camera">org.freedesktop.portal.Camera</a>.</p>
+<h2 id="email">Email<a class="md-anchor" href="#email" title="Permanent link"></a></h2>
+<p>The Email portal lets applications send email, by prompting
+the user to compose a message. The email may already have
+an address, subject, body or&nbsp;attachments.</p>
+<p>See <a href="method.Portal.compose_email.html"><code>xdp_portal_compose_email()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Email">org.freedesktop.portal.Email</a>.</p>
+<h2 id="file">File<a class="md-anchor" href="#file" title="Permanent link"></a></h2>
+<p>The File portal lets applications ask the user for access to
+files outside the sandbox, by presenting a file chooser&nbsp;dialog.</p>
+<p>The selected files will be made accessible to the application
+via the document portal, and the returned <span class="caps">URI</span> will point
+into the document portal fuse filesystem in <code>/run/user/$UID/doc/</code>.</p>
+<p>See <a href="method.Portal.open_file.html"><code>xdp_portal_open_file()</code></a>, <a href="method.Portal.save_file.html"><code>xdp_portal_save_file()</code></a>, and <a href="method.Portal.save_files.html"><code>xdp_portal_save_files()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.FileChooser">org.freedesktop.portal.FileChooser</a>.</p>
+<h2 id="session">Session<a class="md-anchor" href="#session" title="Permanent link"></a></h2>
+<p>The Session portal lets applications inhibit certain login session
+state changes, and be informed about the impending end of the&nbsp;session.</p>
+<p>A typical use for this functionality is to prevent the session
+from locking while a video is&nbsp;playing.</p>
+<p>See <a href="method.Portal.session_inhibit.html"><code>xdp_portal_session_inhibit()</code></a>, and <a href="method.Portal.session_monitor_start.html"><code>xdp_portal_session_monitor_start()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Inhibit">org.freedesktop.portal.Inhibit</a>.</p>
+<h2 id="location">Location<a class="md-anchor" href="#location" title="Permanent link"></a></h2>
+<p>The Access portal lets app access to location&nbsp;information.</p>
+<p>Location monitoring makes location information available
+via the <a href="signal.Portal.location-updated.html"><code>XdpPortal::location-updated</code></a>&nbsp;signal.</p>
+<p>See <a href="method.Portal.location_monitor_start.html"><code>xdp_portal_location_monitor_start()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Location">org.freedesktop.portal.Location</a>.</p>
+<h2 id="notification">Notification<a class="md-anchor" href="#notification" title="Permanent link"></a></h2>
+<p>The Notification portal lets applications send desktop&nbsp;notifications.</p>
+<p>See <a href="method.Portal.add_notification.html"><code>xdp_portal_add_notification()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Notification">org.freedesktop.portal.Notification</a>.</p>
+<h2 id="open-uri">Open URI<a class="md-anchor" href="#open-uri" title="Permanent link"></a></h2>
+<p>The Open <span class="caps">URI</span> portal lets applications open URIs in external handlers.
+A typical example is to open a pdf file in a document&nbsp;viewer.</p>
+<p>See <a href="method.Portal.open_uri.html"><code>xdp_portal_open_uri()</code></a>, and <a href="method.Portal.open_directory.html"><code>xdp_portal_open_directory()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.OpenURI">org.freedesktop.portal.OpenURI</a>.</p>
+<h2 id="print">Print<a class="md-anchor" href="#print" title="Permanent link"></a></h2>
+<p>The Print portal lets applications send documents to a&nbsp;printer.</p>
+<p>See <a href="method.Portal.prepare_print.html"><code>xdp_portal_prepare_print()</code></a>, and <a href="method.Portal.print_file.html"><code>xdp_portal_print_file()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Print">org.freedesktop.portal.Print</a>.</p>
+<h2 id="screencast">Screencast<a class="md-anchor" href="#screencast" title="Permanent link"></a></h2>
+<p>The Screencast portal lets applications create screencast&nbsp;sessions.</p>
+<p>A screencast session makes the content of a monitor or window
+available as a <a href="https://pipewire.org">PipeWire</a>&nbsp;stream.</p>
+<p>See <a href="method.Portal.create_screencast_session.html"><code>xdp_portal_create_screencast_session()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.ScreenCast">org.freedesktop.portal.ScreenCast</a>.</p>
+<h2 id="remote-desktop">Remote Desktop<a class="md-anchor" href="#remote-desktop" title="Permanent link"></a></h2>
+<p>The Remote Desktop portal allows remote control of a&nbsp;session.</p>
+<p>A remote desktop session allows to inject events into the input&nbsp;stream.</p>
+<p>See <a href="method.Portal.create_remote_desktop_session.html"><code>xdp_portal_create_remote_desktop_session()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.RemoteDesktop">org.freedesktop.portal.RemoteDesktop</a>.</p>
+<h2 id="screenshot">Screenshot<a class="md-anchor" href="#screenshot" title="Permanent link"></a></h2>
+<p>The Screenshot portal allows applications to take screenshots or pick&nbsp;colors.</p>
+<p>See <a href="method.Portal.take_screenshot.html"><code>xdp_portal_take_screenshot()</code></a>, and <a href="method.Portal.pick_color.html"><code>xdp_portal_pick_color()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Screenshot">org.freedesktop.portal.Screenshot</a>.</p>
+<h2 id="spawn">Spawn<a class="md-anchor" href="#spawn" title="Permanent link"></a></h2>
+<p>The Spawn portal lets applications spawn a process in another
+copy of their&nbsp;sandbox.</p>
+<p>To monitor spawned processes, use the <a href="signal.Portal.spawn-exited.html"><code>XdpPortal::spawn-exited</code></a>&nbsp;signal.</p>
+<p>See <a href="method.Portal.spawn.html"><code>xdp_portal_spawn()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Flatpak">org.freedesktop.portal.Flatpak</a>.</p>
+<h2 id="trash">Trash<a class="md-anchor" href="#trash" title="Permanent link"></a></h2>
+<p>The Trash portal lets applications send a file to the trash&nbsp;can.</p>
+<p>See <a href="method.Portal.trash_file.html"><code>xdp_portal_trash_file()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Trash">org.freedesktop.portal.Trash</a>.</p>
+<h2 id="updates">Updates<a class="md-anchor" href="#updates" title="Permanent link"></a></h2>
+<p>The Updates portal lets applications be informed about available
+software updates (for themselves) and install those&nbsp;updates.</p>
+<p>See <a href="method.Portal.update_install.html"><code>xdp_portal_update_install()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Flatpak">org.freedesktop.portal.Flatpak</a>.</p>
+<h2 id="wallpaper">Wallpaper<a class="md-anchor" href="#wallpaper" title="Permanent link"></a></h2>
+<p>The Wallpaper portal lets applications set desktop&nbsp;backgrounds.</p>
+<p>See <a href="method.Portal.set_wallpaper.html"><code>xdp_portal_set_wallpaper()</code></a>.</p>
+<p>The underlying D-Bus interface is <a href="https://flatpak.github.io/xdg-desktop-portal/portal-docs.html#gdbus-org.freedesktop.portal.Wallpaper">org.freedesktop.portal.Wallpaper</a>.</p>
+    </div>
+  </section>
+</section>
+
+
+    
+
+    <section id="search" class="content hidden"></section>
+
+    <footer>
+    
+    </footer>
+  </div>
+</body>
+</html>
