@@ -1,5 +1,5 @@
 project('libportal','c',
-        version: '0.4',
+        version: '0.5',
         meson_version: '>= 0.49.0')
 
 cc = meson.get_compiler('c')
