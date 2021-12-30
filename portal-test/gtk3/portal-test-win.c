@@ -78,6 +78,17 @@ struct _PortalTestWinClass
 
 G_DEFINE_TYPE (PortalTestWin, portal_test_win, GTK_TYPE_APPLICATION_WINDOW);
 
+#define TEST_FILE_PATH APPDATADIR ".Gtk3/test.txt"
+
+static char *
+file_path_in_source_dir (const char *file)
+{
+  if (g_getenv ("MESON_SOURCE_ROOT") == NULL)
+    g_warning ("MESON_SOURCE_ROOT was not set, run this application using `ninja portal-test-gtk3`");
+
+  return g_build_filename (g_getenv ("MESON_SOURCE_ROOT"), "portal-test", "gtk3", file, NULL);
+}
+
 static void
 update_network_status (PortalTestWin *win)
 {
@@ -267,7 +278,7 @@ portal_test_win_init (PortalTestWin *win)
 
   filename = g_build_filename (g_get_user_data_dir (), "test.txt", NULL);
   dst = g_file_new_for_path (filename);
-  src = g_file_new_for_path (APPDATADIR "/test.txt");
+  src = g_file_new_for_path (TEST_FILE_PATH);
   g_file_copy (src, dst, 0, NULL, NULL, NULL, NULL);
 
   xdp_portal_update_monitor_start (win->portal, 0, NULL, NULL, NULL);
@@ -1015,9 +1026,10 @@ static char *
 get_text (void)
 {
   char *text;
+  g_autofree char* test_file_path = file_path_in_source_dir ("portal-test-win.c");
   g_autoptr(GError) error = NULL;
 
-  if (!g_file_get_contents ("portal-test-win.c", &text, NULL, &error))
+  if (!g_file_get_contents (test_file_path, &text, NULL, &error))
     {
       g_warning ("Failed to load print text: %s", error->message);
       text = g_strdup (error->message);

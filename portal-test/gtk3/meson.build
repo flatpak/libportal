@@ -15,7 +15,7 @@ src = [
   resources,
 ]
 
-executable('portal-test-gtk3',
+portal_test_gtk3 = executable('portal-test-gtk3',
   src,
   include_directories: [top_inc, libportal_inc],
   dependencies: [gst_dep, libportal_gtk3_dep],
@@ -30,4 +30,8 @@ executable('portal-linking-test-gtk3',
   [ 'portal-linking-test.c' ],
   include_directories: [libportal_inc],
   dependencies: [libportal_gtk3_dep],
+)
+
+run_target('portal-test-gtk3',
+  command: portal_test_gtk3,
 )
