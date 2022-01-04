@@ -1,7 +1,8 @@
 libportal - Flatpak portal library
 ==================================
 
-libportal provides GIO-style async APIs for most Flatpak portals.
+libportal provides GIO-style async APIs for most Flatpak portals. You can find
+the documentation [here](https://flatpak.github.io/libportal/).
 
 ## Getting started
 
