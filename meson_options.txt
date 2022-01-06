@@ -8,3 +8,5 @@ option('vapi', type: 'boolean', value: true,
   description : 'Generate Vala bindings')
 option('docs', type: 'boolean', value: true,
   description : 'Build API reference with gtk-doc')
+option('tests', type: 'boolean', value: true,
+  description : 'Build unit tests')
