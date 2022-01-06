@@ -34,6 +34,10 @@ if get_option('portal-tests')
   subdir('portal-test')
 endif
 
+if get_option('tests')
+  subdir('tests')
+endif
+
 if get_option('docs')
   subdir('doc')
 endif
