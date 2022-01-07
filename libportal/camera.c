@@ -37,7 +37,7 @@ xdp_portal_is_camera_present (XdpPortal *portal)
 {
   g_autoptr(GError) error = NULL;
   g_autoptr(GVariant) ret = NULL;
-  gboolean result;
+  g_autoptr(GVariant) prop = NULL;
 
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
 
@@ -47,7 +47,7 @@ xdp_portal_is_camera_present (XdpPortal *portal)
                                      "org.freedesktop.DBus.Properties",
                                      "Get",
                                      g_variant_new ("(ss)", "org.freedesktop.portal.Camera", "IsCameraPresent"),
-                                     G_VARIANT_TYPE_BOOLEAN,
+                                     G_VARIANT_TYPE ("(v)"),
                                      G_DBUS_CALL_FLAGS_NONE,
                                      -1,
                                      NULL,
@@ -58,9 +58,9 @@ xdp_portal_is_camera_present (XdpPortal *portal)
       return FALSE;
     }
 
-  g_variant_get (ret, "(b)", &result);
+  g_variant_get (ret, "(v)", &prop);
 
-  return result;
+  return g_variant_get_boolean (prop);
 }
 
 typedef struct {
