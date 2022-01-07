@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Portal::spawn-exited</title>
+  <title>Xdp.Portal.running_under_sandbox</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -29,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
 
   
-  <meta property="og:title" content="Xdp.Portal::spawn-exited"/>
-  <meta property="og:description" content="Reference for signal Xdp.Portal::spawn-exited"/>
-  <meta name="twitter:title" content="Xdp.Portal::spawn-exited"/>
-  <meta name="twitter:description" content="Reference for signal Xdp.Portal::spawn-exited"/>
+  <meta property="og:title" content="Xdp.Portal.running_under_sandbox"/>
+  <meta property="og:description" content="Reference for Xdp.Portal.running_under_sandbox"/>
+  <meta name="twitter:title" content="Xdp.Portal.running_under_sandbox"/>
+  <meta name="twitter:description" content="Reference for Xdp.Portal.running_under_sandbox"/>
 
 
   
@@ -86,20 +86,14 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   </div>
 </div>
 <div class="section">
-  <h5>Signals</h5>
+  <h5>Functions</h5>
   <div class="links">
   
-    <a class="signal" href="signal.Portal.location-updated.html">location-updated</a>
+    <a class="method" href="type_func.Portal.running_under_flatpak.html">running_under_flatpak</a>
   
-    <a class="signal" href="signal.Portal.notification-action-invoked.html">notification-action-invoked</a>
+    <a class="method current" href="type_func.Portal.running_under_sandbox.html">running_under_sandbox</a>
   
-    <a class="signal" href="signal.Portal.session-state-changed.html">session-state-changed</a>
-  
-    <a class="signal current" href="signal.Portal.spawn-exited.html">spawn-exited</a>
-  
-    <a class="signal" href="signal.Portal.update-available.html">update-available</a>
-  
-    <a class="signal" href="signal.Portal.update-progress.html">update-progress</a>
+    <a class="method" href="type_func.Portal.running_under_snap.html">running_under_snap</a>
   
   </div>
 </div>
@@ -111,24 +105,24 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
     
 <section id="main" class="content">
   <header>
-    <h3>Signal</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a>::spawn-exited</h1>
+    <h3>Function</h3>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>running_under_sandbox</h1>
   </header>
 
   <section>
     <div class="declaration toggle-wrapper">
-      <h4 id="declaration">
+      <h4 id="declaration" style="display:flex;">
         Declaration
         <a href="#declaration" class="anchor"></a>
+        
+        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/portal-helpers.h#L45">[src]</a>
+        
       </h4>
 
       <div class="docblock">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="n">spawn_exited</span> <span class="p">(</span>
-  <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span>
-  <span class="n">guint</span> <span class="n">pid</span><span class="p">,</span>
-  <span class="n">guint</span> <span class="n">exit_status</span><span class="p">,</span>
-  <span class="n">gpointer</span> <span class="n">user_data</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="n">gboolean</span>
+<span class="n">xdp_portal_running_under_sandbox</span> <span class="p">(</span>
+  <span class="kt">void</span>
 <span class="p">)</span>
 </pre></div>
 </code></pre>
@@ -140,22 +134,19 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a href="#description" class="anchor"></a>
         
-        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/portal.c#L106">[src]</a>
+        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/portal.c#L419">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>This signal is emitted when a process that was spawned
-with <a href="method.Portal.spawn.html"><code>xdp_portal_spawn()</code></a>&nbsp;exits.</p>
+        <p>This function tries to determine if the current process is running under a
+sandbox that requires the use of&nbsp;portals.</p>
+<p>If you need to check error conditions see <code>xdp_portal_running_under_snap()</code>.</p>
+<p>Note that these functions are all cached and will always return the same&nbsp;result.</p>
       </div>
 
       <div class="docblock">
         <table>
-          <tr><td>Default handler:</td><td> <p>The default handler is called before the handlers added via <code>g_signal_connect()</code>.</p></td></tr>
-          
-          
-          
-          
           
           
           
@@ -166,46 +157,26 @@ with <a href="method.Portal.spawn.html"><code>xdp_portal_spawn()</code></a>&nbsp
     </div>
 
     
-    <div class="parameters toggle-wrapper">
-      <h4 id="parameters">
-        Parameters
-        <a href="#parameters" class="anchor"></a>
+
+    
+    <div class="return-value toggle-wrapper">
+      <h4 id="return-value">
+        Return value
+        <a href="#return-value" class="anchor"></a>
       </h4>
 
       <div class="docblock">
-        <table class="arguments">
-          
+        <table class="returns">
           <tr class="arg-name">
-            <td><code>pid</code></td>
-            <td><code>guint</code></td>
+            <td>Returns:</td>
+            <td><code>gboolean</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>The pid of the&nbsp;process.</p></td>
+            <td><p><code>TRUE</code> if the current process should use portals to access resources
+  on the host system, or <code>FALSE</code> if either an error was encountered or the
+  process is running&nbsp;unsandboxed.</p></td>
           </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>exit_status</code></td>
-            <td><code>guint</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>The exit status of the&nbsp;process.</p></td>
-          </tr>
-          
-          
-          
-          
-          
           
           
           
@@ -216,9 +187,6 @@ with <a href="method.Portal.spawn.html"><code>xdp_portal_spawn()</code></a>&nbsp
       </div>
     </div>
     
-
-    
-
   </section>
 </section>
 
