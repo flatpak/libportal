@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2021, Georges Basile Stavracas Neto
-                 2020, Jan Grulich
+                 2020-2022, Jan Grulich
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -72,6 +72,23 @@ xdp_parent_new_qt (QWindow *window)
 }
 
 namespace XdpQt {
+
+class LibPortalQt5 {
+public:
+    LibPortalQt5() : m_xdpPortal(xdp_portal_new()) { }
+    ~LibPortalQt5() { if (m_xdpPortal) { g_object_unref(m_xdpPortal); } }
+    XdpPortal *portalObject() const { return m_xdpPortal; }
+private:
+    XdpPortal *m_xdpPortal = nullptr;
+};
+
+Q_GLOBAL_STATIC(LibPortalQt5, globalLibPortalQt5)
+
+XdpPortal*
+globalPortalObject()
+{
+    return globalLibPortalQt5->portalObject();
+}
 
 GetUserInformationResult
 getUserInformationResultFromGVariant(GVariant *variant)
