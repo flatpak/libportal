@@ -32,6 +32,11 @@ XdpParent *xdp_parent_new_qt (QWindow *window);
 
 namespace XdpQt {
 
+// Returns a global instance of XdpPortal object and takes care
+// of its deletion
+XDP_PUBLIC
+XdpPortal *globalPortalObject();
+
 // Account portal helpers
 struct GetUserInformationResult {
     QString id;
