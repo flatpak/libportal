@@ -240,27 +240,27 @@ open_file (FileCall *call)
  *
  * Asks the user to open one or more files.
  *
- * The format for the @filters argument is a(sa(us)).
+ * The format for the @filters argument is `a(sa(us))`.
  * Each item in the array specifies a single filter to offer to the user.
- * The first string is a user-visible name for the filter. The a(us)
+ * The first string is a user-visible name for the filter. The `a(us)`
  * specifies a list of filter strings, which can be either a glob pattern
  * (indicated by 0) or a mimetype (indicated by 1).
  * 
- * Example: [('Images', [(0, '*.ico'), (1, 'image/png')]), ('Text', [(0, '*.txt')])]
+ * Example: `[('Images', [(0, '*.ico'), (1, 'image/png')]), ('Text', [(0, '*.txt')])]`
  *
- * The format for the @choices argument is a(ssa(ss)s).
+ * The format for the @choices argument is `a(ssa(ss)s)`.
  * For each element, the first string is an ID that will be returned
  * with the response, te second string is a user-visible label. The
- * a(ss) is the list of choices, each being a is an ID and a
+ * `a(ss)` is the list of choices, each being a is an ID and a
  * user-visible label. The final string is the initial selection,
- * or "", to let the portal decide which choice will be initially selected.
+ * or `""`, to let the portal decide which choice will be initially selected.
  * None of the strings, except for the initial selection, should be empty.
  * 
  * As a special case, passing an empty array for the list of choices
  * indicates a boolean choice that is typically displayed as a check
- * button, using "true" and "false" as the choices.
+ * button, using `"true"` and `"false"` as the choices.
  *
- * Example: [('encoding', 'Encoding', [('utf8', 'Unicode (UTF-8)'), ('latin15', 'Western')], 'latin15'), ('reencode', 'Reencode', [], 'false')]
+ * Example: `[('encoding', 'Encoding', [('utf8', 'Unicode (UTF-8)'), ('latin15', 'Western')], 'latin15'), ('reencode', 'Reencode', [], 'false')]`
  *
  * When the request is done, @callback will be called. You can then
  * call [method@Portal.open_file_finish] to get the results.
