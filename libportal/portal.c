@@ -379,15 +379,22 @@ end:
 gboolean
 xdp_portal_running_under_flatpak (void)
 {
-  static gsize under_flatpak;
+  static gsize under_flatpak = 0;
+  enum {
+    NOT_FLATPAK = 1,
+    IS_FLATPAK  = 2
+  };
 
   if (g_once_init_enter (&under_flatpak))
     {
       gboolean flatpak_info_exists = g_file_test ("/.flatpak-info", G_FILE_TEST_EXISTS);
-      g_once_init_leave (&under_flatpak, flatpak_info_exists);
+      if (flatpak_info_exists)
+        g_once_init_leave (&under_flatpak, IS_FLATPAK);
+      else
+        g_once_init_leave (&under_flatpak, NOT_FLATPAK);
     }
 
-  return under_flatpak;
+  return under_flatpak == IS_FLATPAK;
 }
 
 /**
