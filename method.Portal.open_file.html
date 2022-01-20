@@ -257,23 +257,23 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 
       <div class="docblock">
         <p>Asks the user to open one or more&nbsp;files.</p>
-<p>The format for the <code>filters</code> argument is <code>a(sa(us))</code>.
+<p>The format for the <code>filters</code> argument is a(sa(us)).
 Each item in the array specifies a single filter to offer to the user.
-The first string is a user-visible name for the filter. The <code>a(us)</code>
+The first string is a user-visible name for the filter. The a(us)
 specifies a list of filter strings, which can be either a glob pattern
 (indicated by 0) or a mimetype (indicated by&nbsp;1).</p>
-<p>Example: <code>[('Images', [(0, '*.ico'), (1, 'image/png')]), ('Text', [(0, '*.txt')])]</code></p>
-<p>The format for the <code>choices</code> argument is <code>a(ssa(ss)s)</code>.
+<p>Example: [(&#8216;Images&#8217;, [(0, &#8216;<em>.ico&#8217;), (1, &#8216;image/png&#8217;)]), (&#8216;Text&#8217;, [(0, &#8216;</em>.txt&#8217;)])]</p>
+<p>The format for the <code>choices</code> argument is a(ssa(ss)s).
 For each element, the first string is an <span class="caps">ID</span> that will be returned
 with the response, te second string is a user-visible label. The
-<code>a(ss)</code> is the list of choices, each being a is an <span class="caps">ID</span> and a
+a(ss) is the list of choices, each being a is an <span class="caps">ID</span> and a
 user-visible label. The final string is the initial selection,
-or <code>""</code>, to let the portal decide which choice will be initially selected.
+or &#8220;&#8221;, to let the portal decide which choice will be initially selected.
 None of the strings, except for the initial selection, should be&nbsp;empty.</p>
 <p>As a special case, passing an empty array for the list of choices
 indicates a boolean choice that is typically displayed as a check
-button, using <code>"true"</code> and <code>"false"</code> as the&nbsp;choices.</p>
-<p>Example: <code>[('encoding', 'Encoding', [('utf8', 'Unicode (UTF-8)'), ('latin15', 'Western')], 'latin15'), ('reencode', 'Reencode', [], 'false')]</code></p>
+button, using &#8220;true&#8221; and &#8220;false&#8221; as the&nbsp;choices.</p>
+<p>Example: [(&#8216;encoding&#8217;, &#8216;Encoding&#8217;, [(&#8216;utf8&#8217;, &#8216;Unicode (<span class="caps">UTF</span>-8)&#8217;), (&#8216;latin15&#8217;, &#8216;Western&#8217;)], &#8216;latin15&#8217;), (&#8216;reencode&#8217;, &#8216;Reencode&#8217;, [],&nbsp;&#8216;false&#8217;)]</p>
 <p>When the request is done, <code>callback</code> will be called. You can then
 call <a href="method.Portal.open_file_finish.html"><code>xdp_portal_open_file_finish()</code></a> to get the&nbsp;results.</p>
       </div>
