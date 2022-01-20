@@ -379,7 +379,7 @@ end:
 gboolean
 xdp_portal_running_under_flatpak (void)
 {
-  static gsize under_flatpak;
+  static gsize under_flatpak = 0;
   enum {
     NOT_FLATPAK = 1,
     IS_FLATPAK  = 2
