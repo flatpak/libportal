@@ -78,10 +78,10 @@ sources_selected (GDBusConnection *bus,
 
   if (response == 0)
     {
-       XdpSession *session;
+      XdpSession *session;
 
-       session = _xdp_session_new (call->portal, call->id, call->type);
-       g_task_return_pointer (call->task, session, g_object_unref);
+      session = _xdp_session_new (call->portal, call->id, call->type);
+      g_task_return_pointer (call->task, session, g_object_unref);
     }
   else if (response == 1)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Screencast SelectSources() canceled");

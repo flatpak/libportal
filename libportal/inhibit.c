@@ -43,7 +43,7 @@ inhibit_call_free (InhibitCall *call)
       call->parent->parent_unexport (call->parent);
       xdp_parent_free (call->parent);
     }
- g_free (call->parent_handle);
+  g_free (call->parent_handle);
 
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
@@ -127,7 +127,7 @@ inhibit_cancelled_cb (GCancellable *cancellable,
 {
   InhibitCall *call = data;
 
-g_debug ("inhibit cancelled, calling Close");
+  g_debug ("inhibit cancelled, calling Close");
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           call->request_path,

@@ -45,7 +45,7 @@ create_call_free (CreateCall *call)
       call->parent->parent_unexport (call->parent);
       xdp_parent_free (call->parent);
     }
- g_free (call->parent_handle);
+  g_free (call->parent_handle);
 
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
@@ -328,7 +328,7 @@ create_session (CreateCall *call)
  * at a time. If you want to change the @distance_threshold,
  * @time_threshold or @accuracy of the current monitor, you
  * first have to call [method@Portal.location_monitor_stop] to
- * stop monitoring. 
+ * stop monitoring.
  */
 void
 xdp_portal_location_monitor_start (XdpPortal *portal,

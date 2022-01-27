@@ -47,7 +47,7 @@ background_call_free (BackgroundCall *call)
       xdp_parent_free (call->parent);
     }
   g_free (call->parent_handle);
-  
+
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
@@ -109,7 +109,7 @@ parent_exported (XdpParent *parent,
 {
   BackgroundCall *call = data;
   call->parent_handle = g_strdup (handle);
-  request_background (call);  
+  request_background (call);
 }
 
 static void

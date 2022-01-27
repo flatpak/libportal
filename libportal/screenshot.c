@@ -117,7 +117,7 @@ parent_exported (XdpParent *parent,
 {
   ScreenshotCall *call = data;
   call->parent_handle = g_strdup (handle);
-  take_screenshot (call);  
+  take_screenshot (call);
 }
 
 static void
@@ -218,7 +218,7 @@ take_screenshot (ScreenshotCall *call)
  * @data: (closure): data to pass to @callback
  *
  * Takes a screenshot.
- * 
+ *
  * When the request is done, @callback will be called. You can then
  * call [method@Portal.take_screenshot_finish] to get the results.
  */
@@ -333,5 +333,5 @@ xdp_portal_pick_color_finish (XdpPortal *portal,
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_pick_color, NULL);
 
   ret = (GVariant *) g_task_propagate_pointer (G_TASK (result), error);
-  return ret ? g_variant_ref (ret) : NULL; 
+  return ret ? g_variant_ref (ret) : NULL;
 }

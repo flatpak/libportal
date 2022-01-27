@@ -135,7 +135,7 @@ _xdp_session_new (XdpPortal *portal,
  *
  * Obtains information about the type of session that is represented
  * by @session.
- * 
+ *
  * Returns: the type of @session
  */
 XdpSessionType
@@ -152,7 +152,7 @@ xdp_session_get_session_type (XdpSession *session)
  *
  * Obtains information about the state of the session that is represented
  * by @session.
- * 
+ *
  * Returns: the state of @session
  */
 XdpSessionState

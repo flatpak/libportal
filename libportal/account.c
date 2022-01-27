@@ -151,7 +151,7 @@ get_user_information (AccountCall *call)
   GCancellable *cancellable;
 
   if (call->parent_handle == NULL)
-    {   
+    {
       call->parent->parent_export (call->parent, parent_exported, call);
       return;
     }
