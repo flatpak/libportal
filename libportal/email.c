@@ -162,6 +162,12 @@ call_returned (GObject *object,
   ret = g_dbus_connection_call_with_unix_fd_list_finish (bus, NULL, result, &error);
   if (error)
     {
+      if (call->cancelled_id)
+        {
+          g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+          call->cancelled_id = 0;
+        }
+
       g_task_return_error (call->task, error);
       email_call_free (call);
     }
