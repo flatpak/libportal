@@ -84,6 +84,12 @@ response_received (GDBusConnection *bus,
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
 
+  if (call->cancelled_id)
+    {
+      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+      call->cancelled_id = 0;
+    }
+
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
   if (response == 0)
@@ -148,6 +154,12 @@ call_returned (GObject *object,
 
   if (error)
     {
+      if (call->cancelled_id)
+        {
+          g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+          call->cancelled_id = 0;
+        }
+
       g_task_return_error (call->task, error);
       open_call_free (call);
     }
