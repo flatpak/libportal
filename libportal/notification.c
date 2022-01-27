@@ -77,7 +77,7 @@ call_done (GObject *source,
 
   g_object_unref (call_done_data->portal);
   g_free (call_done_data);
-}           
+}
 
 /**
  * xdp_portal_add_notification:

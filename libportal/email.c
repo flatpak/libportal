@@ -270,7 +270,7 @@ compose_email (EmailCall *call)
 
       g_variant_builder_add (&options, "{sv}", "attachment_fds", g_variant_builder_end (&attach_fds));
     }
-  
+
   g_dbus_connection_call_with_unix_fd_list (call->portal->bus,
                                             PORTAL_BUS_NAME,
                                             PORTAL_OBJECT_PATH,
