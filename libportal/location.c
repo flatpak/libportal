@@ -329,7 +329,7 @@ create_session (CreateCall *call)
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Makes XdpPortal start monitoring location changes.
+ * Makes `XdpPortal` start monitoring location changes.
  *
  * When the location changes, the [signal@Portal::location-updated].
  * signal is emitted.

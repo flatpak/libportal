@@ -208,7 +208,7 @@ create_monitor (CreateMonitorCall *call)
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Makes XdpPortal start monitoring for available software updates.
+ * Makes `XdpPortal` start monitoring for available software updates.
  *
  * When a new update is available, the [signal@Portal::update-available].
  * signal is emitted.
