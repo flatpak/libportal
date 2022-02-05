@@ -72,7 +72,7 @@ xdp_session_class_init (XdpSessionClass *klass)
   /**
    * XdpSession::closed:
    *
-   * The ::closed signal is emitted when a session is closed externally.
+   * Emitted when a session is closed externally.
    */
   signals[CLOSED] =
     g_signal_new ("closed",

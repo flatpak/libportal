@@ -109,8 +109,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @pid: the pid of the process
    * @exit_status: the exit status of the process
    *
-   * This signal is emitted when a process that was spawned
-   * with [method@Portal.spawn] exits.
+   * Emitted when a process that was spawned with [method@Portal.spawn] exits.
    */
   signals[SPAWN_EXITED] = g_signal_new ("spawn-exited",
                                         G_TYPE_FROM_CLASS (object_class),
@@ -128,7 +127,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @screensaver_active: whether the screensaver is active
    * @session_state: the current state of the login session
    *
-   * This signal is emitted when session state monitoring is
+   * Emitted when session state monitoring is
    * enabled and the state of the login session changes or
    * the screensaver is activated or deactivated.
    */
@@ -151,10 +150,11 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @remote_commit: the commit that is available as an update.
    *     Updating the app will deloy this commit
    *
-   * This signal is emitted when updates monitoring is enabled
-   * and a new update is available. It is only sent once with
-   * the same information, but it can be sent many times if
-   * new updates appear.
+   * Emitted when updates monitoring is enabled
+   * and a new update is available.
+   *
+   * It is only sent once with the same information, but it can be sent many
+   * times if new updates appear.
    */
   signals[UPDATE_AVAILABLE] = g_signal_new ("update-available",
                                             G_TYPE_FROM_CLASS (object_class),
@@ -178,11 +178,11 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @error: the error name if the status is 'failed'
    * @error_message: the error message if the status is 'failed'
    *
-   * This signal gets emitted to indicate progress of an
-   * update installation. It is undefined exactly how often it
-   * is sent, but it will be emitted at least once at the end with
-   * a non-zero @status. For each successful operation in the
-   * update, we're also guaranteed to send exactly one signal
+   * Emitted to indicate progress of an update installation.
+   *
+   * It is undefined exactly how often it is sent, but it will be emitted at
+   * least once at the end with a non-zero @status. For each successful
+   * operation in the update, we're also guaranteed to send exactly one signal
    * with @progress 100.
    */
   signals[UPDATE_PROGRESS] = g_signal_new ("update-progress",
@@ -212,8 +212,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @timestamp_s: the timestamp seconds since the Unix epoch
    * @timestamp_ms: the microseconds fraction of the timestamp
    *
-   * The ::location-updated signal is emitted when location
-   * monitoring is enabled and the location changes.
+   * Emitted when location monitoring is enabled and the location changes.
    */
   signals[LOCATION_UPDATED] =
     g_signal_new ("location-updated",
@@ -240,8 +239,7 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @action: the action name
    * @parameter: (nullable): the target parameter for the action
    *
-   * The ::notification-action-invoked signal is emitted when
-   * a non-exported action is activated on a notification.
+   * Emitted when a non-exported action is activated on a notification.
    */
   signals[NOTIFICATION_ACTION_INVOKED] =
     g_signal_new ("notification-action-invoked",
