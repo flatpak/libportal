@@ -371,7 +371,8 @@ end:
  *
  * Detects if running inside of a Flatpak or WebKit sandbox.
  *
- * See also: xdp_portal_running_under_sandbox()
+ * See also: [func@Portal.running_under_sandbox].
+ *
  * Returns: %TRUE if the current process is running under a Flatpak sandbox
  */
 gboolean
@@ -401,7 +402,8 @@ xdp_portal_running_under_flatpak (void)
  *
  * Detects if you are running inside of a Snap sandbox.
  *
- * See also: xdp_portal_running_under_sandbox()
+ * See also: [func@Portal.running_under_sandbox].
+ *
  * Returns: %TRUE if the current process is running under a Snap sandbox, or
  *   %FALSE if either unsandboxed or an error was encountered in which case
  *   @error will be set
@@ -427,7 +429,7 @@ xdp_portal_running_under_snap (GError **error)
  * This function tries to determine if the current process is running under a
  * sandbox that requires the use of portals.
  *
- * If you need to check error conditions see xdp_portal_running_under_snap().
+ * If you need to check error conditions see [func@Portal.running_under_snap].
  *
  * Note that these functions are all cached and will always return the same result.
  *
