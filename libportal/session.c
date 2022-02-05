@@ -216,10 +216,12 @@ _xdp_session_set_devices (XdpSession *session,
  * xdp_session_get_streams:
  * @session: a [class@Session]
  *
- * Obtains the streams that the user selected. The information in the
- * returned [struct@GLib.Variant] has the format `a(ua{sv})`. Each item in the array
- * is describing a stream. The first member is the pipewire node ID, the
- * second is a dictionary of stream properties, including:
+ * Obtains the streams that the user selected.
+ *
+ * The information in the returned [struct@GLib.Variant] has the format
+ * `a(ua{sv})`. Each item in the array is describing a stream. The first member
+ * is the pipewire node ID, the second is a dictionary of stream properties,
+ * including:
  *
  * - position, `(ii)`: a tuple consisting of the position `(x, y)` in the compositor
  *     coordinate space. Note that the position may not be equivalent to a

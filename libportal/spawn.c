@@ -253,8 +253,9 @@ xdp_portal_spawn (XdpPortal            *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the spawn request, and returns
- * the pid of the newly spawned process.
+ * Finishes the spawn request.
+ *
+ * Returns the pid of the newly spawned process.
  *
  * Returns: the pid of the spawned process.
  */

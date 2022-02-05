@@ -261,8 +261,9 @@ xdp_portal_take_screenshot (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes a screenshot request, and returns
- * the result in the form of a URI pointing to an image file.
+ * Finishes a screenshot request.
+ *
+ * Returns the result in the form of a URI pointing to an image file.
  *
  * Returns: (transfer full) (nullable): URI pointing to an image file
  */
@@ -321,8 +322,9 @@ xdp_portal_pick_color (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes a pick-color request, and returns
- * the result in the form of a GVariant of the form (ddd), containing
+ * Finishes a pick-color request.
+ *
+ * Returns the result in the form of a GVariant of the form (ddd), containing
  * red, green and blue components in the range [0,1].
  *
  * Returns: (transfer full): GVariant containing the color

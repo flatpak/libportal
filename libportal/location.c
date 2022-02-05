@@ -379,8 +379,9 @@ xdp_portal_location_monitor_start (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes a location-monitor request, and returns
- * the result in the form of boolean.
+ * Finishes a location-monitor request.
+ *
+ * Returns result in the form of boolean.
  *
  * Returns: `TRUE` if the request succeeded
  */

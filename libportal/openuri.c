@@ -313,8 +313,9 @@ xdp_portal_open_uri (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the open-uri request, and returns
- * the result in the form of a boolean.
+ * Finishes the open-uri request.
+ *
+ * Returns the result in the form of a boolean.
  *
  * Returns: `TRUE` if the call succeeded
  */
@@ -340,8 +341,9 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Opens the directory containing the file specified by the @uri. which
- * must be a file: uri pointing to a file that the application has access
+ * Opens the directory containing the file specified by the @uri.
+ *
+ * which must be a file: uri pointing to a file that the application has access
  * to.
  */
 void
@@ -380,8 +382,9 @@ xdp_portal_open_directory (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the open-directory request, and returns
- * the result in the form of a boolean.
+ * Finishes the open-directory request.
+ *
+ * Returns the result in the form of a boolean.
  *
  * Returns: `TRUE` if the call succeeded
  */

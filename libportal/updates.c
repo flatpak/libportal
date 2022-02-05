@@ -241,8 +241,9 @@ xdp_portal_update_monitor_start (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes an update-monitor request, and returns
- * the result in the form of boolean.
+ * Finishes an update-monitor request.
+ *
+ * Returns the result in the form of boolean.
  *
  * Returns: `TRUE` if the request succeeded
  */
@@ -390,8 +391,10 @@ install_update (InstallUpdateCall *call)
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Installs an available software update. This should be
- * called in response to a [signal@Portal::update-available] signal.
+ * Installs an available software update.
+ *
+ * This should be called in response to a [signal@Portal::update-available]
+ * signal.
  *
  * During the update installation, the [signal@Portal::update-progress]
  * signal will be emitted to provide progress information.
@@ -427,8 +430,9 @@ xdp_portal_update_install (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes an update-installation request, and returns
- * the result in the form of boolean.
+ * Finishes an update-installation request.
+ *
+ * Returns the result in the form of boolean.
  *
  * Note that the update may not be completely installed
  * by the time this function is called. You need to

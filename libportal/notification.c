@@ -167,8 +167,9 @@ xdp_portal_add_notification (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the notification request, and returns the result
- * as a boolean.
+ * Finishes the notification request.
+ *
+ * Returns the result as a boolean.
  *
  * Returns: `TRUE` if the notification was added
  */

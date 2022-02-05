@@ -312,9 +312,10 @@ xdp_portal_open_file (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the open-file request, and returns
- * the result in the form of a [struct@GLib.Variant] dictionary containing
- * the following fields:
+ * Finishes the open-file request
+ *
+ * Returns the result in the form of a [struct@GLib.Variant] dictionary
+ * containing the following fields:
  *
  * - uris `as`: an array of strings containing the uris of selected files
  * - choices `a(ss)`: an array of pairs of strings, the first string being the
@@ -409,9 +410,10 @@ xdp_portal_save_file (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the save-file request, and returns
- * the result in the form of a [struct@GLib.Variant] dictionary containing
- * the following fields:
+ * Finishes the save-file request.
+ *
+ * Returns the result in the form of a [struct@GLib.Variant] dictionary
+ * containing the following fields:
  *
  * - uris `(as)`: an array of strings containing the uri of the selected file
  * - choices `a(ss)`: an array of pairs of strings, the first string being the
@@ -449,12 +451,12 @@ xdp_portal_save_file_finish (XdpPortal *portal,
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Asks for a folder as a location to save one or more files. The
- * names of the files will be used as-is and appended to the selected
- * folder's path in the list of returned files. If the selected folder
- * already contains a file with one of the given names, the portal may
- * prompt or take some other action to construct a unique file name and
- * return that instead.
+ * Asks for a folder as a location to save one or more files.
+ *
+ * The names of the files will be used as-is and appended to the selected
+ * folder's path in the list of returned files. If the selected folder already
+ * contains a file with one of the given names, the portal may prompt or take
+ * some other action to construct a unique file name and return that instead.
  *
  * The format for the @choices argument is the same as for [method@Portal.open_file].
  *
@@ -504,9 +506,10 @@ xdp_portal_save_files (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the save-files request, and returns
- * the result in the form of a [struct@GLib.Variant] dictionary containing
- * the following fields:
+ * Finishes the save-files request.
+ *
+ * Returns the result in the form of a [struct@GLib.Variant] dictionary
+ * containing the following fields:
  *
  * - uris `(as)`: an array of strings containing the uri corresponding to each
  *   file passed to the save-files request, in the same order. Note that the

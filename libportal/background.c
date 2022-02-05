@@ -266,7 +266,9 @@ xdp_portal_request_background (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the request, and returns `TRUE` if successful.
+ * Finishes the request.
+ *
+ * Returns `TRUE` if successful.
  *
  * Returns: `TRUE` if successful.
  */

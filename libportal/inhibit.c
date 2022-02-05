@@ -270,9 +270,10 @@ xdp_portal_session_inhibit (XdpPortal            *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the inhbit request, and returns the ID of the
- * inhibition as a positive integer. The ID can be passed to
- * [method@Portal.session_uninhibit] to undo the inhibition.
+ * Finishes the inhbit request.
+ *
+ * Returns the ID of the inhibition as a positive integer. The ID can be passed
+ * to [method@Portal.session_uninhibit] to undo the inhibition.
  *
  * Returns: the ID of the inhibition, or -1 if there was an error
  */
@@ -606,8 +607,9 @@ xdp_portal_session_monitor_start (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes a session-monitor request, and returns
- * the result in the form of boolean.
+ * Finishes a session-monitor request.
+ *
+ * Returns the result in the form of boolean.
  *
  * Returns: `TRUE` if the request succeeded
  */
