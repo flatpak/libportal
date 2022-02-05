@@ -453,7 +453,7 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the create-screencast request, and returns an [class@Session].
+ * Finishes the create-screencast request, and returns a [class@Session].
  *
  * Returns: (transfer full): a [class@Session]
  */
@@ -525,7 +525,7 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the create-remote-desktop request, and returns an [class@Session].
+ * Finishes the create-remote-desktop request, and returns a [class@Session].
  *
  * Returns: (transfer full): a [class@Session]
  */
