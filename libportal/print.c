@@ -322,8 +322,9 @@ xdp_portal_prepare_print (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the prepare-print request, and returns [struct@GLib.Variant] dictionary
- * with the following information:
+ * Finishes the prepare-print request.
+ *
+ * Returns a [struct@GLib.Variant] dictionary with the following information:
  *
  * - settings `a{sv}`: print settings as set up by the user in the print dialog
  * - page-setup `a{sv}: page setup as set up by the user in the print dialog

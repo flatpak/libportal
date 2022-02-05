@@ -252,8 +252,9 @@ xdp_portal_access_camera (XdpPortal           *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes a camera acess request, and returns
- * the result as a boolean.
+ * Finishes a camera acess request.
+ *
+ * Returns the result as a boolean.
  *
  * If the access was granted, you can then call
  * [method@Portal.open_pipewire_remote_for_camera]
@@ -278,9 +279,11 @@ xdp_portal_access_camera_finish (XdpPortal     *portal,
  * @portal: a [class@Portal]
  *
  * Opens a file descriptor to the pipewire remote where the camera
- * nodes are available. The file descriptor should be used to create
- * a pw_remote object, by using pw_remote_connect_fd(). Only the
- * camera nodes will be available from this pipewire node.
+ * nodes are available.
+ *
+ * The file descriptor should be used to create a pw_remote object, by using
+ * pw_remote_connect_fd(). Only the camera nodes will be available from this
+ * pipewire node.
  *
  * Returns: the file descriptor
  */

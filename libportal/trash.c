@@ -157,8 +157,9 @@ xdp_portal_trash_file (XdpPortal           *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the trash-file request, and returns
- * the result in the form of a boolean.
+ * Finishes the trash-file request.
+ *
+ * Returns the result in the form of a boolean.
  *
  * Returns: `TRUE` if the call succeeded
  */

@@ -802,9 +802,11 @@ xdp_session_close (XdpSession *session)
  * @session: a [class@Session]
  *
  * Opens a file descriptor to the pipewire remote where the screencast
- * streams are available. The file descriptor should be used to create
- * a pw_remote object, by using pw_remote_connect_fd(). Only the
- * screencast stream nodes will be available from this pipewire node.
+ * streams are available.
+ *
+ * The file descriptor should be used to create a pw_remote object, by using
+ * pw_remote_connect_fd(). Only the screencast stream nodes will be available
+ * from this pipewire node.
  *
  * Returns: the file descriptor
  */
@@ -1060,9 +1062,10 @@ xdp_session_keyboard_key (XdpSession *session,
  * @x: new X position
  * @y: new Y position
  *
- * Notify about a new touch down event. The `(x, y)` position
- * represents the new touch point position in the streams logical
- * coordinate space.
+ * Notify about a new touch down event.
+ *
+ * The `(x, y)` position represents the new touch point position in the streams
+ * logical coordinate space.
  *
  * May only be called on a remote desktop session
  * with `XDP_DEVICE_TOUCHSCREEN` access.
@@ -1099,9 +1102,10 @@ xdp_session_touch_down (XdpSession *session,
  * @x: new X position
  * @y: new Y position
  *
- * Notify about a new touch motion event. The `(x, y)` position
- * represents where the touch point position in the streams logical
- * coordinate space moved.
+ * Notify about a new touch motion event.
+ *
+ * The `(x, y)` position represents where the touch point position in the
+ * streams logical coordinate space moved.
  *
  * May only be called on a remote desktop session
  * with `XDP_DEVICE_TOUCHSCREEN` access.

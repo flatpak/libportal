@@ -246,9 +246,10 @@ xdp_portal_get_user_information (XdpPortal *portal,
  * @result: a [iface@Gio.AsyncResult]
  * @error: return location for an error
  *
- * Finishes the get-user-information request, and returns
- * the result in the form of a [struct@GLib.Variant] dictionary containing
- * the following fields:
+ * Finishes the get-user-information request.
+ *
+ * Returns the result in the form of a [struct@GLib.Variant] dictionary
+ * containing the following fields:
  *
  * - id `s`: the user ID
  * - name `s`: the users real name
