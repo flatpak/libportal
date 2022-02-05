@@ -236,7 +236,7 @@ void      xdp_session_pointer_axis   (XdpSession     *session,
  * @XDP_AXIS_HORIZONTAL_SCROLL: the horizontal scroll axis
  * @XDP_AXIS_VERTICAL_SCROLL: the horizontal scroll axis
  *
- * The XdpDiscreteAxis enumeration is used to describe
+ * The `XdpDiscreteAxis` enumeration is used to describe
  * the discrete scroll axes.
  */
 typedef enum {
@@ -254,7 +254,7 @@ void      xdp_session_pointer_axis_discrete (XdpSession *session,
  * @XDP_KEY_RELEASED: the key is down
  * @XDP_KEY_PRESSED: the key is up
  *
- * The XdpKeyState enumeration is used to describe
+ * The `XdpKeyState` enumeration is used to describe
  * the state of keys.
  */
 typedef enum {
