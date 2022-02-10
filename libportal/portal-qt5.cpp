@@ -116,7 +116,7 @@ getUserInformationResultFromGVariant(GVariant *variant)
     return result;
 }
 
-static GVariant *
+GVariant *
 filechooserFilterToGVariant(const FileChooserFilter &filter)
 {
     GVariantBuilder builder;
