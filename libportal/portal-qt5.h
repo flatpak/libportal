@@ -74,6 +74,9 @@ XDP_PUBLIC
 GVariant *filechooserFilesToGVariant(const QStringList &files);
 
 XDP_PUBLIC
+GVariant *filechooserFilterToGVariant(const FileChooserFilter &filter);
+
+XDP_PUBLIC
 GVariant *filechooserFiltersToGVariant(const QList<FileChooserFilter> &filters);
 
 XDP_PUBLIC
