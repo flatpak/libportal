@@ -5,7 +5,8 @@ authors = "Flatpak"
 license = "LGPL-3.0-only"
 browse_url = "https://github.com/flatpak/libportal"
 repository_url = "https://github.com/flatpak/libportal.git"
-website_url = "https://github.com/flatpak/libportal"
+website_url = "https://libportal.org/"
+docs_url = "https://libportal.org/"
 logo_url = "libportal.svg"
 dependencies = [
   "GObject-2.0",
@@ -31,9 +32,7 @@ show_class_hierarchy = true
 
 [source-location]
 # The base URL for the web UI
-base_url = "https://flatpak.github.io/libportal/docs/"
-# The format for links, using "filename" and "line" for the format
-file_format = "{filename}#L{line}"
+base_url = "https://github.com/flatpak/libportal/blob/main/"
 
 [extra]
 urlmap_file = "urlmap.js"
