@@ -144,16 +144,15 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a href="#description" class="anchor"></a>
         
-        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/portal.c#L170">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/portal.c#L170">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>This signal gets emitted to indicate progress of an
-update installation. It is undefined exactly how often it
-is sent, but it will be emitted at least once at the end with
-a non-zero <code>status</code>. For each successful operation in the
-update, we&#8217;re also guaranteed to send exactly one signal
+        <p>Emitted to indicate progress of an update&nbsp;installation.</p>
+<p>It is undefined exactly how often it is sent, but it will be emitted at
+least once at the end with a non-zero <code>status</code>. For each successful
+operation in the update, we&#8217;re also guaranteed to send exactly one signal
 with <code>progress</code> 100.</p>
       </div>
 

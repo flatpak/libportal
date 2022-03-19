@@ -223,7 +223,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/filechooser.h#L80">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/filechooser.h#L80">[src]</a>
         
       </h4>
 
@@ -252,17 +252,16 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/filechooser.c#L432">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/filechooser.c#L440">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Asks for a folder as a location to save one or more files. The
-names of the files will be used as-is and appended to the selected
-folder&#8217;s path in the list of returned files. If the selected folder
-already contains a file with one of the given names, the portal may
-prompt or take some other action to construct a unique file name and
-return that&nbsp;instead.</p>
+        <p>Asks for a folder as a location to save one or more&nbsp;files.</p>
+<p>The names of the files will be used as-is and appended to the selected
+folder&#8217;s path in the list of returned files. If the selected folder already
+contains a file with one of the given names, the portal may prompt or take
+some other action to construct a unique file name and return that&nbsp;instead.</p>
 <p>The format for the <code>choices</code> argument is the same as for <a href="method.Portal.open_file.html"><code>xdp_portal_open_file()</code></a>.</p>
 <p>When the request is done, <code>callback</code> will be called. You can then
 call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_finish()</code></a> to get the&nbsp;results.</p>

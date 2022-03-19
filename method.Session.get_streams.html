@@ -147,7 +147,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/remote.h#L198">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/remote.h#L198">[src]</a>
         
       </h4>
 
@@ -166,15 +166,15 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/session.c#L215">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/session.c#L215">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Obtains the streams that the user selected. The information in the
-returned <a href="javascript:void(0)" data-namespace="GLib" data-link="struct.Variant.html" class="external"><code>GVariant</code></a> has the format <code>a(ua{sv})</code>. Each item in the array
-is describing a stream. The first member is the pipewire node <span class="caps">ID</span>, the
-second is a dictionary of stream properties,&nbsp;including:</p>
+        <p>Obtains the streams that the user&nbsp;selected.</p>
+<p>The information in the returned <a href="javascript:void(0)" data-namespace="GLib" data-link="struct.Variant.html" class="external"><code>GVariant</code></a> has the format
+<code>a(ua{sv})</code>. Each item in the array is describing a stream. The first member
+is the pipewire node <span class="caps">ID</span>, the second is a dictionary of stream properties,&nbsp;including:</p>
 <ul>
 <li>position, <code>(ii)</code>: a tuple consisting of the position <code>(x, y)</code> in the compositor
     coordinate space. Note that the position may not be equivalent to a

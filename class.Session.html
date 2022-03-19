@@ -173,7 +173,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
           Description
           <a href="#description" class="anchor"></a>
           
-          <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/session.c#L25">[src]</a>
+          <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/session.c#L25">[src]</a>
           
         </h4>
 
@@ -291,10 +291,7 @@ by <code>session</code>.</p>
         <div class="">
           <h6><a href="method.Session.get_streams.html">xdp_session_get_streams</a></h6>
           <div class="docblock">
-            <p>Obtains the streams that the user selected. The information in the
-returned <code>GVariant</code> has the format <code>a(ua{sv})</code>. Each item in the array
-is describing a stream. The first member is the pipewire node <span class="caps">ID</span>, the
-second is a dictionary of stream properties,&nbsp;including:</p>
+            <p>Obtains the streams that the user&nbsp;selected.</p>
           </div>
           
         </div>
@@ -311,9 +308,7 @@ second is a dictionary of stream properties,&nbsp;including:</p>
           <h6><a href="method.Session.open_pipewire_remote.html">xdp_session_open_pipewire_remote</a></h6>
           <div class="docblock">
             <p>Opens a file descriptor to the pipewire remote where the screencast
-streams are available. The file descriptor should be used to create
-a pw_remote object, by using <code>pw_remote_connect_fd()</code>. Only the
-screencast stream nodes will be available from this pipewire&nbsp;node.</p>
+streams are&nbsp;available.</p>
           </div>
           
         </div>
@@ -380,9 +375,7 @@ coordinate&nbsp;space.</p>
         <div class="">
           <h6><a href="method.Session.touch_down.html">xdp_session_touch_down</a></h6>
           <div class="docblock">
-            <p>Notify about a new touch down event. The <code>(x, y)</code> position
-represents the new touch point position in the streams logical
-coordinate&nbsp;space.</p>
+            <p>Notify about a new touch down&nbsp;event.</p>
           </div>
           
         </div>
@@ -390,9 +383,7 @@ coordinate&nbsp;space.</p>
         <div class="">
           <h6><a href="method.Session.touch_position.html">xdp_session_touch_position</a></h6>
           <div class="docblock">
-            <p>Notify about a new touch motion event. The <code>(x, y)</code> position
-represents where the touch point position in the streams logical
-coordinate space&nbsp;moved.</p>
+            <p>Notify about a new touch motion&nbsp;event.</p>
           </div>
           
         </div>
@@ -429,7 +420,7 @@ coordinate space&nbsp;moved.</p>
         <div class="">
           <h6><a href="signal.Session.closed.html">Xdp.Session::closed</a></h6>
           <div class="docblock">
-            <p>The ::closed signal is emitted when a session is closed&nbsp;externally.</p>
+            <p>Emitted when a session is closed&nbsp;externally.</p>
           </div>
           
         </div>

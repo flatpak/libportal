@@ -281,7 +281,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
           Description
           <a href="#description" class="anchor"></a>
           
-          <a class="srclink" title="go to source location" href="https://flatpak.github.io/libportal/docs/libportal/portal.c#L33">[src]</a>
+          <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/portal.c#L33">[src]</a>
           
         </h4>
 
@@ -375,8 +375,7 @@ object with <a href="ctor.Portal.new.html"><code>xdp_portal_new()</code></a> and
         <div class="">
           <h6><a href="method.Portal.access_camera_finish.html">xdp_portal_access_camera_finish</a></h6>
           <div class="docblock">
-            <p>Finishes a camera acess request, and returns
-the result as a&nbsp;boolean.</p>
+            <p>Finishes a camera acess&nbsp;request.</p>
           </div>
           
         </div>
@@ -392,8 +391,7 @@ the result as a&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.add_notification_finish.html">xdp_portal_add_notification_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the notification request, and returns the result
-as a&nbsp;boolean.</p>
+            <p>Finishes the notification&nbsp;request.</p>
           </div>
           
         </div>
@@ -426,7 +424,7 @@ with some pre-filled&nbsp;information.</p>
         <div class="">
           <h6><a href="method.Portal.create_remote_desktop_session_finish.html">xdp_portal_create_remote_desktop_session_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the create-remote-desktop request, and returns an <code>XdpSession</code>.</p>
+            <p>Finishes the create-remote-desktop request, and returns a <code>XdpSession</code>.</p>
           </div>
           
         </div>
@@ -442,7 +440,7 @@ with some pre-filled&nbsp;information.</p>
         <div class="">
           <h6><a href="method.Portal.create_screencast_session_finish.html">xdp_portal_create_screencast_session_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the create-screencast request, and returns an <code>XdpSession</code>.</p>
+            <p>Finishes the create-screencast request, and returns a <code>XdpSession</code>.</p>
           </div>
           
         </div>
@@ -458,9 +456,7 @@ with some pre-filled&nbsp;information.</p>
         <div class="">
           <h6><a href="method.Portal.get_user_information_finish.html">xdp_portal_get_user_information_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the get-user-information request, and returns
-the result in the form of a <code>GVariant</code> dictionary containing
-the following&nbsp;fields:</p>
+            <p>Finishes the get-user-information&nbsp;request.</p>
           </div>
           
         </div>
@@ -476,7 +472,7 @@ the following&nbsp;fields:</p>
         <div class="">
           <h6><a href="method.Portal.location_monitor_start.html">xdp_portal_location_monitor_start</a></h6>
           <div class="docblock">
-            <p>Makes XdpPortal start monitoring location&nbsp;changes.</p>
+            <p>Makes <code>XdpPortal</code> start monitoring location&nbsp;changes.</p>
           </div>
           
         </div>
@@ -484,8 +480,7 @@ the following&nbsp;fields:</p>
         <div class="">
           <h6><a href="method.Portal.location_monitor_start_finish.html">xdp_portal_location_monitor_start_finish</a></h6>
           <div class="docblock">
-            <p>Finishes a location-monitor request, and returns
-the result in the form of&nbsp;boolean.</p>
+            <p>Finishes a location-monitor&nbsp;request.</p>
           </div>
           
         </div>
@@ -502,8 +497,7 @@ the result in the form of&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.open_directory.html">xdp_portal_open_directory</a></h6>
           <div class="docblock">
-            <p>Opens the directory containing the file specified by the <code>uri</code>. which
-must be a file: uri pointing to a file that the application has access&nbsp;to.</p>
+            <p>Opens the directory containing the file specified by the <code>uri</code>.</p>
           </div>
           
         </div>
@@ -511,8 +505,7 @@ must be a file: uri pointing to a file that the application has access&nbsp;to.<
         <div class="">
           <h6><a href="method.Portal.open_directory_finish.html">xdp_portal_open_directory_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the open-directory request, and returns
-the result in the form of a&nbsp;boolean.</p>
+            <p>Finishes the open-directory&nbsp;request.</p>
           </div>
           
         </div>
@@ -528,9 +521,7 @@ the result in the form of a&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.open_file_finish.html">xdp_portal_open_file_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the open-file request, and returns
-the result in the form of a <code>GVariant</code> dictionary containing
-the following&nbsp;fields:</p>
+            <p>Finishes the open-file&nbsp;request.</p>
           </div>
           
         </div>
@@ -539,9 +530,7 @@ the following&nbsp;fields:</p>
           <h6><a href="method.Portal.open_pipewire_remote_for_camera.html">xdp_portal_open_pipewire_remote_for_camera</a></h6>
           <div class="docblock">
             <p>Opens a file descriptor to the pipewire remote where the camera
-nodes are available. The file descriptor should be used to create
-a pw_remote object, by using <code>pw_remote_connect_fd()</code>. Only the
-camera nodes will be available from this pipewire&nbsp;node.</p>
+nodes are&nbsp;available.</p>
           </div>
           
         </div>
@@ -557,8 +546,7 @@ camera nodes will be available from this pipewire&nbsp;node.</p>
         <div class="">
           <h6><a href="method.Portal.open_uri_finish.html">xdp_portal_open_uri_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the open-uri request, and returns
-the result in the form of a&nbsp;boolean.</p>
+            <p>Finishes the open-uri&nbsp;request.</p>
           </div>
           
         </div>
@@ -574,9 +562,7 @@ the result in the form of a&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.pick_color_finish.html">xdp_portal_pick_color_finish</a></h6>
           <div class="docblock">
-            <p>Finishes a pick-color request, and returns
-the result in the form of a GVariant of the form (ddd), containing
-red, green and blue components in the range&nbsp;[0,1].</p>
+            <p>Finishes a pick-color&nbsp;request.</p>
           </div>
           
         </div>
@@ -592,8 +578,7 @@ red, green and blue components in the range&nbsp;[0,1].</p>
         <div class="">
           <h6><a href="method.Portal.prepare_print_finish.html">xdp_portal_prepare_print_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the prepare-print request, and returns <code>GVariant</code> dictionary
-with the following&nbsp;information:</p>
+            <p>Finishes the prepare-print&nbsp;request.</p>
           </div>
           
         </div>
@@ -633,7 +618,7 @@ with the following&nbsp;information:</p>
         <div class="">
           <h6><a href="method.Portal.request_background_finish.html">xdp_portal_request_background_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the request, and returns <code>TRUE</code> if&nbsp;successful.</p>
+            <p>Finishes the&nbsp;request.</p>
           </div>
           
         </div>
@@ -649,9 +634,7 @@ with the following&nbsp;information:</p>
         <div class="">
           <h6><a href="method.Portal.save_file_finish.html">xdp_portal_save_file_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the save-file request, and returns
-the result in the form of a <code>GVariant</code> dictionary containing
-the following&nbsp;fields:</p>
+            <p>Finishes the save-file&nbsp;request.</p>
           </div>
           
         </div>
@@ -659,12 +642,7 @@ the following&nbsp;fields:</p>
         <div class="">
           <h6><a href="method.Portal.save_files.html">xdp_portal_save_files</a></h6>
           <div class="docblock">
-            <p>Asks for a folder as a location to save one or more files. The
-names of the files will be used as-is and appended to the selected
-folder&#8217;s path in the list of returned files. If the selected folder
-already contains a file with one of the given names, the portal may
-prompt or take some other action to construct a unique file name and
-return that&nbsp;instead.</p>
+            <p>Asks for a folder as a location to save one or more&nbsp;files.</p>
           </div>
           
         </div>
@@ -672,9 +650,7 @@ return that&nbsp;instead.</p>
         <div class="">
           <h6><a href="method.Portal.save_files_finish.html">xdp_portal_save_files_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the save-files request, and returns
-the result in the form of a <code>GVariant</code> dictionary containing
-the following&nbsp;fields:</p>
+            <p>Finishes the save-files&nbsp;request.</p>
           </div>
           
         </div>
@@ -690,9 +666,7 @@ the following&nbsp;fields:</p>
         <div class="">
           <h6><a href="method.Portal.session_inhibit_finish.html">xdp_portal_session_inhibit_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the inhbit request, and returns the <span class="caps">ID</span> of the
-inhibition as a positive integer. The <span class="caps">ID</span> can be passed to
-<code>xdp_portal_session_uninhibit()</code> to undo the&nbsp;inhibition.</p>
+            <p>Finishes the inhbit&nbsp;request.</p>
           </div>
           
         </div>
@@ -719,8 +693,7 @@ have handled the state&nbsp;change.</p>
         <div class="">
           <h6><a href="method.Portal.session_monitor_start_finish.html">xdp_portal_session_monitor_start_finish</a></h6>
           <div class="docblock">
-            <p>Finishes a session-monitor request, and returns
-the result in the form of&nbsp;boolean.</p>
+            <p>Finishes a session-monitor&nbsp;request.</p>
           </div>
           
         </div>
@@ -754,8 +727,7 @@ to <code>xdp_portal_session_inhibit()</code>.</p>
         <div class="">
           <h6><a href="method.Portal.set_wallpaper_finish.html">xdp_portal_set_wallpaper_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the open-uri request, and returns
-the result in the form of a&nbsp;boolean.</p>
+            <p>Finishes the open-uri&nbsp;request.</p>
           </div>
           
         </div>
@@ -772,8 +744,7 @@ a process in, with the given&nbsp;arguments.</p>
         <div class="">
           <h6><a href="method.Portal.spawn_finish.html">xdp_portal_spawn_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the spawn request, and returns
-the pid of the newly spawned&nbsp;process.</p>
+            <p>Finishes the spawn&nbsp;request.</p>
           </div>
           
         </div>
@@ -798,8 +769,7 @@ by <code>xdp_portal_spawn()</code>.</p>
         <div class="">
           <h6><a href="method.Portal.take_screenshot_finish.html">xdp_portal_take_screenshot_finish</a></h6>
           <div class="docblock">
-            <p>Finishes a screenshot request, and returns
-the result in the form of a <span class="caps">URI</span> pointing to an image&nbsp;file.</p>
+            <p>Finishes a screenshot&nbsp;request.</p>
           </div>
           
         </div>
@@ -815,8 +785,7 @@ the result in the form of a <span class="caps">URI</span> pointing to an image&n
         <div class="">
           <h6><a href="method.Portal.trash_file_finish.html">xdp_portal_trash_file_finish</a></h6>
           <div class="docblock">
-            <p>Finishes the trash-file request, and returns
-the result in the form of a&nbsp;boolean.</p>
+            <p>Finishes the trash-file&nbsp;request.</p>
           </div>
           
         </div>
@@ -824,8 +793,7 @@ the result in the form of a&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.update_install.html">xdp_portal_update_install</a></h6>
           <div class="docblock">
-            <p>Installs an available software update. This should be
-called in response to a <code>XdpPortal::update-available</code> signal.</p>
+            <p>Installs an available software&nbsp;update.</p>
           </div>
           
         </div>
@@ -833,8 +801,7 @@ called in response to a <code>XdpPortal::update-available</code> signal.</p>
         <div class="">
           <h6><a href="method.Portal.update_install_finish.html">xdp_portal_update_install_finish</a></h6>
           <div class="docblock">
-            <p>Finishes an update-installation request, and returns
-the result in the form of&nbsp;boolean.</p>
+            <p>Finishes an update-installation&nbsp;request.</p>
           </div>
           
         </div>
@@ -842,7 +809,7 @@ the result in the form of&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.update_monitor_start.html">xdp_portal_update_monitor_start</a></h6>
           <div class="docblock">
-            <p>Makes XdpPortal start monitoring for available software&nbsp;updates.</p>
+            <p>Makes <code>XdpPortal</code> start monitoring for available software&nbsp;updates.</p>
           </div>
           
         </div>
@@ -850,8 +817,7 @@ the result in the form of&nbsp;boolean.</p>
         <div class="">
           <h6><a href="method.Portal.update_monitor_start_finish.html">xdp_portal_update_monitor_start_finish</a></h6>
           <div class="docblock">
-            <p>Finishes an update-monitor request, and returns
-the result in the form of&nbsp;boolean.</p>
+            <p>Finishes an update-monitor&nbsp;request.</p>
           </div>
           
         </div>
@@ -889,8 +855,7 @@ the result in the form of&nbsp;boolean.</p>
         <div class="">
           <h6><a href="signal.Portal.location-updated.html">Xdp.Portal::location-updated</a></h6>
           <div class="docblock">
-            <p>The ::location-updated signal is emitted when location
-monitoring is enabled and the location&nbsp;changes.</p>
+            <p>Emitted when location monitoring is enabled and the location&nbsp;changes.</p>
           </div>
           
         </div>
@@ -898,8 +863,7 @@ monitoring is enabled and the location&nbsp;changes.</p>
         <div class="">
           <h6><a href="signal.Portal.notification-action-invoked.html">Xdp.Portal::notification-action-invoked</a></h6>
           <div class="docblock">
-            <p>The ::notification-action-invoked signal is emitted when
-a non-exported action is activated on a&nbsp;notification.</p>
+            <p>Emitted when a non-exported action is activated on a&nbsp;notification.</p>
           </div>
           
         </div>
@@ -907,7 +871,7 @@ a non-exported action is activated on a&nbsp;notification.</p>
         <div class="">
           <h6><a href="signal.Portal.session-state-changed.html">Xdp.Portal::session-state-changed</a></h6>
           <div class="docblock">
-            <p>This signal is emitted when session state monitoring is
+            <p>Emitted when session state monitoring is
 enabled and the state of the login session changes or
 the screensaver is activated or&nbsp;deactivated.</p>
           </div>
@@ -917,8 +881,7 @@ the screensaver is activated or&nbsp;deactivated.</p>
         <div class="">
           <h6><a href="signal.Portal.spawn-exited.html">Xdp.Portal::spawn-exited</a></h6>
           <div class="docblock">
-            <p>This signal is emitted when a process that was spawned
-with <code>xdp_portal_spawn()</code> exits.</p>
+            <p>Emitted when a process that was spawned with <code>xdp_portal_spawn()</code> exits.</p>
           </div>
           
         </div>
@@ -926,10 +889,8 @@ with <code>xdp_portal_spawn()</code> exits.</p>
         <div class="">
           <h6><a href="signal.Portal.update-available.html">Xdp.Portal::update-available</a></h6>
           <div class="docblock">
-            <p>This signal is emitted when updates monitoring is enabled
-and a new update is available. It is only sent once with
-the same information, but it can be sent many times if
-new updates&nbsp;appear.</p>
+            <p>Emitted when updates monitoring is enabled
+and a new update is&nbsp;available.</p>
           </div>
           
         </div>
@@ -937,12 +898,7 @@ new updates&nbsp;appear.</p>
         <div class="">
           <h6><a href="signal.Portal.update-progress.html">Xdp.Portal::update-progress</a></h6>
           <div class="docblock">
-            <p>This signal gets emitted to indicate progress of an
-update installation. It is undefined exactly how often it
-is sent, but it will be emitted at least once at the end with
-a non-zero <code>status</code>. For each successful operation in the
-update, we&#8217;re also guaranteed to send exactly one signal
-with <code>progress</code> 100.</p>
+            <p>Emitted to indicate progress of an update&nbsp;installation.</p>
           </div>
           
         </div>
