@@ -86,4 +86,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/doc/libportal-1/
+          cname: libportal.org
           destination_dir: ./
