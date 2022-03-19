@@ -5,10 +5,10 @@ name: PortalTest Flatpak
 on:
   push:
     paths-ignore: ['**.md']
-    branches: [master]
+    branches: [main]
   pull_request:
     paths-ignore: ['**.md']
-    branches: [master]
+    branches: [main]
 
 jobs:
   build-flatpak-gtk3:
