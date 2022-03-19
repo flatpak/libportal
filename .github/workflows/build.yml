@@ -82,7 +82,7 @@ jobs:
         run: ninja -C_build
       - name: Deploy Docs
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') }}
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/doc/libportal-1/
