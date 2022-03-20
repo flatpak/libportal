@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Portal.spawn_finish</title>
+  <title>Xdp.Portal.dynamic_launcher_prepare_install</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -29,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
 
   
-  <meta priority="og:title" content="Xdp.Portal.spawn_finish"/>
-  <meta priority="og:description" content="Reference for Xdp.Portal.spawn_finish"/>
-  <meta name="twitter:title" content="Xdp.Portal.spawn_finish"/>
-  <meta name="twitter:description" content="Reference for Xdp.Portal.spawn_finish"/>
+  <meta priority="og:title" content="Xdp.Portal.dynamic_launcher_prepare_install"/>
+  <meta priority="og:description" content="Reference for Xdp.Portal.dynamic_launcher_prepare_install"/>
+  <meta name="twitter:title" content="Xdp.Portal.dynamic_launcher_prepare_install"/>
+  <meta name="twitter:description" content="Reference for Xdp.Portal.dynamic_launcher_prepare_install"/>
 
 
   
@@ -117,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.dynamic_launcher_launch.html">dynamic_launcher_launch</a>
   
-    <a class="method" href="method.Portal.dynamic_launcher_prepare_install.html">dynamic_launcher_prepare_install</a>
+    <a class="method current" href="method.Portal.dynamic_launcher_prepare_install.html">dynamic_launcher_prepare_install</a>
   
     <a class="method" href="method.Portal.dynamic_launcher_prepare_install_finish.html">dynamic_launcher_prepare_install_finish</a>
   
@@ -197,7 +197,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.spawn.html">spawn</a>
   
-    <a class="method current" href="method.Portal.spawn_finish.html">spawn_finish</a>
+    <a class="method" href="method.Portal.spawn_finish.html">spawn_finish</a>
   
     <a class="method" href="method.Portal.spawn_signal.html">spawn_signal</a>
   
@@ -230,7 +230,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <section id="main" class="content">
   <header>
     <h3>Method</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>spawn_finish</h1>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>dynamic_launcher_prepare_install</h1>
   </header>
 
   <section>
@@ -239,16 +239,24 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/spawn.h#L63">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/dynamic-launcher.h#L39">[src]</a>
         
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">pid_t</span>
-<span class="n">xdp_portal_spawn_finish</span> <span class="p">(</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="n">xdp_portal_dynamic_launcher_prepare_install</span> <span class="p">(</span>
   <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span><span class="p">,</span>
-  <span class="n">GAsyncResult</span><span class="o">*</span> <span class="n">result</span><span class="p">,</span>
-  <span class="n">GError</span><span class="o">**</span> <span class="n">error</span>
+  <span class="n">XdpParent</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">,</span>
+  <span class="n">GVariant</span><span class="o">*</span> <span class="n">icon_v</span><span class="p">,</span>
+  <span class="n">XdpLauncherType</span> <span class="n">launcher_type</span><span class="p">,</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">target</span><span class="p">,</span>
+  <span class="n">gboolean</span> <span class="n">editable_name</span><span class="p">,</span>
+  <span class="n">gboolean</span> <span class="n">editable_icon</span><span class="p">,</span>
+  <span class="n">GCancellable</span><span class="o">*</span> <span class="n">cancellable</span><span class="p">,</span>
+  <span class="n">GAsyncReadyCallback</span> <span class="n">callback</span><span class="p">,</span>
+  <span class="n">gpointer</span> <span class="n">data</span>
 <span class="p">)</span>
 </pre></div>
 </code></pre>
@@ -260,13 +268,15 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/spawn.c#L250">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/dynamic-launcher.c#L224">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Finishes the spawn&nbsp;request.</p>
-<p>Returns the pid of the newly spawned&nbsp;process.</p>
+        <p>Presents a dialog to the user so they can confirm they want to install a
+launcher to their&nbsp;desktop.</p>
+<p>When the request is done, <code>callback</code> will be called. You can then
+call <a href="method.Portal.dynamic_launcher_prepare_install_finish.html"><code>xdp_portal_dynamic_launcher_prepare_install_finish()</code></a> to get the&nbsp;results.</p>
       </div>
 
       <div class="docblock">
@@ -291,12 +301,48 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         <table class="arguments">
           
           <tr class="arg-name">
-            <td><code>result</code></td>
-            <td><code>GAsyncResult*</code></td>
+            <td><code>parent</code></td>
+            <td><a href="struct.Parent.html"><code>XdpParent</code></a></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>A <a href="javascript:void(0)" data-namespace="Gio" data-link="iface.AsyncResult.html" class="external"><code>GAsyncResult</code></a></p></td>
+            <td><p>Parent window&nbsp;information.</p></td>
+          </tr>
+          
+          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
+          
+          
+          
+          
+          
+          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
+          
+          
+          <tr class="arg-name">
+            <td><code>name</code></td>
+            <td><code>const char*</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>The name for the&nbsp;launcher.</p></td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
+          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          
+          <tr class="arg-name">
+            <td><code>icon_v</code></td>
+            <td><code>GVariant*</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>A <code>GBytesIcon</code> as returned by <code>g_icon_serialize()</code>. Must be a png or jpeg no larger than 512x512, or an&nbsp;svg.</p></td>
           </tr>
           
           
@@ -308,47 +354,138 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
           
           
-          
           <tr class="arg-name">
-            <td><code>error</code></td>
-            <td><code>GError **</code></td>
+            <td><code>launcher_type</code></td>
+            <td><a href="flags.LauncherType.html"><code>XdpLauncherType</code></a></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td>The return location for a <code>GError*</code>, or <code>NULL</code>.</td>
+            <td><p>The type of the&nbsp;launcher.</p></td>
           </tr>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <tr class="arg-name">
+            <td><code>target</code></td>
+            <td><code>const char*</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>The <span class="caps">URL</span> if the launcher is for a web app, or <code>NULL</code>.</p></td>
+          </tr>
+          
+          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
+          
+          
+          
+          
+          
+          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
+          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          
+          <tr class="arg-name">
+            <td><code>editable_name</code></td>
+            <td><code>gboolean</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>If <code>TRUE</code>, the user will be able to edit the name of the&nbsp;launcher.</p></td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <tr class="arg-name">
+            <td><code>editable_icon</code></td>
+            <td><code>gboolean</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>If <code>TRUE</code>, the user will be able to edit the icon of the launcher, if the implementation supports&nbsp;this.</p></td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <tr class="arg-name">
+            <td><code>cancellable</code></td>
+            <td><code>GCancellable*</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>Optional <a href="javascript:void(0)" data-namespace="Gio" data-link="class.Cancellable.html" class="external"><code>GCancellable</code></a></p></td>
+          </tr>
+          
+          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
+          
+          
+          
+          
+          
+          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
+          
+          
+          <tr class="arg-name">
+            <td><code>callback</code></td>
+            <td><code>GAsyncReadyCallback</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>A callback to call when the request is&nbsp;done.</p></td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <tr class="arg-name">
+            <td><code>data</code></td>
+            <td><code>gpointer</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td><p>Data to pass to <code>callback</code>.</p></td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
           
         </table>
       </div>
     </div>
     
 
-    
-    <div class="return-value toggle-wrapper">
-      <h4 id="return-value">
-        Return value
-        <a href="#return-value" class="anchor"></a>
-      </h4>
-
-      <div class="docblock">
-        <table class="returns">
-          <tr class="arg-name">
-            <td>Returns:</td>
-            <td><code>pid_t</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>The pid of the spawned&nbsp;process.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-        </table>
-      </div>
-    </div>
     
 
   </section>

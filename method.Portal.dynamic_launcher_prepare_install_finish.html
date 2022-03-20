@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Portal.spawn_finish</title>
+  <title>Xdp.Portal.dynamic_launcher_prepare_install_finish</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -29,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
 
   
-  <meta priority="og:title" content="Xdp.Portal.spawn_finish"/>
-  <meta priority="og:description" content="Reference for Xdp.Portal.spawn_finish"/>
-  <meta name="twitter:title" content="Xdp.Portal.spawn_finish"/>
-  <meta name="twitter:description" content="Reference for Xdp.Portal.spawn_finish"/>
+  <meta priority="og:title" content="Xdp.Portal.dynamic_launcher_prepare_install_finish"/>
+  <meta priority="og:description" content="Reference for Xdp.Portal.dynamic_launcher_prepare_install_finish"/>
+  <meta name="twitter:title" content="Xdp.Portal.dynamic_launcher_prepare_install_finish"/>
+  <meta name="twitter:description" content="Reference for Xdp.Portal.dynamic_launcher_prepare_install_finish"/>
 
 
   
@@ -119,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.dynamic_launcher_prepare_install.html">dynamic_launcher_prepare_install</a>
   
-    <a class="method" href="method.Portal.dynamic_launcher_prepare_install_finish.html">dynamic_launcher_prepare_install_finish</a>
+    <a class="method current" href="method.Portal.dynamic_launcher_prepare_install_finish.html">dynamic_launcher_prepare_install_finish</a>
   
     <a class="method" href="method.Portal.dynamic_launcher_request_install_token.html">dynamic_launcher_request_install_token</a>
   
@@ -197,7 +197,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.spawn.html">spawn</a>
   
-    <a class="method current" href="method.Portal.spawn_finish.html">spawn_finish</a>
+    <a class="method" href="method.Portal.spawn_finish.html">spawn_finish</a>
   
     <a class="method" href="method.Portal.spawn_signal.html">spawn_signal</a>
   
@@ -230,7 +230,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <section id="main" class="content">
   <header>
     <h3>Method</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>spawn_finish</h1>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>dynamic_launcher_prepare_install_finish</h1>
   </header>
 
   <section>
@@ -239,13 +239,13 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/spawn.h#L63">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/dynamic-launcher.h#L52">[src]</a>
         
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">pid_t</span>
-<span class="n">xdp_portal_spawn_finish</span> <span class="p">(</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="n">GVariant</span><span class="o">*</span>
+<span class="n">xdp_portal_dynamic_launcher_prepare_install_finish</span> <span class="p">(</span>
   <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span><span class="p">,</span>
   <span class="n">GAsyncResult</span><span class="o">*</span> <span class="n">result</span><span class="p">,</span>
   <span class="n">GError</span><span class="o">**</span> <span class="n">error</span>
@@ -260,13 +260,19 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/spawn.c#L250">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/dynamic-launcher.c#L282">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Finishes the spawn&nbsp;request.</p>
-<p>Returns the pid of the newly spawned&nbsp;process.</p>
+        <p>Finishes the prepare-install-launcher request, and returns
+<a href="javascript:void(0)" data-namespace="GLib" data-link="struct.Variant.html" class="external"><code>GVariant</code></a> dictionary with the following&nbsp;information:</p>
+<ul>
+<li>name s: the name chosen by the user (or the provided name if the
+    editable_name option was not&nbsp;set)</li>
+<li>token s: a token that can by used in a <a href="method.Portal.dynamic_launcher_install.html"><code>xdp_portal_dynamic_launcher_install()</code></a>
+    call to complete the&nbsp;installation.</li>
+</ul>
       </div>
 
       <div class="docblock">
@@ -334,16 +340,16 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         <table class="returns">
           <tr class="arg-name">
             <td>Returns:</td>
-            <td><code>pid_t</code></td>
+            <td><code>GVariant*</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>The pid of the spawned&nbsp;process.</p></td>
+            <td><p>A <a href="javascript:void(0)" data-namespace="GLib" data-link="struct.Variant.html" class="external"><code>GVariant</code></a> dictionary with launcher&nbsp;information.</p></td>
           </tr>
           
           
           
-          
+          <tr><td>&nbsp;</td><td title="transfer: full">The caller of the method takes ownership of the data, and is responsible for freeing it.</td></tr>
           
           
         </table>

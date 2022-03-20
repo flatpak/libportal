@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Portal.spawn_finish</title>
+  <title>Xdp.Portal.dynamic_launcher_launch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -29,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
 
   
-  <meta priority="og:title" content="Xdp.Portal.spawn_finish"/>
-  <meta priority="og:description" content="Reference for Xdp.Portal.spawn_finish"/>
-  <meta name="twitter:title" content="Xdp.Portal.spawn_finish"/>
-  <meta name="twitter:description" content="Reference for Xdp.Portal.spawn_finish"/>
+  <meta priority="og:title" content="Xdp.Portal.dynamic_launcher_launch"/>
+  <meta priority="og:description" content="Reference for Xdp.Portal.dynamic_launcher_launch"/>
+  <meta name="twitter:title" content="Xdp.Portal.dynamic_launcher_launch"/>
+  <meta name="twitter:description" content="Reference for Xdp.Portal.dynamic_launcher_launch"/>
 
 
   
@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.dynamic_launcher_install.html">dynamic_launcher_install</a>
   
-    <a class="method" href="method.Portal.dynamic_launcher_launch.html">dynamic_launcher_launch</a>
+    <a class="method current" href="method.Portal.dynamic_launcher_launch.html">dynamic_launcher_launch</a>
   
     <a class="method" href="method.Portal.dynamic_launcher_prepare_install.html">dynamic_launcher_prepare_install</a>
   
@@ -197,7 +197,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.spawn.html">spawn</a>
   
-    <a class="method current" href="method.Portal.spawn_finish.html">spawn_finish</a>
+    <a class="method" href="method.Portal.spawn_finish.html">spawn_finish</a>
   
     <a class="method" href="method.Portal.spawn_signal.html">spawn_signal</a>
   
@@ -230,7 +230,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <section id="main" class="content">
   <header>
     <h3>Method</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>spawn_finish</h1>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>dynamic_launcher_launch</h1>
   </header>
 
   <section>
@@ -239,15 +239,16 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/spawn.h#L63">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/dynamic-launcher.h#L87">[src]</a>
         
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">pid_t</span>
-<span class="n">xdp_portal_spawn_finish</span> <span class="p">(</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="n">gboolean</span>
+<span class="n">xdp_portal_dynamic_launcher_launch</span> <span class="p">(</span>
   <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span><span class="p">,</span>
-  <span class="n">GAsyncResult</span><span class="o">*</span> <span class="n">result</span><span class="p">,</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">desktop_file_id</span><span class="p">,</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">activation_token</span><span class="p">,</span>
   <span class="n">GError</span><span class="o">**</span> <span class="n">error</span>
 <span class="p">)</span>
 </pre></div>
@@ -260,13 +261,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/spawn.c#L250">[src]</a>
-        
       </h4>
 
       <div class="docblock">
-        <p>Finishes the spawn&nbsp;request.</p>
-<p>Returns the pid of the newly spawned&nbsp;process.</p>
+        No description available.
       </div>
 
       <div class="docblock">
@@ -291,12 +289,12 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         <table class="arguments">
           
           <tr class="arg-name">
-            <td><code>result</code></td>
-            <td><code>GAsyncResult*</code></td>
+            <td><code>desktop_file_id</code></td>
+            <td><code>const char*</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>A <a href="javascript:void(0)" data-namespace="Gio" data-link="iface.AsyncResult.html" class="external"><code>GAsyncResult</code></a></p></td>
+            <td>No description available.</td>
           </tr>
           
           
@@ -306,7 +304,25 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
+          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
           
+          <tr class="arg-name">
+            <td><code>activation_token</code></td>
+            <td><code>const char*</code></td>
+          </tr>
+          <tr class="arg-description">
+            <td>&nbsp;</td>
+            <td>No description available.</td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
+          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
           
           
           <tr class="arg-name">
@@ -334,11 +350,11 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         <table class="returns">
           <tr class="arg-name">
             <td>Returns:</td>
-            <td><code>pid_t</code></td>
+            <td><code>gboolean</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>The pid of the spawned&nbsp;process.</p></td>
+            <td>No description available.</td>
           </tr>
           
           
