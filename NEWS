@@ -1,3 +1,19 @@
+Changes in 0.6, 21-03-2022
+==========================
+
+- New portal support: Dynamic launcher
+- Add API for checking for flatpak/snap sandbox
+- Fix a bug where the callback setup by libportal for a GCancellable was not
+  properly canceled in case a portal method call was not successful, which can
+  lead to a double free seg fault
+- libportal-qt: Add convenient functions to better deal with GVariants
+- libportal-qt: Use a global instance of XdpPortal object
+- libportal-qt: make filechooserFilterToGVariant() public
+- camera: Use correct variant for is_camera_present()
+- portal-test-gtk3: Fix incorrect paths used in tests
+- Documentation improvements
+- CI improvements
+
 Changes in 0.5, 21-12-2021
 ==========================
 
