@@ -88,3 +88,23 @@ jobs:
           publish_dir: ./_build/doc/libportal-1/
           cname: libportal.org
           destination_dir: ./
+
+  abi-check:
+    name: ABI check
+    runs-on: ubuntu-latest
+    container: fedora:35
+    env:
+      LAST_ABI_BREAK: "467a397fd7996557f837cdc26ac07c01c62810e5"
+
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel qt5-qtbase-devel qt5-qtx11extras-devel git libabigail
+      - name: Install check-abi
+        run: |
+          curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
+          rm -rf check-abi/
+      - name: Check out libportal
+        uses: actions/checkout@v1
+      - name: Run ABI check
+        run: check-abi --old-parameters="-Dvapi=false -Ddocs=false -Dintrospection=false" --new-parameters="-Dvapi=false -Ddocs=false -Dtests=false -Dintrospection=false" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
