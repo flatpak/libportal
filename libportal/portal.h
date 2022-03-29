@@ -34,6 +34,7 @@
 #include <libportal/print.h>
 #include <libportal/remote.h>
 #include <libportal/screenshot.h>
+#include <libportal/session.h>
 #include <libportal/spawn.h>
 #include <libportal/trash.h>
 #include <libportal/types.h>

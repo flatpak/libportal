@@ -19,6 +19,7 @@ headers = [
   'print.h',
   'remote.h',
   'screenshot.h',
+  'session.h',
   'spawn.h',
   'trash.h',
   'types.h',
