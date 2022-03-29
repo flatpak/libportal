@@ -147,112 +147,24 @@ xdp_session_get_session_type (XdpSession *session)
 }
 
 /**
- * xdp_session_get_session_state:
- * @session: an [class@Session]
+ * xdp_session_close:
+ * @session: an active [class@Session]
  *
- * Obtains information about the state of the session that is represented
- * by @session.
- *
- * Returns: the state of @session
+ * Closes the session.
  */
-XdpSessionState
-xdp_session_get_session_state (XdpSession *session)
-{
-  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_SESSION_CLOSED);
-
-  return session->state;
-}
-
 void
-_xdp_session_set_session_state (XdpSession *session,
-                                XdpSessionState state)
+xdp_session_close (XdpSession *session)
 {
-  session->state = state;
+  g_return_if_fail (XDP_IS_SESSION (session));
 
-  if (state == XDP_SESSION_INITIAL && session->state != XDP_SESSION_INITIAL)
-    {
-      g_warning ("Can't move a session back to initial state");
-      return;
-    }
-  if (session->state == XDP_SESSION_CLOSED && state != XDP_SESSION_CLOSED)
-    {
-      g_warning ("Can't move a session back from closed state");
-      return;
-    }
+  g_dbus_connection_call (session->portal->bus,
+                          PORTAL_BUS_NAME,
+                          session->id,
+                          SESSION_INTERFACE,
+                          "Close",
+                          NULL,
+                          NULL, 0, -1, NULL, NULL, NULL);
 
-  if (state == XDP_SESSION_CLOSED)
-    g_signal_emit (session, signals[CLOSED], 0);
-}
-
-/**
- * xdp_session_get_devices:
- * @session: a [class@Session]
- *
- * Obtains the devices that the user selected.
- *
- * Unless the session is active, this function returns `XDP_DEVICE_NONE`.
- *
- * Returns: the selected devices
- */
-XdpDeviceType
-xdp_session_get_devices (XdpSession *session)
-{
-  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_DEVICE_NONE);
-
-  if (session->state != XDP_SESSION_ACTIVE)
-    return XDP_DEVICE_NONE;
-
-  return session->devices;
-}
-
-void
-_xdp_session_set_devices (XdpSession *session,
-                          XdpDeviceType devices)
-{
-  session->devices = devices;
-}
-
-/**
- * xdp_session_get_streams:
- * @session: a [class@Session]
- *
- * Obtains the streams that the user selected.
- *
- * The information in the returned [struct@GLib.Variant] has the format
- * `a(ua{sv})`. Each item in the array is describing a stream. The first member
- * is the pipewire node ID, the second is a dictionary of stream properties,
- * including:
- *
- * - position, `(ii)`: a tuple consisting of the position `(x, y)` in the compositor
- *     coordinate space. Note that the position may not be equivalent to a
- *     position in a pixel coordinate space. Only available for monitor streams.
- * - size, `(ii)`: a tuple consisting of (width, height). The size represents the size
- *     of the stream as it is displayed in the compositor coordinate space.
- *     Note that this size may not be equivalent to a size in a pixel coordinate
- *     space. The size may differ from the size of the stream.
- *
- * Unless the session is active, this function returns `NULL`.
- *
- * Returns: the selected streams
- */
-GVariant *
-xdp_session_get_streams (XdpSession *session)
-{
-  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
-
-  if (session->state != XDP_SESSION_ACTIVE)
-    return NULL;
-
-  return session->streams;
-}
-
-void
-_xdp_session_set_streams (XdpSession *session,
-                          GVariant *streams)
-{
-  if (session->streams)
-    g_variant_unref (session->streams);
-  session->streams = streams;
-  if (session->streams)
-    g_variant_ref (session->streams);
+  _xdp_session_set_session_state (session, XDP_SESSION_CLOSED);
+  _xdp_session_close (session);
 }

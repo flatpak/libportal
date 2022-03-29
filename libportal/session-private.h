@@ -24,18 +24,22 @@
 struct _XdpSession {
   GObject parent_instance;
 
+  /* Generic Session implementation */
   XdpPortal *portal;
   char *id;
   XdpSessionType type;
+  guint signal_id;
+
+  /* RemoteDesktop/ScreenCast */
   XdpSessionState state;
   XdpDeviceType devices;
   GVariant *streams;
 
   XdpPersistMode persist_mode;
   char *restore_token;
+
   gboolean uses_eis;
 
-  guint signal_id;
 };
 
 XdpSession * _xdp_session_new (XdpPortal *portal,
