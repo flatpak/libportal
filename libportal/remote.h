@@ -20,13 +20,23 @@
 #pragma once
 
 #include <libportal/types.h>
+#include <libportal/session.h>
 
 G_BEGIN_DECLS
 
-#define XDP_TYPE_SESSION (xdp_session_get_type ())
-
-XDP_PUBLIC
-G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
+/**
+ * XdpSessionState:
+ * @XDP_SESSION_INITIAL: the session has not been started.
+ * @XDP_SESSION_ACTIVE: the session is active.
+ * @XDP_SESSION_CLOSED: the session is no longer active.
+ *
+ * The state of a session.
+ */
+typedef enum {
+  XDP_SESSION_INITIAL,
+  XDP_SESSION_ACTIVE,
+  XDP_SESSION_CLOSED
+} XdpSessionState;
 
 /**
  * XdpOutputType:
@@ -59,32 +69,6 @@ typedef enum {
   XDP_DEVICE_POINTER     = 1 << 1,
   XDP_DEVICE_TOUCHSCREEN = 1 << 2
 } XdpDeviceType;
-
-/**
- * XdpSessionType:
- * @XDP_SESSION_SCREENCAST: a screencast session.
- * @XDP_SESSION_REMOTE_DESKTOP: a remote desktop session.
- *
- * The type of a session.
- */
-typedef enum {
-  XDP_SESSION_SCREENCAST,
-  XDP_SESSION_REMOTE_DESKTOP
-} XdpSessionType;
-
-/**
- * XdpSessionState:
- * @XDP_SESSION_INITIAL: the session has not been started.
- * @XDP_SESSION_ACTIVE: the session is active.
- * @XDP_SESSION_CLOSED: the session is no longer active.
- *
- * The state of a session.
- */
-typedef enum {
-  XDP_SESSION_INITIAL,
-  XDP_SESSION_ACTIVE,
-  XDP_SESSION_CLOSED
-} XdpSessionState;
 
 /**
  * XdpScreencastFlags:
@@ -170,6 +154,9 @@ XdpSession *xdp_portal_create_remote_desktop_session_finish (XdpPortal          
                                                              GError                **error);
 
 XDP_PUBLIC
+XdpSessionState xdp_session_get_session_state (XdpSession *session);
+
+XDP_PUBLIC
 void        xdp_session_start                (XdpSession           *session,
                                               XdpParent            *parent,
                                               GCancellable         *cancellable,
@@ -182,16 +169,7 @@ gboolean    xdp_session_start_finish         (XdpSession           *session,
                                               GError              **error);
 
 XDP_PUBLIC
-void        xdp_session_close                (XdpSession           *session);
-
-XDP_PUBLIC
 int         xdp_session_open_pipewire_remote (XdpSession           *session);
-
-XDP_PUBLIC
-XdpSessionType  xdp_session_get_session_type  (XdpSession *session);
-
-XDP_PUBLIC
-XdpSessionState xdp_session_get_session_state (XdpSession *session);
 
 XDP_PUBLIC
 XdpDeviceType   xdp_session_get_devices       (XdpSession *session);

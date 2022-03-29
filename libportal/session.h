@@ -19,24 +19,31 @@
 
 #pragma once
 
-#include <libportal/portal-enums.h>
-#include <libportal/account.h>
-#include <libportal/background.h>
-#include <libportal/camera.h>
-#include <libportal/dynamic-launcher.h>
-#include <libportal/email.h>
-#include <libportal/filechooser.h>
-#include <libportal/inhibit.h>
-#include <libportal/location.h>
-#include <libportal/notification.h>
-#include <libportal/openuri.h>
-#include <libportal/parent.h>
-#include <libportal/print.h>
-#include <libportal/remote.h>
-#include <libportal/screenshot.h>
-#include <libportal/session.h>
-#include <libportal/spawn.h>
-#include <libportal/trash.h>
 #include <libportal/types.h>
-#include <libportal/updates.h>
-#include <libportal/wallpaper.h>
+
+G_BEGIN_DECLS
+
+#define XDP_TYPE_SESSION (xdp_session_get_type ())
+
+XDP_PUBLIC
+G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
+
+/**
+ * XdpSessionType:
+ * @XDP_SESSION_SCREENCAST: a screencast session.
+ * @XDP_SESSION_REMOTE_DESKTOP: a remote desktop session.
+ *
+ * The type of a session.
+ */
+typedef enum {
+  XDP_SESSION_SCREENCAST,
+  XDP_SESSION_REMOTE_DESKTOP,
+} XdpSessionType;
+
+XDP_PUBLIC
+void            xdp_session_close             (XdpSession *session);
+
+XDP_PUBLIC
+XdpSessionType  xdp_session_get_session_type  (XdpSession *session);
+
+G_END_DECLS
