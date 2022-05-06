@@ -59,23 +59,23 @@ ensure_action_invoked_connection (XdpPortal *portal)
                                            NULL);
 }
 
-typedef struct {
-  XdpPortal *portal;
-  GAsyncReadyCallback callback;
-  gpointer data;
-} CallDoneData;
-
 static void
 call_done (GObject *source,
            GAsyncResult *result,
            gpointer data)
 {
-  CallDoneData *call_done_data = data;
+  g_autoptr(GVariant) res = NULL;
+  g_autoptr(GTask) task = data;
+  GError *error = NULL;
+  XdpPortal *portal;
 
-  call_done_data->callback (G_OBJECT (call_done_data->portal), result, call_done_data->data);
+  portal = g_task_get_source_object (task);
+  res = g_dbus_connection_call_finish (portal->bus, result, &error);
 
-  g_object_unref (call_done_data->portal);
-  g_free (call_done_data);
+  if (error)
+    g_task_return_error (task, error);
+  else
+    g_task_return_boolean (task, !!res);
 }
 
 /**
@@ -130,7 +130,7 @@ xdp_portal_add_notification (XdpPortal *portal,
                              gpointer data)
 {
   GAsyncReadyCallback call_done_cb = NULL;
-  CallDoneData *call_done_data = NULL;
+  g_autoptr(GTask) task = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (flags == XDP_NOTIFICATION_FLAG_NONE);
@@ -139,11 +139,8 @@ xdp_portal_add_notification (XdpPortal *portal,
 
   if (callback)
     {
-      call_done_cb = call_done; 
-      call_done_data = g_new (CallDoneData, 1);
-      call_done_data->portal = g_object_ref (portal);
-      call_done_data->callback = callback,
-      call_done_data->data = data;
+      call_done_cb = call_done;
+      task = g_task_new (portal, cancellable, callback, data);
     }
 
   g_dbus_connection_call (portal->bus,
@@ -157,7 +154,7 @@ xdp_portal_add_notification (XdpPortal *portal,
                           -1,
                           cancellable,
                           call_done_cb,
-                          call_done_data);
+                          g_steal_pointer (&task));
 }
 
 /**
@@ -177,11 +174,10 @@ xdp_portal_add_notification_finish (XdpPortal     *portal,
                                     GAsyncResult  *result,
                                     GError       **error)
 {
-  g_autoptr(GVariant) res = NULL;
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
 
-  res = g_dbus_connection_call_finish (portal->bus, result, error);
-
-  return !!res;
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**
