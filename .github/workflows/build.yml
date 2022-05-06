@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:35
     env:
-      LAST_ABI_BREAK: "467a397fd7996557f837cdc26ac07c01c62810e5"
+      LAST_ABI_BREAK: "37ceaba91f399239864b767736ea3c4be0c22b3b"
 
     steps:
       - name: Install dependencies
