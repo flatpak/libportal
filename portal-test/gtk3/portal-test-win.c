@@ -594,7 +594,7 @@ session_started (GObject *source,
       g_variant_lookup (props, "size", "(ii)", &w, &h);
       if (s->len > 0)
         g_string_append (s, "\n");
-      g_string_append_printf (s, "Stream %d: %dx%d @ %d,%d", id, w, y, x, y);
+      g_string_append_printf (s, "Stream %d: %dx%d @ %d,%d", id, w, h, x, y);
       g_variant_unref (props);
     }
 
