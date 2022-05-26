@@ -254,12 +254,47 @@ xdp_portal_class_init (XdpPortalClass *klass)
                   G_TYPE_VARIANT);
 }
 
+static GDBusConnection *
+create_bus_from_address (const char *address,
+                         GError    **error)
+{
+  g_autoptr(GDBusConnection) bus = NULL;
+
+  if (!address)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "Missing D-Bus session bus address");
+      return NULL;
+    }
+
+  bus = g_dbus_connection_new_for_address_sync (address,
+                                                G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT |
+                                                G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION,
+                                                NULL, NULL,
+                                                error);
+  return g_steal_pointer (&bus);
+}
+
 static void
 xdp_portal_init (XdpPortal *portal)
 {
+  g_autoptr(GError) error = NULL;
   int i;
 
-  portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
+  /* g_bus_get_sync() returns a singleton. In the test suite we may restart
+   * the session bus, so we have to manually connect to the new bus */
+  if (getenv ("LIBPORTAL_TEST_SUITE"))
+    portal->bus = create_bus_from_address (getenv ("DBUS_SESSION_BUS_ADDRESS"), &error);
+  else
+    portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
+
+  if (error)
+    {
+      g_critical ("Failed to create XdpPortal instance: %s\n", error->message);
+      abort ();
+    }
+
+  g_assert (portal->bus != NULL);
+
   portal->sender = g_strdup (g_dbus_connection_get_unique_name (portal->bus) + 1);
   for (i = 0; portal->sender[i]; i++)
     if (portal->sender[i] == '.')
