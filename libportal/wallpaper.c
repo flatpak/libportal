@@ -278,7 +278,7 @@ set_wallpaper (WallpaperCall *call)
 /**
  * xdp_portal_set_wallpaper:
  * @portal: a [class@Portal]
- * @parent: parent window information
+ * @parent: (nullable): parent window information
  * @uri: the URI to use
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
