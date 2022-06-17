@@ -107,4 +107,4 @@ jobs:
       - name: Check out libportal
         uses: actions/checkout@v1
       - name: Run ABI check
-        run: check-abi --old-parameters="-Dvapi=false -Ddocs=false -Dintrospection=false" --new-parameters="-Dvapi=false -Ddocs=false -Dtests=false -Dintrospection=false" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+        run: check-abi --old-parameters="-Dvapi=false -Ddocs=false -Dintrospection=false" --new-parameters="-Dvapi=false -Ddocs=false -Dtests=false -Dintrospection=false" ${LAST_ABI_BREAK} $GITHUB_SHA
