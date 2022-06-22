@@ -846,6 +846,16 @@ xdp_session_open_pipewire_remote (XdpSession *session)
   return g_unix_fd_list_get (fd_list, fd_out, NULL);
 }
 
+static gboolean
+is_active_remotedesktop_session (XdpSession    *session,
+                                 XdpDeviceType  required_device)
+{
+  return XDP_IS_SESSION (session) &&
+         session->type == XDP_SESSION_REMOTE_DESKTOP &&
+         session->state == XDP_SESSION_ACTIVE &&
+         (session->devices & required_device) != 0;
+}
+
 /**
  * xdp_session_pointer_motion:
  * @session: a [class@Session]
@@ -864,10 +874,7 @@ xdp_session_pointer_motion (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_POINTER) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -900,10 +907,7 @@ xdp_session_pointer_position (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_POINTER) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -933,10 +937,7 @@ xdp_session_pointer_button (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_POINTER) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -970,10 +971,7 @@ xdp_session_pointer_axis (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_POINTER) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "finish", g_variant_new_boolean (finish));
@@ -1004,10 +1002,7 @@ xdp_session_pointer_axis_discrete (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_POINTER) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -1039,10 +1034,7 @@ xdp_session_keyboard_key (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_KEYBOARD) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_KEYBOARD));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -1079,10 +1071,7 @@ xdp_session_touch_down (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_TOUCHSCREEN) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_TOUCHSCREEN));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -1119,10 +1108,7 @@ xdp_session_touch_position (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_TOUCHSCREEN) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_TOUCHSCREEN));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
@@ -1150,10 +1136,7 @@ xdp_session_touch_up (XdpSession *session,
 {
   GVariantBuilder options;
 
-  g_return_if_fail (XDP_IS_SESSION (session) &&
-                    session->type == XDP_SESSION_REMOTE_DESKTOP &&
-                    session->state == XDP_SESSION_ACTIVE &&
-                    ((session->devices & XDP_DEVICE_TOUCHSCREEN) != 0));
+  g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_TOUCHSCREEN));
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_dbus_connection_call (session->portal->bus,
