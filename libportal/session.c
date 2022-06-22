@@ -129,6 +129,22 @@ _xdp_session_new (XdpPortal *portal,
   return session;
 }
 
+const char *
+_xdp_session_get_id (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
+
+  return session->id;
+}
+
+XdpPortal *
+_xdp_session_get_portal (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
+
+  return session->portal;
+}
+
 /**
  * xdp_session_get_session_type:
  * @session: an [class@Session]
@@ -212,6 +228,14 @@ _xdp_session_set_devices (XdpSession *session,
   session->devices = devices;
 }
 
+XdpDeviceType
+_xdp_session_get_devices (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_DEVICE_NONE);
+
+  return session->devices;
+}
+
 /**
  * xdp_session_get_streams:
  * @session: a [class@Session]
@@ -255,4 +279,35 @@ _xdp_session_set_streams (XdpSession *session,
   session->streams = streams;
   if (session->streams)
     g_variant_ref (session->streams);
+}
+
+void
+_xdp_session_set_persist_mode (XdpSession *session,
+                               XdpPersistMode persist_mode)
+{
+  session->persist_mode = persist_mode;
+}
+
+XdpPersistMode
+_xdp_session_get_persist_mode (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_PERSIST_MODE_NONE);
+
+  return session->persist_mode;
+}
+
+void
+_xdp_session_set_restore_token (XdpSession *session,
+                                char *restore_token)
+{
+  g_clear_pointer (&session->restore_token, g_free);
+  session->restore_token = restore_token;
+}
+
+const char *
+_xdp_session_get_restore_token (XdpSession *session)
+{
+  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
+
+  return session->restore_token;
 }

@@ -612,11 +612,13 @@ session_started (GDBusConnection *bus,
     {
       guint32 devices;
       GVariant *streams;
+      XdpPersistMode persist_mode = XDP_PERSIST_MODE_NONE;
+      char *restore_token = NULL;
 
-      if (!g_variant_lookup (ret, "persist_mode", "u", &call->session->persist_mode))
-        call->session->persist_mode = XDP_PERSIST_MODE_NONE;
-      if (!g_variant_lookup (ret, "restore_token", "s", &call->session->restore_token))
-        call->session->restore_token = NULL;
+      if (g_variant_lookup (ret, "persist_mode", "u", &persist_mode))
+        _xdp_session_set_persist_mode (call->session, persist_mode);
+      if (g_variant_lookup (ret, "restore_token", "s", &restore_token))
+        _xdp_session_set_restore_token (call->session, g_steal_pointer (&restore_token));
       if (g_variant_lookup (ret, "devices", "u", &devices))
         _xdp_session_set_devices (call->session, devices);
       if (g_variant_lookup (ret, "streams", "@a(ua{sv})", &streams))
@@ -626,11 +628,11 @@ session_started (GDBusConnection *bus,
     }
   else if (response == 1)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                             call->session->type == XDP_SESSION_REMOTE_DESKTOP ?
+                             xdp_session_get_session_type (call->session) == XDP_SESSION_REMOTE_DESKTOP ?
                              "Remote desktop canceled" : "Screencast canceled");
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED,
-                             call->session->type == XDP_SESSION_REMOTE_DESKTOP ?
+                             xdp_session_get_session_type (call->session) == XDP_SESSION_REMOTE_DESKTOP ?
                              "Remote desktop failed" : "Screencast failed");
 
   start_call_free (call);
@@ -701,12 +703,12 @@ start_session (StartCall *call)
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
-                          call->session->type == XDP_SESSION_REMOTE_DESKTOP
+                          xdp_session_get_session_type (call->session) == XDP_SESSION_REMOTE_DESKTOP
                              ? "org.freedesktop.portal.RemoteDesktop"
                              : "org.freedesktop.portal.ScreenCast",
                           "Start",
                           g_variant_new ("(osa{sv})",
-                                         call->session->id,
+                                         _xdp_session_get_id (call->session),
                                          call->parent_handle,
                                          &options),
                           NULL,
@@ -742,7 +744,7 @@ xdp_session_start (XdpSession *session,
   g_return_if_fail (XDP_IS_SESSION (session));
 
   call = g_new0 (StartCall, 1);
-  call->portal = g_object_ref (session->portal);
+  call->portal = g_object_ref (_xdp_session_get_portal (session));
   call->session = g_object_ref (session);
   if (parent)
     call->parent = xdp_parent_copy (parent);
@@ -783,11 +785,15 @@ xdp_session_start_finish (XdpSession *session,
 void
 xdp_session_close (XdpSession *session)
 {
+  XdpPortal *portal;
+
   g_return_if_fail (XDP_IS_SESSION (session));
 
-  g_dbus_connection_call (session->portal->bus,
+  portal = _xdp_session_get_portal (session);
+
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
-                          session->id,
+                          _xdp_session_get_id (session),
                           SESSION_INTERFACE,
                           "Close",
                           NULL,
@@ -813,6 +819,7 @@ xdp_session_close (XdpSession *session)
 int
 xdp_session_open_pipewire_remote (XdpSession *session)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
   g_autoptr(GError) error = NULL;
   g_autoptr(GVariant) ret = NULL;
@@ -821,13 +828,14 @@ xdp_session_open_pipewire_remote (XdpSession *session)
 
   g_return_val_if_fail (XDP_IS_SESSION (session), -1);
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  ret = g_dbus_connection_call_with_unix_fd_list_sync (session->portal->bus,
+  ret = g_dbus_connection_call_with_unix_fd_list_sync (portal->bus,
                                                        PORTAL_BUS_NAME,
                                                        PORTAL_OBJECT_PATH,
                                                        "org.freedesktop.portal.ScreenCast",
                                                        "OpenPipeWireRemote",
-                                                       g_variant_new ("(oa{sv})", session->id, &options),
+                                                       g_variant_new ("(oa{sv})", _xdp_session_get_id (session), &options),
                                                        G_VARIANT_TYPE ("(h)"),
                                                        G_DBUS_CALL_FLAGS_NONE,
                                                        -1,
@@ -851,9 +859,9 @@ is_active_remotedesktop_session (XdpSession    *session,
                                  XdpDeviceType  required_device)
 {
   return XDP_IS_SESSION (session) &&
-         session->type == XDP_SESSION_REMOTE_DESKTOP &&
-         session->state == XDP_SESSION_ACTIVE &&
-         (session->devices & required_device) != 0;
+         xdp_session_get_session_type (session) == XDP_SESSION_REMOTE_DESKTOP &&
+         xdp_session_get_session_state (session) == XDP_SESSION_ACTIVE &&
+         (_xdp_session_get_devices (session) & required_device) != 0;
 }
 
 /**
@@ -872,17 +880,19 @@ xdp_session_pointer_motion (XdpSession *session,
                             double dx,
                             double dy)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyPointerMotion",
-                          g_variant_new ("(oa{sv}dd)", session->id, &options, dx, dy),
+                          g_variant_new ("(oa{sv}dd)", _xdp_session_get_id (session), &options, dx, dy),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -905,17 +915,19 @@ xdp_session_pointer_position (XdpSession *session,
                               double x,
                               double y)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyPointerMotionAbsolute",
-                          g_variant_new ("(oa{sv}udd)", session->id, &options, stream, x, y),
+                          g_variant_new ("(oa{sv}udd)", _xdp_session_get_id (session), &options, stream, x, y),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -935,17 +947,19 @@ xdp_session_pointer_button (XdpSession *session,
                             int button,
                             XdpButtonState state)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyPointerButton",
-                          g_variant_new ("(oa{sv}iu)", session->id, &options, button, state),
+                          g_variant_new ("(oa{sv}iu)", _xdp_session_get_id (session), &options, button, state),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -969,18 +983,20 @@ xdp_session_pointer_axis (XdpSession *session,
                           double dx,
                           double dy)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "finish", g_variant_new_boolean (finish));
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyPointerAxis",
-                          g_variant_new ("(oa{sv}dd)", session->id, &options, dx, dy),
+                          g_variant_new ("(oa{sv}dd)", _xdp_session_get_id (session), &options, dx, dy),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -1000,17 +1016,19 @@ xdp_session_pointer_axis_discrete (XdpSession *session,
                                    XdpDiscreteAxis axis,
                                    int steps)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_POINTER));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyPointerAxisDiscrete",
-                          g_variant_new ("(oa{sv}ui)", session->id, &options, axis, steps),
+                          g_variant_new ("(oa{sv}ui)", _xdp_session_get_id (session), &options, axis, steps),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -1032,17 +1050,19 @@ xdp_session_keyboard_key (XdpSession *session,
                           int key,
                           XdpKeyState state)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_KEYBOARD));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           keysym ? "NotifyKeyboardKeysym" : "NotifyKeyboardKeycode",
-                          g_variant_new ("(oa{sv}iu)", session->id, &options, key, state),
+                          g_variant_new ("(oa{sv}iu)", _xdp_session_get_id (session), &options, key, state),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -1069,17 +1089,19 @@ xdp_session_touch_down (XdpSession *session,
                         double x,
                         double y)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_TOUCHSCREEN));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyTouchDown",
-                          g_variant_new ("(oa{sv}uudd)", session->id, &options, stream, slot, x, y),
+                          g_variant_new ("(oa{sv}uudd)", _xdp_session_get_id (session), &options, stream, slot, x, y),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -1106,17 +1128,19 @@ xdp_session_touch_position (XdpSession *session,
                             double x,
                             double y)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_TOUCHSCREEN));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyTouchMotion",
-                          g_variant_new ("(oa{sv}uudd)", session->id, &options, stream, slot, x, y),
+                          g_variant_new ("(oa{sv}uudd)", _xdp_session_get_id (session), &options, stream, slot, x, y),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -1134,17 +1158,19 @@ void
 xdp_session_touch_up (XdpSession *session,
                       guint slot)
 {
+  XdpPortal *portal;
   GVariantBuilder options;
 
   g_return_if_fail (is_active_remotedesktop_session (session, XDP_DEVICE_TOUCHSCREEN));
 
+  portal = _xdp_session_get_portal (session);
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_dbus_connection_call (session->portal->bus,
+  g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
                           "NotifyTouchUp",
-                          g_variant_new ("(oa{sv}u)", session->id, &options, slot),
+                          g_variant_new ("(oa{sv}u)", _xdp_session_get_id (session), &options, slot),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
 
@@ -1163,9 +1189,9 @@ XdpPersistMode
 xdp_session_get_persist_mode (XdpSession *session)
 {
   g_return_val_if_fail (XDP_IS_SESSION (session), XDP_PERSIST_MODE_NONE);
-  g_return_val_if_fail (session->state == XDP_SESSION_ACTIVE, XDP_PERSIST_MODE_NONE);
+  g_return_val_if_fail (xdp_session_get_session_state (session) == XDP_SESSION_ACTIVE, XDP_PERSIST_MODE_NONE);
 
-  return session->persist_mode;
+  return _xdp_session_get_persist_mode (session);
 }
 
 /**
@@ -1189,7 +1215,7 @@ char *
 xdp_session_get_restore_token (XdpSession *session)
 {
   g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
-  g_return_val_if_fail (session->state == XDP_SESSION_ACTIVE, NULL);
+  g_return_val_if_fail (xdp_session_get_session_state (session) == XDP_SESSION_ACTIVE, NULL);
 
-  return g_strdup (session->restore_token);
+  return g_strdup (_xdp_session_get_restore_token (session));
 }

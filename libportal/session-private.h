@@ -41,11 +41,27 @@ XdpSession * _xdp_session_new (XdpPortal *portal,
                                const char *id,
                                XdpSessionType type);
 
+const char * _xdp_session_get_id (XdpSession *session);
+
+XdpPortal  * _xdp_session_get_portal (XdpSession *session);
+
 void         _xdp_session_set_session_state (XdpSession *session,
                                              XdpSessionState state);
 
 void         _xdp_session_set_devices (XdpSession *session,
                                        XdpDeviceType devices);
 
+XdpDeviceType _xdp_session_get_devices (XdpSession *session);
+
 void         _xdp_session_set_streams (XdpSession *session,
                                        GVariant   *streams);
+
+void         _xdp_session_set_persist_mode (XdpSession *session,
+                                            XdpPersistMode persist_mode);
+
+void         _xdp_session_set_restore_token (XdpSession *session,
+                                             char *restore_token);
+
+const char * _xdp_session_get_restore_token (XdpSession *session);
+
+XdpPersistMode _xdp_session_get_persist_mode (XdpSession *session);
