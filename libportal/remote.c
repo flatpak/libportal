@@ -191,7 +191,7 @@ devices_selected (GDBusConnection *bus,
       g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
       call->signal_id = 0;
 
-      if (call->outputs != 0)
+      if (call->outputs != XDP_OUTPUT_NONE)
         select_sources (call);
       else
         {
