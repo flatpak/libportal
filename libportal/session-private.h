@@ -21,20 +21,13 @@
 
 #include <libportal/remote.h>
 
-struct _XdpSession {
-  GObject parent_instance;
+struct _XdpSessionClass
+{
+  GObjectClass parent_class;
 
-  XdpPortal *portal;
-  char *id;
-  XdpSessionType type;
-  XdpSessionState state;
-  XdpDeviceType devices;
-  GVariant *streams;
+  void (*close) (XdpSession *session);
 
-  XdpPersistMode persist_mode;
-  char *restore_token;
-
-  guint signal_id;
+  gpointer padding[24];
 };
 
 XdpSession * _xdp_session_new (XdpPortal *portal,

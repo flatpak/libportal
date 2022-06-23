@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 #define XDP_TYPE_SESSION (xdp_session_get_type ())
 
 XDP_PUBLIC
-G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
+G_DECLARE_DERIVABLE_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
 
 /**
  * XdpSessionType:

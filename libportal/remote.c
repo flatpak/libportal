@@ -777,33 +777,6 @@ xdp_session_start_finish (XdpSession *session,
 }
 
 /**
- * xdp_session_close:
- * @session: an active [class@Session]
- *
- * Closes the session.
- */
-void
-xdp_session_close (XdpSession *session)
-{
-  XdpPortal *portal;
-
-  g_return_if_fail (XDP_IS_SESSION (session));
-
-  portal = _xdp_session_get_portal (session);
-
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          _xdp_session_get_id (session),
-                          SESSION_INTERFACE,
-                          "Close",
-                          NULL,
-                          NULL, 0, -1, NULL, NULL, NULL);
-
-  _xdp_session_set_session_state (session, XDP_SESSION_CLOSED);
-  g_signal_emit_by_name (session, "closed");
-}
-
-/**
  * xdp_session_open_pipewire_remote:
  * @session: a [class@Session]
  *
