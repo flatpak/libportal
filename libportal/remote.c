@@ -41,6 +41,139 @@ typedef struct {
   guint cancelled_id;
 } CreateCall;
 
+struct _XdpScreenCastSessionClass
+{
+  XdpSessionClass parent_class;
+};
+
+typedef struct {
+  GVariant *streams;
+  XdpPersistMode persist_mode;
+  char *restore_token;
+} XdpScreenCastSessionPrivate;
+
+G_DEFINE_TYPE_WITH_PRIVATE (XdpScreenCastSession, xdp_screencast_session, XDP_TYPE_SESSION)
+
+struct _XdpRemoteDesktopSessionClass
+{
+  XdpScreenCastSessionClass parent_class;
+};
+
+typedef struct {
+  XdpDeviceType devices;
+  gboolean is_screencast;
+} XdpRemoteDesktopSessionPrivate;
+
+G_DEFINE_TYPE_WITH_PRIVATE (XdpRemoteDesktopSession, xdp_remotedesktop_session, XDP_TYPE_SCREENCAST_SESSION)
+
+
+static void
+xdp_screencast_session_finalize (GObject *object)
+{
+  XdpScreenCastSession *session = XDP_SCREENCAST_SESSION (object);
+  XdpScreenCastSessionPrivate *priv = xdp_screencast_session_get_instance_private (session);
+
+  g_clear_pointer (&priv->restore_token, g_free);
+  g_clear_pointer (&priv->streams, g_variant_unref);
+
+  G_OBJECT_CLASS (xdp_screencast_session_parent_class)->finalize (object);
+}
+
+static void
+xdp_screencast_session_class_init (XdpScreenCastSessionClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->finalize = xdp_screencast_session_finalize;
+}
+
+static void
+xdp_screencast_session_init (XdpScreenCastSession *session)
+{
+}
+
+static void
+xdp_remotedesktop_session_class_init (XdpRemoteDesktopSessionClass *klass)
+{
+}
+
+static void
+xdp_remotedesktop_session_init (XdpRemoteDesktopSession *session)
+{
+}
+
+/**
+ * xdp_session_get_streams:
+ * @session: a [class@Session]
+ *
+ * Obtains the streams that the user selected.
+ *
+ * The information in the returned [struct@GLib.Variant] has the format
+ * `a(ua{sv})`. Each item in the array is describing a stream. The first member
+ * is the pipewire node ID, the second is a dictionary of stream properties,
+ * including:
+ *
+ * - position, `(ii)`: a tuple consisting of the position `(x, y)` in the compositor
+ *     coordinate space. Note that the position may not be equivalent to a
+ *     position in a pixel coordinate space. Only available for monitor streams.
+ * - size, `(ii)`: a tuple consisting of (width, height). The size represents the size
+ *     of the stream as it is displayed in the compositor coordinate space.
+ *     Note that this size may not be equivalent to a size in a pixel coordinate
+ *     space. The size may differ from the size of the stream.
+ *
+ * Unless the session is active, this function returns `NULL`.
+ *
+ * Returns: the selected streams
+ */
+GVariant *
+xdp_session_get_streams (XdpSession *session)
+{
+  XdpScreenCastSession *sc; 
+  XdpScreenCastSessionPrivate *priv; 
+
+  g_return_val_if_fail (XDP_IS_SCREENCAST_SESSION (session), NULL);
+
+  if (xdp_session_get_session_state(session) != XDP_SESSION_ACTIVE)
+    return NULL;
+
+  if (XDP_IS_REMOTEDESKTOP_SESSION (session))
+    {
+      XdpRemoteDesktopSession *rd = XDP_REMOTEDESKTOP_SESSION (session); 
+      XdpRemoteDesktopSessionPrivate *rd_priv = xdp_remotedesktop_session_get_instance_private (rd);
+
+      g_return_val_if_fail (rd_priv->is_screencast, NULL);
+    }
+
+  sc = XDP_SCREENCAST_SESSION (session);
+  priv = xdp_screencast_session_get_instance_private (sc);
+
+  return priv->streams;
+}
+
+/**
+ * xdp_session_get_devices:
+ * @session: a [class@Session]
+ *
+ * Obtains the devices that the user selected.
+ *
+ * Unless the session is active, this function returns `XDP_DEVICE_NONE`.
+ *
+ * Returns: the selected devices
+ */
+XdpDeviceType
+xdp_session_get_devices (XdpSession *session)
+{
+  XdpRemoteDesktopSessionPrivate *priv;
+
+  g_return_val_if_fail (XDP_IS_REMOTEDESKTOP_SESSION (session), XDP_DEVICE_NONE);
+
+  if (xdp_session_get_session_state (session) != XDP_SESSION_ACTIVE)
+    return XDP_DEVICE_NONE;
+
+  priv = xdp_remotedesktop_session_get_instance_private (XDP_REMOTEDESKTOP_SESSION (session));
+  return priv->devices;
+}
+
 static void
 create_call_free (CreateCall *call)
 {
@@ -84,10 +217,23 @@ sources_selected (GDBusConnection *bus,
 
   if (response == 0)
     {
-      XdpSession *session;
+      g_autoptr(XdpSession) session = NULL;
+      if (call->devices != 0)
+        {
+          g_autoptr(XdpRemoteDesktopSession) rd = g_object_new (XDP_TYPE_REMOTEDESKTOP_SESSION, NULL);
+          XdpRemoteDesktopSessionPrivate *priv = xdp_remotedesktop_session_get_instance_private (rd);
 
-      session = _xdp_session_new (call->portal, call->id, call->type);
-      g_task_return_pointer (call->task, session, g_object_unref);
+          priv->is_screencast = call->outputs != XDP_OUTPUT_NONE;
+          session = XDP_SESSION (g_steal_pointer (&rd));
+        }
+      else
+        {
+          g_autoptr(XdpScreenCastSession) sc = g_object_new (XDP_TYPE_SCREENCAST_SESSION, NULL);
+          session = XDP_SESSION (g_steal_pointer (&sc));
+        }
+
+      _xdp_session_init (XDP_SESSION (session), call->portal, call->id, call->type);
+      g_task_return_pointer (call->task, XDP_SCREENCAST_SESSION (g_steal_pointer (&session)), g_object_unref);
     }
   else if (response == 1)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Screencast SelectSources() canceled");
@@ -195,13 +341,17 @@ devices_selected (GDBusConnection *bus,
         select_sources (call);
       else
         {
+          g_autoptr (XdpRemoteDesktopSession) session = g_object_new (XDP_TYPE_REMOTEDESKTOP_SESSION, NULL);
+
           if (call->cancelled_id)
             {
               g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
               call->cancelled_id = 0;
             }
 
-          g_task_return_pointer (call->task, _xdp_session_new (call->portal, call->id, call->type), g_object_unref);
+          _xdp_session_init (XDP_SESSION (session), call->portal, call->id, call->type);
+
+          g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
           create_call_free (call);
         }
     }
@@ -550,7 +700,7 @@ xdp_portal_create_remote_desktop_session_finish (XdpPortal *portal,
 
 typedef struct {
   XdpPortal *portal;
-  XdpSession *session;
+  XdpScreenCastSession *session;
   XdpParent *parent;
   char *parent_handle;
   guint signal_id;
@@ -605,34 +755,36 @@ session_started (GDBusConnection *bus,
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
-  _xdp_session_set_session_state (call->session, response == 0 ? XDP_SESSION_ACTIVE
-                                                               : XDP_SESSION_CLOSED);
+  _xdp_session_set_session_state (XDP_SESSION (call->session),
+                                  response == 0 ? XDP_SESSION_ACTIVE : XDP_SESSION_CLOSED);
 
   if (response == 0)
     {
-      guint32 devices;
-      GVariant *streams;
-      XdpPersistMode persist_mode = XDP_PERSIST_MODE_NONE;
-      char *restore_token = NULL;
+      XdpScreenCastSessionPrivate *priv = xdp_screencast_session_get_instance_private (call->session);
 
-      if (g_variant_lookup (ret, "persist_mode", "u", &persist_mode))
-        _xdp_session_set_persist_mode (call->session, persist_mode);
-      if (g_variant_lookup (ret, "restore_token", "s", &restore_token))
-        _xdp_session_set_restore_token (call->session, g_steal_pointer (&restore_token));
-      if (g_variant_lookup (ret, "devices", "u", &devices))
-        _xdp_session_set_devices (call->session, devices);
-      if (g_variant_lookup (ret, "streams", "@a(ua{sv})", &streams))
-        _xdp_session_set_streams (call->session, streams);
+      if (!g_variant_lookup (ret, "persist_mode", "u", &priv->persist_mode))
+        priv->persist_mode = XDP_PERSIST_MODE_NONE;
+      if (!g_variant_lookup (ret, "restore_token", "s", &priv->restore_token))
+        priv->restore_token = NULL;
+
+      g_variant_lookup (ret, "streams", "@a(ua{sv})", &priv->streams);
+
+      if (XDP_IS_REMOTEDESKTOP_SESSION (call->session))
+        {
+          XdpRemoteDesktopSession *rd = XDP_REMOTEDESKTOP_SESSION (call->session);
+          XdpRemoteDesktopSessionPrivate *rd_priv = xdp_remotedesktop_session_get_instance_private (rd);
+          g_variant_lookup (ret, "devices", "u", &rd_priv->devices);
+        }
 
       g_task_return_boolean (call->task, TRUE);
     }
   else if (response == 1)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                             xdp_session_get_session_type (call->session) == XDP_SESSION_REMOTE_DESKTOP ?
+                             xdp_session_get_session_type (XDP_SESSION (call->session)) == XDP_SESSION_REMOTE_DESKTOP ?
                              "Remote desktop canceled" : "Screencast canceled");
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED,
-                             xdp_session_get_session_type (call->session) == XDP_SESSION_REMOTE_DESKTOP ?
+                             xdp_session_get_session_type (XDP_SESSION (call->session)) == XDP_SESSION_REMOTE_DESKTOP ?
                              "Remote desktop failed" : "Screencast failed");
 
   start_call_free (call);
@@ -703,12 +855,12 @@ start_session (StartCall *call)
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
-                          xdp_session_get_session_type (call->session) == XDP_SESSION_REMOTE_DESKTOP
+                          xdp_session_get_session_type (XDP_SESSION (call->session)) == XDP_SESSION_REMOTE_DESKTOP
                              ? "org.freedesktop.portal.RemoteDesktop"
                              : "org.freedesktop.portal.ScreenCast",
                           "Start",
                           g_variant_new ("(osa{sv})",
-                                         _xdp_session_get_id (call->session),
+                                         _xdp_session_get_id (XDP_SESSION (call->session)),
                                          call->parent_handle,
                                          &options),
                           NULL,
@@ -745,7 +897,7 @@ xdp_session_start (XdpSession *session,
 
   call = g_new0 (StartCall, 1);
   call->portal = g_object_ref (_xdp_session_get_portal (session));
-  call->session = g_object_ref (session);
+  call->session = g_object_ref (XDP_SCREENCAST_SESSION (session));
   if (parent)
     call->parent = xdp_parent_copy (parent);
   else
@@ -834,7 +986,7 @@ is_active_remotedesktop_session (XdpSession    *session,
   return XDP_IS_SESSION (session) &&
          xdp_session_get_session_type (session) == XDP_SESSION_REMOTE_DESKTOP &&
          xdp_session_get_session_state (session) == XDP_SESSION_ACTIVE &&
-         (_xdp_session_get_devices (session) & required_device) != 0;
+         (xdp_session_get_devices (session) & required_device) != 0;
 }
 
 /**
@@ -1161,10 +1313,20 @@ xdp_session_touch_up (XdpSession *session,
 XdpPersistMode
 xdp_session_get_persist_mode (XdpSession *session)
 {
-  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_PERSIST_MODE_NONE);
+  XdpScreenCastSession *sc = XDP_SCREENCAST_SESSION (session);
+  XdpScreenCastSessionPrivate *priv = xdp_screencast_session_get_instance_private (sc);
+
+  g_return_val_if_fail (XDP_IS_SCREENCAST_SESSION (session), XDP_PERSIST_MODE_NONE);
   g_return_val_if_fail (xdp_session_get_session_state (session) == XDP_SESSION_ACTIVE, XDP_PERSIST_MODE_NONE);
 
-  return _xdp_session_get_persist_mode (session);
+  if (XDP_IS_REMOTEDESKTOP_SESSION (session))
+    {
+      XdpRemoteDesktopSession *rd = XDP_REMOTEDESKTOP_SESSION (session);
+      XdpRemoteDesktopSessionPrivate *rd_priv = xdp_remotedesktop_session_get_instance_private (rd);
+      g_return_val_if_fail (rd_priv->is_screencast, XDP_PERSIST_MODE_NONE);
+    }
+
+  return priv->persist_mode;
 }
 
 /**
@@ -1187,8 +1349,19 @@ xdp_session_get_persist_mode (XdpSession *session)
 char *
 xdp_session_get_restore_token (XdpSession *session)
 {
-  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
+  XdpScreenCastSession *sc = XDP_SCREENCAST_SESSION (session);
+  XdpScreenCastSessionPrivate *priv = xdp_screencast_session_get_instance_private (sc);
+
+  g_return_val_if_fail (XDP_IS_SCREENCAST_SESSION (session), NULL);
   g_return_val_if_fail (xdp_session_get_session_state (session) == XDP_SESSION_ACTIVE, NULL);
 
-  return g_strdup (_xdp_session_get_restore_token (session));
+  if (XDP_IS_REMOTEDESKTOP_SESSION (session))
+    {
+      XdpRemoteDesktopSession *rd = XDP_REMOTEDESKTOP_SESSION (session);
+      XdpRemoteDesktopSessionPrivate *rd_priv = xdp_remotedesktop_session_get_instance_private (rd);
+      g_return_val_if_fail (rd_priv->is_screencast, NULL);
+    }
+
+
+  return g_strdup (priv->restore_token);
 }

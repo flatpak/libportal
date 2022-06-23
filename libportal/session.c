@@ -45,17 +45,10 @@ enum {
 static guint signals[LAST_SIGNAL];
 
 typedef struct {
-  GObject parent_instance;
-
   XdpPortal *portal;
   char *id;
   XdpSessionType type;
   XdpSessionState state;
-  XdpDeviceType devices;
-  GVariant *streams;
-
-  XdpPersistMode persist_mode;
-  char *restore_token;
 
   guint signal_id;
 } XdpSessionPrivate;
@@ -75,9 +68,7 @@ xdp_session_finalize (GObject *object)
     g_dbus_connection_signal_unsubscribe (priv->portal->bus, priv->signal_id);
 
   g_clear_object (&priv->portal);
-  g_clear_pointer (&priv->restore_token, g_free);
   g_clear_pointer (&priv->id, g_free);
-  g_clear_pointer (&priv->streams, g_variant_unref);
 
   G_OBJECT_CLASS (xdp_session_parent_class)->finalize (object);
 }
@@ -125,15 +116,14 @@ session_closed (GDBusConnection *bus,
   _xdp_session_set_session_state (session, XDP_SESSION_CLOSED);
 }
 
-XdpSession *
-_xdp_session_new (XdpPortal *portal,
-                  const char *id,
-                  XdpSessionType type)
+void
+_xdp_session_init (XdpSession *session,
+                   XdpPortal *portal,
+                   const char *id,
+                   XdpSessionType type)
 {
-  XdpSession *session;
   XdpSessionPrivate *priv;
 
-  session = g_object_new (XDP_TYPE_SESSION, NULL);
   priv = xdp_session_get_instance_private (session);
   priv->portal = g_object_ref (portal);
   priv->id = g_strdup (id);
@@ -150,7 +140,6 @@ _xdp_session_new (XdpPortal *portal,
                                                         session_closed,
                                                         session,
                                                         NULL);
-  return session;
 }
 
 const char *
@@ -236,141 +225,6 @@ _xdp_session_set_session_state (XdpSession *session,
 
   if (state == XDP_SESSION_CLOSED)
     g_signal_emit (session, signals[CLOSED], 0);
-}
-
-/**
- * xdp_session_get_devices:
- * @session: a [class@Session]
- *
- * Obtains the devices that the user selected.
- *
- * Unless the session is active, this function returns `XDP_DEVICE_NONE`.
- *
- * Returns: the selected devices
- */
-XdpDeviceType
-xdp_session_get_devices (XdpSession *session)
-{
-  XdpSessionPrivate *priv;
-
-  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_DEVICE_NONE);
-
-  priv = xdp_session_get_instance_private (session);
-  if (priv->state != XDP_SESSION_ACTIVE)
-    return XDP_DEVICE_NONE;
-
-  return priv->devices;
-}
-
-void
-_xdp_session_set_devices (XdpSession *session,
-                          XdpDeviceType devices)
-{
-  XdpSessionPrivate *priv = xdp_session_get_instance_private (session);
-
-  priv->devices = devices;
-}
-
-XdpDeviceType
-_xdp_session_get_devices (XdpSession *session)
-{
-  XdpSessionPrivate *priv;
-
-  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_DEVICE_NONE);
-
-  priv = xdp_session_get_instance_private (session);
-  return priv->devices;
-}
-
-/**
- * xdp_session_get_streams:
- * @session: a [class@Session]
- *
- * Obtains the streams that the user selected.
- *
- * The information in the returned [struct@GLib.Variant] has the format
- * `a(ua{sv})`. Each item in the array is describing a stream. The first member
- * is the pipewire node ID, the second is a dictionary of stream properties,
- * including:
- *
- * - position, `(ii)`: a tuple consisting of the position `(x, y)` in the compositor
- *     coordinate space. Note that the position may not be equivalent to a
- *     position in a pixel coordinate space. Only available for monitor streams.
- * - size, `(ii)`: a tuple consisting of (width, height). The size represents the size
- *     of the stream as it is displayed in the compositor coordinate space.
- *     Note that this size may not be equivalent to a size in a pixel coordinate
- *     space. The size may differ from the size of the stream.
- *
- * Unless the session is active, this function returns `NULL`.
- *
- * Returns: the selected streams
- */
-GVariant *
-xdp_session_get_streams (XdpSession *session)
-{
-  XdpSessionPrivate *priv;
-
-  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
-
-  priv = xdp_session_get_instance_private (session);
-  if (priv->state != XDP_SESSION_ACTIVE)
-    return NULL;
-
-  return priv->streams;
-}
-
-void
-_xdp_session_set_streams (XdpSession *session,
-                          GVariant *streams)
-{
-  XdpSessionPrivate *priv = xdp_session_get_instance_private (session);
-
-  if (priv->streams)
-    g_variant_unref (priv->streams);
-  priv->streams = streams;
-  if (priv->streams)
-    g_variant_ref (priv->streams);
-}
-
-void
-_xdp_session_set_persist_mode (XdpSession *session,
-                               XdpPersistMode persist_mode)
-{
-  XdpSessionPrivate *priv = xdp_session_get_instance_private (session);
-
-  priv->persist_mode = persist_mode;
-}
-
-XdpPersistMode
-_xdp_session_get_persist_mode (XdpSession *session)
-{
-  XdpSessionPrivate *priv;
-
-  g_return_val_if_fail (XDP_IS_SESSION (session), XDP_PERSIST_MODE_NONE);
-
-  priv = xdp_session_get_instance_private (session);
-  return priv->persist_mode;
-}
-
-void
-_xdp_session_set_restore_token (XdpSession *session,
-                                char *restore_token)
-{
-  XdpSessionPrivate *priv = xdp_session_get_instance_private (session);
-
-  g_clear_pointer (&priv->restore_token, g_free);
-  priv->restore_token = restore_token;
-}
-
-const char *
-_xdp_session_get_restore_token (XdpSession *session)
-{
-  XdpSessionPrivate *priv;
-
-  g_return_val_if_fail (XDP_IS_SESSION (session), NULL);
-
-  priv = xdp_session_get_instance_private (session);
-  return priv->restore_token;
 }
 
 static void

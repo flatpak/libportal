@@ -24,6 +24,16 @@
 
 G_BEGIN_DECLS
 
+#define XDP_TYPE_SCREENCAST_SESSION (xdp_screencast_session_get_type ())
+
+XDP_PUBLIC
+G_DECLARE_DERIVABLE_TYPE (XdpScreenCastSession, xdp_screencast_session, XDP, SCREENCAST_SESSION, XdpSession)
+
+#define XDP_TYPE_REMOTEDESKTOP_SESSION (xdp_remotedesktop_session_get_type ())
+
+XDP_PUBLIC
+G_DECLARE_DERIVABLE_TYPE (XdpRemoteDesktopSession, xdp_remotedesktop_session, XDP, REMOTEDESKTOP_SESSION, XdpScreenCastSession)
+
 /**
  * XdpOutputType:
  * @XDP_OUTPUT_NONE: do not select any output
