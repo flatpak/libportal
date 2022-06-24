@@ -88,9 +88,13 @@ class PortalTest(dbusmock.DBusTestCase):
         self._mainloop = None
         self.dbus_monitor = None
 
-    def setup_daemon(self, params=None):
+    def setup_daemon(self, params=None, extra_templates: List[Tuple[str, Dict]] = []):
         """
-        Start a DBusMock daemon in a separate process
+        Start a DBusMock daemon in a separate process.
+
+        If extra_templates is specified, it is a list of tuples with the
+        portal name as first value and the param dict to be passed to that
+        template as second value, e.g. ("ScreenCast", {...}).
         """
         self.start_session_bus()
         self.p_mock, self.obj_portal = self.spawn_server_template(
@@ -106,6 +110,14 @@ class PortalTest(dbusmock.DBusTestCase):
             self.obj_portal, dbus.PROPERTIES_IFACE
         )
         self.portal_interface = dbus.Interface(self.obj_portal, self.INTERFACE_NAME)
+
+        for t, tparams in extra_templates:
+            template = f"pyportaltest/templates/{t.lower()}.py"
+            self.obj_portal.AddTemplate(
+                template,
+                dbus.Dictionary(tparams, signature="sv"),
+                dbus_interface=dbusmock.MOCK_IFACE,
+            )
 
         self.dbus_monitor = start_dbus_monitor()
 
