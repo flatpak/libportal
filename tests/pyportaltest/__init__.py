@@ -70,6 +70,7 @@ class PortalTest(dbusmock.DBusTestCase):
         appearance.
 
     """
+
     @classmethod
     def setUpClass(cls):
         if cls.__name__ != "PortalTest":
@@ -97,6 +98,7 @@ class PortalTest(dbusmock.DBusTestCase):
             parameters=params,
             stdout=subprocess.PIPE,
         )
+
         flags = fcntl.fcntl(self.p_mock.stdout, fcntl.F_GETFL)
         fcntl.fcntl(self.p_mock.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
         self.mock_interface = dbus.Interface(self.obj_portal, dbusmock.MOCK_IFACE)
