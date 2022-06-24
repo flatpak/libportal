@@ -1160,7 +1160,7 @@ xdp_session_touch_up (XdpSession *session,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.RemoteDesktop",
-                          "NotifyTouchMotion",
+                          "NotifyTouchUp",
                           g_variant_new ("(oa{sv}u)", session->id, &options, slot),
                           NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
 }
