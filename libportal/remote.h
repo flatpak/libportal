@@ -50,7 +50,7 @@ typedef enum {
  * @XDP_DEVICE_KEYBOARD: control the keyboard.
  * @XDP_DEVICE_POINTER: control the pointer.
  * @XDP_DEVICE_TOUCHSCREEN: control the touchscreen.
- * 
+ *
  * Flags to specify what input devices to control for a remote desktop session.
  */
 typedef enum {
@@ -242,8 +242,8 @@ void      xdp_session_pointer_axis   (XdpSession     *session,
  * the discrete scroll axes.
  */
 typedef enum {
-  XDP_AXIS_HORIZONTAL_SCROLL = 0, 
-  XDP_AXIS_VERTICAL_SCROLL   = 1 
+  XDP_AXIS_HORIZONTAL_SCROLL = 0,
+  XDP_AXIS_VERTICAL_SCROLL   = 1
 } XdpDiscreteAxis;
 
 XDP_PUBLIC
@@ -266,7 +266,7 @@ typedef enum {
 
 XDP_PUBLIC
 void      xdp_session_keyboard_key   (XdpSession *session,
-                                      gboolean    keysym, 
+                                      gboolean    keysym,
                                       int         key,
                                       XdpKeyState state);
 
