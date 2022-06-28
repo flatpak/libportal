@@ -27,6 +27,7 @@ class SessionCreationFailed(Exception):
 
 class SessionSetup(NamedTuple):
     session: Xdp.Session
+    session_handle_token: str
     pw_fd: TextIO
 
 
@@ -96,6 +97,16 @@ class TestRemoteDesktop(PortalTest):
         if session_error is not None:
             raise SessionCreationFailed(session_error)
 
+        # Extract our expected session id. This isn't available from
+        # XdpSession so we need to go around it. We can't easily get the
+        # sender id so the full path is hard. Let's just extract the token and
+        # pretend that's good enough.
+        method_calls = self.mock_interface.GetMethodCalls("CreateSession")
+        assert len(method_calls) >= 1
+        _, args = method_calls.pop()  # Assume the latest has our session
+        (options,) = args
+        session_handle = options["session_handle_token"]
+
         assert session.get_session_type() == Xdp.SessionType.REMOTE_DESKTOP
 
         if outputs:
@@ -117,6 +128,7 @@ class TestRemoteDesktop(PortalTest):
 
         return SessionSetup(
             session=session,
+            session_handle_token=session_handle,
             pw_fd=pw_fd,
         )
 
@@ -402,3 +414,32 @@ class TestRemoteDesktop(PortalTest):
         _, args = method_calls.pop(0)
         session_handle, options, slot = args
         assert slot == 10
+
+    def test_close_session(self):
+        """
+        Ensure that closing our session explicitly closes the session on DBus
+        """
+        setup = self.create_session()
+        session = setup.session
+
+        was_closed = False
+
+        def method_called(method_name, method_args, path):
+            nonlocal was_closed
+
+            if method_name == "Close" and path.endswith(setup.session_handle_token):
+                was_closed = True
+                self.mainloop.quit()
+
+        bus = self.get_dbus()
+        bus.add_signal_receiver(
+            handler_function=method_called,
+            signal_name="MethodCalled",
+            dbus_interface="org.freedesktop.DBus.Mock",
+            path_keyword="path",
+        )
+
+        session.close()
+        self.mainloop.run()
+
+        assert was_closed is True

@@ -42,6 +42,7 @@ class Request:
             props={},
         )
         self.mock.AddMethod("", "Close", "", "", "self.RemoveObject(self.path)")
+        logger.debug(f"Request created at {self.handle}")
 
     def respond(self, response: Response, delay: int = 0):
         def respond():
@@ -80,6 +81,7 @@ class Session:
             props={},
         )
         self.mock.AddMethod("", "Close", "", "", "self.RemoveObject(self.path)")
+        logger.debug(f"Session created at {self.handle}")
 
     def close(self, details: ASVType, delay: int = 0):
         def respond():
