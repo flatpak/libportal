@@ -2,7 +2,7 @@
 #
 # This file is formatted with Python Black
 
-from pyportaltest.templates import Request, Response, ASVType
+from pyportaltest.templates import Request, Response, Session, ASVType
 from typing import Dict, List, Tuple, Iterator
 from itertools import count
 
@@ -42,6 +42,8 @@ def load(mock, parameters=None):
         ),
     )
 
+    mock.sessions: Dict[str, Session] = {}
+
 
 @dbus.service.method(
     MAIN_IFACE,
@@ -53,6 +55,9 @@ def CreateSession(self, options, sender):
     try:
         logger.debug(f"CreateSession: {options}")
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
+
+        session = Session(bus_name=self.bus_name, sender=sender, options=options)
+        self.sessions[session.handle] = session
 
         response = Response(self.response, {})
 
