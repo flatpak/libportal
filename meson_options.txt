@@ -1,5 +1,9 @@
-option('backends', type: 'array', choices: ['gtk3', 'gtk4', 'qt5'], value: ['gtk3', 'gtk4', 'qt5'],
-  description : 'A list of portal backends to build')
+option('backend-gtk3', type: 'feature', value: 'auto',
+  description: 'Build the GTK3 portal backend')
+option('backend-gtk4', type: 'feature', value: 'auto',
+  description: 'Build the GTK4 portal backend')
+option('backend-qt5', type: 'feature', value: 'auto',
+  description: 'Build the Qt5 portal backend')
 option('portal-tests', type: 'boolean', value: false,
   description : 'Build portal tests of each backend')
 option('introspection', type: 'boolean', value: true,

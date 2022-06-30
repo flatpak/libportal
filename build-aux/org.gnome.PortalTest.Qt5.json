@@ -15,7 +15,7 @@
             "buildsystem": "meson",
             "builddir": true,
             "config-opts": [
-              "-Dbackends=qt5",
+              "-Dbackend-qt5=enabled",
               "-Dportal-tests=true",
               "-Dintrospection=false",
               "-Dvapi=false",
