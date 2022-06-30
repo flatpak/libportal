@@ -131,6 +131,8 @@ do_spawn (SpawnCall *call)
 
   ensure_spawn_exited_connection (call->portal);
 
+  g_variant_builder_init (&opt_builder, G_VARIANT_TYPE_VARDICT);
+
   g_variant_builder_init (&fds_builder, G_VARIANT_TYPE ("a{uh}"));
   if (call->n_fds > 0)
     {
