@@ -1,8 +1,14 @@
 project('libportal','c',
         version: '0.6',
+        default_options: ['warning_level=2'],
         meson_version: '>= 0.49.0')
 
 cc = meson.get_compiler('c')
+cflags = [
+  '-Wno-unused-parameter',
+  '-Wno-missing-field-initializers',
+]
+add_project_arguments(cc.get_supported_arguments(cflags), language: 'c')
 
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
