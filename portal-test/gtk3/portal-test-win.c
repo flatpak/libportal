@@ -1106,7 +1106,7 @@ inhibit_changed (GtkToggleButton *button, PortalTestWin *win)
       xdp_portal_session_inhibit (win->portal,
                                   parent,
                                   "Portal Testing",
-                                  win->inhibit_flags,
+                                  (XdpInhibitFlags)win->inhibit_flags,
                                   NULL,
                                   inhibit_finished,
                                   win);
