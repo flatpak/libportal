@@ -168,7 +168,6 @@ create_monitor (CreateMonitorCall *call)
 {
   GVariantBuilder options;
   g_autofree char *token = NULL;
-  g_autofree char *session_token = NULL;
   GCancellable *cancellable;
 
   if (call->portal->update_monitor_handle)

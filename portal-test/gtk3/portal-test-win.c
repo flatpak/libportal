@@ -526,7 +526,6 @@ taken (GObject *source,
 {
   PortalTestWin *win = data;
   g_autofree char *uri = NULL;
-  g_autoptr(GdkPixbuf) pixbuf = NULL;
   g_autoptr(GError) error = NULL;
 
   uri = xdp_portal_take_screenshot_finish (win->portal, result, &error);
