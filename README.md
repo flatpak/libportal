@@ -31,8 +31,9 @@ For subsequent builds, you only need to use the `ninja -C _build` command.
 ### Passing options
 
 libportal includes [Meson build options][2] for components that can optionally
-be built. After first running `meson _build`, you can view the available options
-with:
+be built. Run `meson configure` to see all available options or,
+after first running `meson _build`, view available options and their current
+values with:
 
 ```
 meson configure _build
