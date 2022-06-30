@@ -32,7 +32,6 @@ action_invoked (GDBusConnection *bus,
                 gpointer data)
 {
   XdpPortal *portal = data;
-  g_autoptr(GVariant) info = NULL;
   const char *id;
   const char *action;
   g_autoptr(GVariant) parameter = NULL;
