@@ -16,7 +16,7 @@
             "buildsystem": "meson",
             "builddir": true,
             "config-opts": [
-              "-Dbackends=gtk4",
+              "-Dbackend-gtk4=enabled",
               "-Dportal-tests=true",
               "-Ddocs=false"
             ],

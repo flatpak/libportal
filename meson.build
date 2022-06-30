@@ -34,7 +34,6 @@ endforeach
 
 configure_file(output : 'config.h', configuration : conf)
 
-backends = get_option('backends')
 introspection = get_option('introspection')
 vapi = get_option('vapi')
 

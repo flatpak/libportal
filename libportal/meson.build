@@ -109,12 +109,14 @@ if introspection
   endif
 endif
 
+enabled_backends = []
+
 ########
 # GTK3 #
 ########
 
-if 'gtk3' in backends
-  gtk3_dep = dependency('gtk+-3.0')
+gtk3_dep = dependency('gtk+-3.0', required: get_option('backend-gtk3'))
+if gtk3_dep.found()
   gtk3_headers = ['portal-gtk3.h']
   gtk3_sources = ['portal-gtk3.c']
 
@@ -164,14 +166,15 @@ if 'gtk3' in backends
       )
     endif
   endif
+  enabled_backends += ['gtk3']
 endif
 
 ########
 # GTK4 #
 ########
 
-if 'gtk4' in backends
-  gtk4_dep = dependency('gtk4')
+gtk4_dep = dependency('gtk4', required: get_option('backend-gtk4'))
+if gtk4_dep.found()
   gtk4_headers = ['portal-gtk4.h']
   gtk4_sources = ['portal-gtk4.c']
 
@@ -222,16 +225,17 @@ if 'gtk4' in backends
       )
     endif
   endif
+  enabled_backends += ['gtk4']
 endif
 
 ########
 # Qt 5 #
 ########
 
-if 'qt5' in backends
-  add_languages('cpp', required : true)
+have_cpp = add_languages('cpp', required: get_option('backend-qt5'))
+qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'X11Extras', 'Widgets'], required: get_option('backend-qt5'))
 
-  qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'X11Extras', 'Widgets'])
+if have_cpp and qt5_dep.found()
   qt5_headers = ['portal-qt5.h']
   qt5_sources = ['portal-qt5.cpp']
 
@@ -257,4 +261,9 @@ if 'qt5' in backends
     dependencies: [libportal_dep, qt5_dep],
     link_with: libportal_qt5,
   )
+  enabled_backends += ['qt5']
+endif
+
+if meson.version().version_compare('>= 0.54.0')
+  summary({'enabled backends': enabled_backends}, section: 'Backends', list_sep: ',')
 endif

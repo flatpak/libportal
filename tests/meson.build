@@ -1,4 +1,4 @@
-if 'qt5' in backends
+if 'qt5' in enabled_backends
   subdir('qt5')
 endif
 
