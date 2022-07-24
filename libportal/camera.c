@@ -281,8 +281,8 @@ xdp_portal_access_camera_finish (XdpPortal     *portal,
  * Opens a file descriptor to the pipewire remote where the camera
  * nodes are available.
  *
- * The file descriptor should be used to create a pw_remote object, by using
- * pw_remote_connect_fd(). Only the camera nodes will be available from this
+ * The file descriptor should be used to create a pw_core object, by using
+ * pw_context_connect_fd(). Only the camera nodes will be available from this
  * pipewire node.
  *
  * Returns: the file descriptor
