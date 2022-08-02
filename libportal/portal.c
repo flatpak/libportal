@@ -27,7 +27,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifdef __APPLE__
+#include <sys/mount.h>
+#else
 #include <sys/vfs.h>
+#endif
 #include <stdio.h>
 
 /**
