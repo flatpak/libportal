@@ -27,7 +27,9 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
+#endif
 #include <stdio.h>
 
 /**

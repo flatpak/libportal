@@ -25,6 +25,13 @@ if cc.has_argument('-fvisibility=hidden')
   conf.set('XDP_PUBLIC', '__attribute__((visibility("default"))) extern')
 endif
 
+check_headers = ['sys/vfs.h']
+
+foreach header : check_headers
+    macro = 'HAVE_' + header.underscorify().to_upper()
+    conf.set(macro, cc.has_header(header) ? 1 : false)
+endforeach
+
 configure_file(output : 'config.h', configuration : conf)
 
 backends = get_option('backends')
