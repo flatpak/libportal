@@ -65,10 +65,13 @@ jobs:
       - name: Build libportal
         run: ninja -C_build
 
-  fedora-35:
-    name: Fedora 35
+  fedora:
+    name: Fedora
     runs-on: ubuntu-latest
-    container: fedora:35
+    container: fedora:${{ matrix.fedora-version }}
+    strategy:
+      matrix:
+        fedora-version: ['35']
 
     steps:
       - name: Install dependencies
