@@ -15,7 +15,7 @@ jobs:
     name: GTK3
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-41
+      image: bilelmoussaoui/flatpak-github-actions:gnome-42
       options: --privileged
     steps:
       - name: Checkout
@@ -32,7 +32,7 @@ jobs:
     name: GTK4
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-41
+      image: bilelmoussaoui/flatpak-github-actions:gnome-42
       options: --privileged
     steps:
       - name: Checkout
