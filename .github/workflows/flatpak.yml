@@ -1,6 +1,6 @@
 ---
 
-name: PortalTest Flatpak
+name: Flatpak Portal Test App
 
 on:
   push:
