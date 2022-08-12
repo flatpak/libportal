@@ -35,6 +35,7 @@ const refs = {
     form: null,
     search: null,
     main: null,
+    toc: null,
 };
 
 let searchIndex = undefined;
@@ -52,30 +53,37 @@ function onInitSearch() {
 function onDidLoadSearchIndex(data) {
     searchIndex = new SearchIndex(data)
 
-    refs.input  = document.querySelector("#search-input")
-    refs.form   = document.querySelector("#search-form")
-    refs.search = document.querySelector("#search")
-    refs.main   = document.querySelector("#main")
+    refs.input  = document.querySelector("#search-input");
+    refs.form   = document.querySelector("#search-form");
+    refs.search = document.querySelector("#search");
+    refs.main   = document.querySelector("#main");
+    refs.toc    = document.querySelector("#toc");
 
-    attachInputHandlers()
+    attachInputHandlers();
 
     if (searchParams.q) {
         search(searchParams.q);
     }
 }
 
+function getNakedUrl() {
+    return window.location.href.split("?")[0].split("#")[0];
+}
+
 function onDidSearch() {
-    const query = refs.input.value
-    if (query)
-        search(query)
-    else
-        hideSearchResults()
+    const query = refs.input.value;
+    if (query) {
+        search(query);
+    }
+    else {
+        hideSearchResults();
+    }
 }
 
 function onDidSubmit(ev) {
     ev.preventDefault();
-    if (searchResults.length > 0) {
-        window.location.href = searchResults[0].href
+    if (searchResults.length == 1) {
+        window.location.href = searchResults[0].href;
     }
 }
 
@@ -84,7 +92,7 @@ function attachInputHandlers() {
         refs.input.value === searchParams.q || "";
     }
 
-    refs.input.addEventListener('keydown', debounce(200, onDidSearch))
+    refs.input.addEventListener('keyup', debounce(500, onDidSearch))
     refs.form.addEventListener('submit', onDidSubmit)
 }
 
@@ -116,12 +124,18 @@ function search(query) {
 
 function showSearchResults() {
     addClass(refs.main, "hidden");
+    if (refs.toc) {
+        addClass(refs.toc, "hidden");
+    }
     removeClass(refs.search, "hidden");
 }
 
 function hideSearchResults() {
     addClass(refs.search, "hidden");
     removeClass(refs.main, "hidden");
+    if (refs.toc) {
+        removeClass(refs.toc, "hidden");
+    }
 }
 
 function renderResults(query, results) {
@@ -153,6 +167,12 @@ function renderResults(query, results) {
 }
 
 function showResults(query, results) {
+    if (window.history && typeof window.history.pushState === "function") {
+        let baseUrl = getNakedUrl();
+        let extra = "?q=" + encodeURIComponent(refs.input.value);
+        window.history.replaceState(refs.input.value, "", baseUrl + extra + window.location.hash);
+    }
+
     window.title = "Results for: " + query;
     window.scroll({ top: 0 })
     refs.search.innerHTML = renderResults(query, results);
@@ -207,6 +227,7 @@ function getLabelForDocument(doc, meta) {
     switch (doc.type) {
         case "alias":
         case "bitfield":
+        case "callback":
         case "class":
         case "domain":
         case "enum":
@@ -214,6 +235,7 @@ function getLabelForDocument(doc, meta) {
         case "record":
         case "union":
             return "<code>" + doc.ctype + "</code>";
+
         case "class_method":
         case "constant":
         case "ctor":
@@ -235,9 +257,6 @@ function getLabelForDocument(doc, meta) {
         case "vfunc":
             return "<code>" + meta.ns + doc.type_name + "." + doc.name + "</code>";
 
-        case "callback":
-            return "<code>" + doc.name + "</code>";
-
         case "content":
             return doc.name;
     }
@@ -249,6 +268,7 @@ function getTextForDocument(doc, meta) {
     switch (doc.type) {
         case "alias":
         case "bitfield":
+        case "callback":
         case "class":
         case "domain":
         case "enum":
@@ -256,6 +276,7 @@ function getTextForDocument(doc, meta) {
         case "record":
         case "union":
             return doc.ctype;
+
         case "class_method":
         case "constant":
         case "ctor":
@@ -276,9 +297,6 @@ function getTextForDocument(doc, meta) {
             return meta.ns + doc.type_name + "::" + doc.name;
         case "vfunc":
             return meta.ns + doc.type_name + "." + doc.name;
-
-        case "callback":
-            return doc.name;
 
         case "content":
             return doc.name;
@@ -333,18 +351,22 @@ function matchQuery(input) {
 }
 
 function debounce(delay, fn) {
-  let timeout
-  let savedArgs
-  return function() {
-    const self = this
-    savedArgs = Array.prototype.slice.call(arguments)
-    if (timeout)
-      clearTimeout(timeout)
-    timeout = setTimeout(function() {
-      fn.apply(self, savedArgs)
-      timeout = undefined
-    }, delay)
-  }
+    let timeout;
+    let savedArgs
+
+    return function() {
+        const self = this;
+        savedArgs = Array.prototype.slice.call(arguments);
+
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+
+        timeout = setTimeout(function() {
+            fn.apply(self, savedArgs)
+            timeout = undefined
+        }, delay)
+    }
 }
 
 })()
