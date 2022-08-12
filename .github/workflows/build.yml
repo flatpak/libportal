@@ -46,10 +46,10 @@ jobs:
       - name: Build libportal
         run: ninja -C_build
 
-  ubuntu-21-04:
-    name: Ubuntu 21.10
-    runs-on: ubuntu-latest
-    container: ubuntu:21.10
+  ubuntu-22-04:
+    name: Ubuntu 22.04
+    runs-on: ubuntu-22.04
+    container: ubuntu:22.04
 
     steps:
       - name: Install dependencies
