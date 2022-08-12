@@ -23,6 +23,14 @@
 
 G_BEGIN_DECLS
 
+/**
+ * XdpOpenUriFlags:
+ * @XDP_OPEN_URI_FLAG_NONE: No options
+ * @XDP_OPEN_URI_FLAG_ASK: Use an application chooser for the given uri
+ * @XDP_OPEN_URI_FLAG_WRITABLE: Allow writing to file (if uri points to a local file that is exported in the document portal and app is sandboxed itself)
+ *
+ * Options for opening uris.
+ */
 typedef enum {
   XDP_OPEN_URI_FLAG_NONE     = 0,
   XDP_OPEN_URI_FLAG_ASK      = 1 << 0,
