@@ -12,24 +12,6 @@ on:
     - main
 
 jobs:
-  ubuntu-18-04:
-    name: Ubuntu 18.04
-    runs-on: ubuntu-18.04
-
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo add-apt-repository ppa:alexlarsson/glib260
-          sudo add-apt-repository 'deb https://download.mono-project.com/repo/ubuntu stable-bionic main' # Needed for updates to work
-          sudo apt-get update
-          sudo apt-get install -y libglib2.0 gettext dbus meson libgirepository1.0-dev libgtk-3-dev valac
-      - name: Check out libportal
-        uses: actions/checkout@v1
-      - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackends=gtk3 -Ddocs=false
-      - name: Build libportal
-        run: ninja -C_build
-
   ubuntu-20-04:
     name: Ubuntu 20.04
     runs-on: ubuntu-20.04
