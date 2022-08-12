@@ -274,7 +274,7 @@ do_open (OpenCall *call)
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
  *
- * Opens @uri with an external hamdler.
+ * Opens @uri with an external handler.
  */
 void
 xdp_portal_open_uri (XdpPortal *portal,
