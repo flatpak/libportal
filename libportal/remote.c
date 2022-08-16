@@ -357,9 +357,9 @@ create_session (CreateCall *call)
 }
 
 static void
-get_version_returned (GObject *object,
-                      GAsyncResult *result,
-                      gpointer data)
+get_screencast_interface_version_returned (GObject *object,
+                                           GAsyncResult *result,
+                                           gpointer data)
 {
   CreateCall *call = data;
   GError *error = NULL;
@@ -393,7 +393,7 @@ get_screencast_interface_version (CreateCall *call)
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           g_task_get_cancellable (call->task),
-                          get_version_returned,
+                          get_screencast_interface_version_returned,
                           call);
 }
 
