@@ -46,7 +46,8 @@ class TestScreenCast(PortalTest):
         persist_mode=Xdp.PersistMode.NONE,
         restore_token=None,
     ) -> SessionSetup:
-        self.setup_daemon(params or {})
+        extra_templates = [("RemoteDesktop", {})]
+        self.setup_daemon(params=params or {}, extra_templates=extra_templates)
 
         xdp = Xdp.Portal.new()
         assert xdp is not None

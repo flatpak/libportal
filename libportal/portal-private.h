@@ -51,6 +51,7 @@ struct _XdpPortal {
 
   /* screencast */
   guint screencast_interface_version;
+  guint remote_desktop_interface_version;
 
   /* background */
   guint background_interface_version;
