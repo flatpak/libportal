@@ -2,7 +2,7 @@
 #
 # This file is formatted with Python Black
 
-from pyportaltest.templates import Request, Response, ASVType
+from pyportaltest.templates import Request, Response, ASVType, MockParams
 from typing import Dict, List, Tuple, Iterator
 
 import dbus
@@ -19,9 +19,10 @@ MAIN_IFACE = "org.freedesktop.portal.Wallpaper"
 
 def load(mock, parameters):
     logger.debug(f"loading {MAIN_IFACE} template")
-    mock.delay = 500
 
-    mock.response = parameters.get("response", 0)
+    params = MockParams.get(mock, MAIN_IFACE)
+    params.delay = 500
+    params.response = parameters.get("response", 0)
 
     mock.AddProperties(
         MAIN_IFACE,
@@ -38,11 +39,12 @@ def load(mock, parameters):
 def SetWallpaperURI(self, parent_window, uri, options, sender):
     try:
         logger.debug(f"SetWallpaperURI: {parent_window}, {uri}, {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
-        response = Response(self.response, {})
+        response = Response(params.response, {})
 
-        request.respond(response, delay=self.delay)
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:
