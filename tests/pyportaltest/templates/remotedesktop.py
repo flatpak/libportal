@@ -26,7 +26,7 @@ def load(mock, parameters):
 
     params = MockParams.get(mock, MAIN_IFACE)
     params.delay = 500
-    params.version = parameters.get("version", 1)
+    params.version = parameters.get("version", 2)
     params.response = parameters.get("response", 0)
     params.devices = parameters.get("devices", 0b111)
     params.sessions: Dict[str, Session] = {}
@@ -243,5 +243,26 @@ def NotifyTouchMotion(self, session_handle, options, stream, slot, x, y):
 def NotifyTouchUp(self, session_handle, options, slot):
     try:
         logger.debug(f"NotifyTouchMotion: {session_handle} {options} {slot}")
+    except Exception as e:
+        logger.critical(e)
+
+
+@dbus.service.method(
+    MAIN_IFACE,
+    in_signature="oa{sv}",
+    out_signature="h",
+)
+def ConnectToEIS(self, session_handle, options):
+    try:
+        logger.debug(f"ConnectToEIS: {session_handle} {options}")
+        import socket
+
+        sockets = socket.socketpair()
+        # Write some random data down so it'll break anything that actually
+        # expects the socket to be a real EIS socket
+        sockets[0].send(b"VANILLA")
+        fd = sockets[1]
+        logger.debug(f"ConnectToEIS with fd {fd.fileno()}")
+        return dbus.types.UnixFd(fd)
     except Exception as e:
         logger.critical(e)

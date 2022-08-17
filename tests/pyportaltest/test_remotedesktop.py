@@ -4,7 +4,6 @@
 
 from . import PortalTest
 
-import dbus
 import gi
 import logging
 import os
@@ -12,7 +11,7 @@ import os
 from typing import NamedTuple, TextIO
 
 gi.require_version("Xdp", "1.0")
-from gi.repository import GLib, Xdp
+from gi.repository import Gio, GLib, Xdp
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class SessionSetup(NamedTuple):
 
 class TestRemoteDesktop(PortalTest):
     def test_version(self):
-        self.assert_version_eq(1)
+        self.assert_version_eq(2)
 
     def short_mainloop(self):
         """
@@ -413,6 +412,55 @@ class TestRemoteDesktop(PortalTest):
         _, args = method_calls.pop(0)
         session_handle, options, slot = args
         assert slot == 10
+
+    def test_connect_to_eis_v1(self):
+        params = {"version": 1}
+        setup = self.create_session(params=params, start_session=True)
+        session = setup.session
+
+        try:
+            session.connect_to_eis()
+            assert False, "Expected an exception here"
+        except GLib.GError as err:
+            assert err.matches(Gio.io_error_quark(), Gio.IOErrorEnum.NOT_SUPPORTED)
+
+    def test_connect_to_eis(self):
+        setup = self.create_session(start_session=True)
+        session = setup.session
+        handle = session.connect_to_eis()
+        assert handle
+
+        fd = os.fdopen(handle)
+        buf = fd.read()
+        assert buf == "VANILLA"  # template sends this by default
+
+        method_calls = self.mock_interface.GetMethodCalls("ConnectToEIS")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, options = args
+        assert "handle_token" not in options  # this is not a Request
+        assert list(options.keys()) == []
+
+    def test_connect_to_eis_fail_reconnect(self):
+        setup = self.create_session(start_session=True)
+        session = setup.session
+        handle = session.connect_to_eis()
+        assert handle
+
+        try:
+            session.connect_to_eis()
+            assert False, "Expected an exception here"
+        except GLib.GError as err:
+            assert err.matches(Gio.io_error_quark(), Gio.IOErrorEnum.INVALID_ARGUMENT)
+
+    def test_connect_to_eis_fail_connect_before_start(self):
+        setup = self.create_session(start_session=False)
+        session = setup.session
+        try:
+            session.connect_to_eis()
+            assert False, "Expected an exception here"
+        except GLib.GError as err:
+            assert err.matches(Gio.io_error_quark(), Gio.IOErrorEnum.INVALID_ARGUMENT)
 
     def test_close_session(self):
         """
