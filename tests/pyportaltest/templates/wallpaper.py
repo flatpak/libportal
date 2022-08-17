@@ -5,6 +5,7 @@
 from pyportaltest.templates import Request, Response, ASVType
 from typing import Dict, List, Tuple, Iterator
 
+import dbus
 import dbus.service
 import logging
 
@@ -16,7 +17,7 @@ SYSTEM_BUS = False
 MAIN_IFACE = "org.freedesktop.portal.Wallpaper"
 
 
-def load(mock, parameters=None):
+def load(mock, parameters):
     logger.debug(f"loading {MAIN_IFACE} template")
     mock.delay = 500
 
