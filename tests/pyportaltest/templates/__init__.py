@@ -17,6 +17,32 @@ logging.basicConfig(format="%(levelname).1s|%(name)s: %(message)s", level=loggin
 logger = logging.getLogger("templates")
 
 
+class MockParams:
+    """
+    Helper class for storing template parameters. The Mock object passed into
+    ``load()`` is shared between all templates. This makes it easy to have
+    per-template parameters by calling:
+
+        >>> params = MockParams.get(mock, MAIN_IFACE)
+        >>> params.version = 1
+
+    and later, inside a DBus method:
+        >>> params = MockParams.get(self, MAIN_IFACE)
+        >>> return params.version
+    """
+
+    @classmethod
+    def get(cls, mock, interface_name):
+        params = getattr(mock, "params", {})
+        try:
+            return params[interface_name]
+        except KeyError:
+            c = cls()
+            params[interface_name] = c
+            mock.params = params
+            return c
+
+
 class Response(NamedTuple):
     response: int
     results: ASVType

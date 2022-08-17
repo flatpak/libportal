@@ -2,7 +2,7 @@
 #
 # This file is formatted with Python Black
 
-from pyportaltest.templates import Request, Response, Session, ASVType
+from pyportaltest.templates import Request, Response, Session, ASVType, MockParams
 from typing import Dict, List, Tuple, Iterator
 from itertools import count
 
@@ -24,26 +24,24 @@ _restore_tokens = count()
 def load(mock, parameters):
     logger.debug(f"loading {MAIN_IFACE} template")
 
-    mock.delay = 500
-    mock.version = parameters.get("version", 1)
-
-    mock.response = parameters.get("response", 0)
-
-    mock.devices = parameters.get("devices", 0b111)
+    params = MockParams.get(mock, MAIN_IFACE)
+    params.delay = 500
+    params.version = parameters.get("version", 1)
+    params.response = parameters.get("response", 0)
+    params.devices = parameters.get("devices", 0b111)
+    params.sessions: Dict[str, Session] = {}
 
     mock.AddProperties(
         MAIN_IFACE,
         dbus.Dictionary(
             {
-                "version": dbus.UInt32(mock.version),
+                "version": dbus.UInt32(params.version),
                 "AvailableDeviceTypes": dbus.UInt32(
-                    parameters.get("device-types", mock.devices)
+                    parameters.get("device-types", params.devices)
                 ),
             }
         ),
     )
-
-    mock.sessions: Dict[str, Session] = {}
 
 
 @dbus.service.method(
@@ -55,14 +53,15 @@ def load(mock, parameters):
 def CreateSession(self, options, sender):
     try:
         logger.debug(f"CreateSession: {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
         session = Session(bus_name=self.bus_name, sender=sender, options=options)
-        self.sessions[session.handle] = session
+        params.sessions[session.handle] = session
 
-        response = Response(self.response, {})
+        response = Response(params.response, {})
 
-        request.respond(response, delay=self.delay)
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:
@@ -78,10 +77,11 @@ def CreateSession(self, options, sender):
 def SelectDevices(self, session_handle, options, sender):
     try:
         logger.debug(f"SelectDevices: {session_handle} {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
-        response = Response(self.response, {})
-        request.respond(response, delay=self.delay)
+        response = Response(params.response, {})
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:
@@ -97,15 +97,16 @@ def SelectDevices(self, session_handle, options, sender):
 def Start(self, session_handle, parent_window, options, sender):
     try:
         logger.debug(f"Start: {session_handle} {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
         results = {
-            "devices": dbus.UInt32(self.devices),
+            "devices": dbus.UInt32(params.devices),
         }
 
-        response = Response(self.response, results)
+        response = Response(params.response, results)
 
-        request.respond(response, delay=self.delay)
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:

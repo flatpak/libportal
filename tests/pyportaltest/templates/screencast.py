@@ -2,7 +2,7 @@
 #
 # This file is formatted with Python Black
 
-from pyportaltest.templates import Request, Response, Session, ASVType
+from pyportaltest.templates import Request, Response, Session, ASVType, MockParams
 from typing import Dict, List, Tuple, Iterator
 from itertools import count
 
@@ -24,22 +24,21 @@ _restore_tokens = count()
 def load(mock, parameters):
     logger.debug(f"loading {MAIN_IFACE} template")
 
-    mock.delay = 500
-    mock.version = parameters.get("version", 4)
-
-    mock.response = parameters.get("response", 0)
-
+    params = MockParams.get(mock, MAIN_IFACE)
+    params.delay = 500
+    params.version = parameters.get("version", 4)
+    params.response = parameters.get("response", 0)
     # streams returned in Start
-    mock.streams = parameters.get("streams", [])
-
+    params.streams = parameters.get("streams", [])
     # persist_mode returned in Start
-    mock.persist_mode = parameters.get("persist-mode", 0)
+    params.persist_mode = parameters.get("persist-mode", 0)
+    params.sessions: Dict[str, Session] = {}
 
     mock.AddProperties(
         MAIN_IFACE,
         dbus.Dictionary(
             {
-                "version": dbus.UInt32(mock.version),
+                "version": dbus.UInt32(params.version),
                 "AvailableSourceTypes": dbus.UInt32(
                     parameters.get("source-types", 0b111)
                 ),
@@ -49,8 +48,6 @@ def load(mock, parameters):
             }
         ),
     )
-
-    mock.sessions: Dict[str, Session] = {}
 
 
 @dbus.service.method(
@@ -62,14 +59,15 @@ def load(mock, parameters):
 def CreateSession(self, options, sender):
     try:
         logger.debug(f"CreateSession: {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
         session = Session(bus_name=self.bus_name, sender=sender, options=options)
-        self.sessions[session.handle] = session
+        params.sessions[session.handle] = session
 
-        response = Response(self.response, {})
+        response = Response(params.response, {})
 
-        request.respond(response, delay=self.delay)
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:
@@ -85,11 +83,12 @@ def CreateSession(self, options, sender):
 def SelectSources(self, session_handle, options, sender):
     try:
         logger.debug(f"SelectSources: {session_handle} {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
-        response = Response(self.response, {})
+        response = Response(params.response, {})
 
-        request.respond(response, delay=self.delay)
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:
@@ -105,20 +104,21 @@ def SelectSources(self, session_handle, options, sender):
 def Start(self, session_handle, parent_window, options, sender):
     try:
         logger.debug(f"Start: {session_handle} {options}")
+        params = MockParams.get(self, MAIN_IFACE)
         request = Request(bus_name=self.bus_name, sender=sender, options=options)
 
         results = {
-            "streams": self.streams,
+            "streams": params.streams,
         }
 
-        if self.version >= 4:
-            results["persist_mode"] = dbus.UInt32(self.persist_mode)
-            if self.persist_mode != 0:
+        if params.version >= 4:
+            results["persist_mode"] = dbus.UInt32(params.persist_mode)
+            if params.persist_mode != 0:
                 results["restore_token"] = f"restore_token{next(_restore_tokens)}"
 
-        response = Response(self.response, results)
+        response = Response(params.response, results)
 
-        request.respond(response, delay=self.delay)
+        request.respond(response, delay=params.delay)
 
         return request.handle
     except Exception as e:
