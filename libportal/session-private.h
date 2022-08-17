@@ -33,6 +33,7 @@ struct _XdpSession {
 
   XdpPersistMode persist_mode;
   char *restore_token;
+  gboolean uses_eis;
 
   guint signal_id;
 };
