@@ -6,6 +6,7 @@ from pyportaltest.templates import Request, Response, Session, ASVType
 from typing import Dict, List, Tuple, Iterator
 from itertools import count
 
+import dbus
 import dbus.service
 import logging
 import socket
@@ -20,7 +21,7 @@ MAIN_IFACE = "org.freedesktop.portal.RemoteDesktop"
 _restore_tokens = count()
 
 
-def load(mock, parameters=None):
+def load(mock, parameters):
     logger.debug(f"loading {MAIN_IFACE} template")
 
     mock.delay = 500
