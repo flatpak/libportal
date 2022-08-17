@@ -59,9 +59,7 @@ class TestRemoteDesktop(PortalTest):
         params = params or {}
         # To make the tests easier, load ScreenCast automatically if we have
         # any outputs specified.
-        extra_templates = []
-        if outputs:
-            extra_templates = [("ScreenCast", {})]
+        extra_templates = [("ScreenCast", {})]
         self.setup_daemon(params=params, extra_templates=extra_templates)
 
         xdp = Xdp.Portal.new()
@@ -182,6 +180,7 @@ class TestRemoteDesktop(PortalTest):
             "types",
             "multiple",
             "cursor_mode",
+            "persist_mode",
         ]
 
         assert options["types"] == outputs
