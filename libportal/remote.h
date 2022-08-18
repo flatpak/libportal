@@ -162,6 +162,90 @@ typedef enum {
 } XdpKeyState;
 
 XDP_PUBLIC
+void        xdp_screencast_create_session           (XdpSession           *session,
+                                                     XdpOutputType         outputs,
+                                                     XdpScreencastFlags    flags,
+                                                     XdpCursorMode         cursor_mode,
+                                                     XdpPersistMode        persist_mode,
+                                                     const char           *restore_token,
+                                                     GCancellable         *cancellable,
+                                                     GAsyncReadyCallback   callback,
+                                                     gpointer              data);
+
+gboolean    xdp_screencast_create_session_finish    (XdpSession           *session,
+                                                     GAsyncResult         *result,
+                                                     GError              **error);
+
+
+XDP_PUBLIC
+void        xdp_remote_desktop_create_session       (XdpSession             *session,
+                                                     XdpDeviceType           devices,
+                                                     XdpOutputType           outputs,
+                                                     XdpRemoteDesktopFlags   flags,
+                                                     XdpCursorMode           cursor_mode,
+                                                     GCancellable           *cancellable,
+                                                     GAsyncReadyCallback     callback,
+                                                     gpointer                data);
+
+XDP_PUBLIC
+gboolean    xdp_remote_desktop_create_session_finish(XdpSession             *session,
+                                                     GAsyncResult           *result,
+                                                     GError                **error);
+
+XDP_PUBLIC
+void        xdp_remote_desktop_start                (XdpSession           *session,
+                                                     XdpParent            *parent,
+                                                     GCancellable         *cancellable,
+                                                     GAsyncReadyCallback   callback,
+                                                     gpointer              data);
+
+XDP_PUBLIC
+gboolean    xdp_remote_desktop_start_finish         (XdpSession           *session,
+                                                     GAsyncResult         *result,
+                                                     GError              **error);
+
+XDP_PUBLIC
+void        xdp_screeencast_start                   (XdpSession           *session,
+                                                     XdpParent            *parent,
+                                                     GCancellable         *cancellable,
+                                                     GAsyncReadyCallback   callback,
+                                                     gpointer              data);
+
+XDP_PUBLIC
+gboolean    xdp_screencast_start_finish             (XdpSession           *session,
+                                                     GAsyncResult         *result,
+                                                     GError              **error);
+
+XDP_PUBLIC
+int         xdp_screencast_open_pipewire_remote     (XdpSession            *session);
+
+XDP_PUBLIC
+XdpDeviceType   xdp_remote_desktop_get_devices      (XdpSession            *session);
+
+XDP_PUBLIC
+GVariant *  xdp_screencast_get_streams              (XdpSession             *session);
+
+XDP_PUBLIC
+void        xdp_remote_desktop_pointer_motion       (XdpSession             *session,
+                                                     double                  dx,
+                                                     double                  dy);
+
+XDP_PUBLIC
+XdpPersistMode  xdp_screencast_get_persist_mode     (XdpSession             *session);
+
+XDP_PUBLIC
+char           *xdp_screencast_get_restore_token    (XdpSession             *session);
+
+XDP_PUBLIC
+XdpSessionState xdp_screencast_get_session_state    (XdpSession             *session);
+
+XDP_PUBLIC
+XdpSessionState xdp_remote_desktop_get_session_state(XdpSession             *session);
+
+/* Deprecated API below */
+
+G_DEPRECATED_FOR (xdp_screencast_create_session)
+XDP_PUBLIC
 void        xdp_portal_create_screencast_session            (XdpPortal            *portal,
                                                              XdpOutputType         outputs,
                                                              XdpScreencastFlags    flags,
@@ -172,10 +256,12 @@ void        xdp_portal_create_screencast_session            (XdpPortal          
                                                              GAsyncReadyCallback   callback,
                                                              gpointer              data);
 
+G_DEPRECATED_FOR (xdp_screencast_create_session_finish)
 XDP_PUBLIC
 XdpSession *xdp_portal_create_screencast_session_finish     (XdpPortal            *portal,
                                                              GAsyncResult         *result,
                                                              GError              **error);
+G_DEPRECATED_FOR (xdp_remote_desktop_create_session)
 XDP_PUBLIC
 void        xdp_portal_create_remote_desktop_session        (XdpPortal              *portal,
                                                              XdpDeviceType           devices,
@@ -186,14 +272,17 @@ void        xdp_portal_create_remote_desktop_session        (XdpPortal          
                                                              GAsyncReadyCallback     callback,
                                                              gpointer                data);
 
+G_DEPRECATED_FOR (xdp_remote_desktop_create_session_finish)
 XDP_PUBLIC
 XdpSession *xdp_portal_create_remote_desktop_session_finish (XdpPortal              *portal,
                                                              GAsyncResult           *result,
                                                              GError                **error);
 
+G_DEPRECATED_FOR (xdp_screencast_get_session_state)
 XDP_PUBLIC
 XdpSessionState xdp_session_get_session_state (XdpSession *session);
 
+G_DEPRECATED_FOR (xdp_remote_desktop_start)
 XDP_PUBLIC
 void        xdp_session_start                (XdpSession           *session,
                                               XdpParent            *parent,
@@ -201,20 +290,25 @@ void        xdp_session_start                (XdpSession           *session,
                                               GAsyncReadyCallback   callback,
                                               gpointer              data);
 
+G_DEPRECATED_FOR (xdp_remote_desktop_start_finish)
 XDP_PUBLIC
 gboolean    xdp_session_start_finish         (XdpSession           *session,
                                               GAsyncResult         *result,
                                               GError              **error);
 
+G_DEPRECATED_FOR (xdp_screencast_open_pipewire_remote)
 XDP_PUBLIC
 int         xdp_session_open_pipewire_remote (XdpSession           *session);
 
+G_DEPRECATED_FOR (xdp_remote_desktop_get_devices)
 XDP_PUBLIC
 XdpDeviceType   xdp_session_get_devices       (XdpSession *session);
 
+G_DEPRECATED_FOR (xdp_screencast_get_streams)
 XDP_PUBLIC
 GVariant *      xdp_session_get_streams       (XdpSession *session);
 
+G_DEPRECATED_FOR (xdp_remote_desktop_pointer_motion)
 XDP_PUBLIC
 void      xdp_session_pointer_motion    (XdpSession *session,
                                          double      dx,
@@ -267,9 +361,11 @@ void      xdp_session_touch_up       (XdpSession *session,
                                       guint       slot);
 
 
+G_DEPRECATED_FOR (xdp_screencast_get_persist_mode)
 XDP_PUBLIC
 XdpPersistMode  xdp_session_get_persist_mode  (XdpSession *session);
 
+G_DEPRECATED_FOR (xdp_screencast_get_restore_token)
 XDP_PUBLIC
 char           *xdp_session_get_restore_token (XdpSession *session);
 
