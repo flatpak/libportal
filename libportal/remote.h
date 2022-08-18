@@ -110,6 +110,57 @@ typedef enum {
   XDP_PERSIST_MODE_PERSISTENT,
 } XdpPersistMode;
 
+/**
+ * XdpRemoteDesktopFlags:
+ * @XDP_REMOTE_DESKTOP_FLAG_NONE: No options
+ * @XDP_REMOTE_DESKTOP_FLAG_MULTIPLE: allow opening multiple streams
+ *
+ * Options for starting remote desktop sessions.
+ */
+typedef enum {
+  XDP_REMOTE_DESKTOP_FLAG_NONE     = 0,
+  XDP_REMOTE_DESKTOP_FLAG_MULTIPLE = 1 << 0
+} XdpRemoteDesktopFlags;
+
+/**
+ * XdpButtonState:
+ * @XDP_BUTTON_RELEASED: the button is down
+ * @XDP_BUTTON_PRESSED: the button is up
+ *
+ * The XdpButtonState enumeration is used to describe
+ * the state of buttons.
+ */
+typedef enum {
+  XDP_BUTTON_RELEASED = 0,
+  XDP_BUTTON_PRESSED = 1
+} XdpButtonState;
+
+/**
+ * XdpDiscreteAxis:
+ * @XDP_AXIS_HORIZONTAL_SCROLL: the horizontal scroll axis
+ * @XDP_AXIS_VERTICAL_SCROLL: the horizontal scroll axis
+ *
+ * The `XdpDiscreteAxis` enumeration is used to describe
+ * the discrete scroll axes.
+ */
+typedef enum {
+  XDP_AXIS_HORIZONTAL_SCROLL = 0,
+  XDP_AXIS_VERTICAL_SCROLL   = 1
+} XdpDiscreteAxis;
+
+/**
+ * XdpKeyState:
+ * @XDP_KEY_RELEASED: the key is down
+ * @XDP_KEY_PRESSED: the key is up
+ *
+ * The `XdpKeyState` enumeration is used to describe
+ * the state of keys.
+ */
+typedef enum {
+  XDP_KEY_RELEASED = 0,
+  XDP_KEY_PRESSED = 1
+} XdpKeyState;
+
 XDP_PUBLIC
 void        xdp_portal_create_screencast_session            (XdpPortal            *portal,
                                                              XdpOutputType         outputs,
@@ -125,19 +176,6 @@ XDP_PUBLIC
 XdpSession *xdp_portal_create_screencast_session_finish     (XdpPortal            *portal,
                                                              GAsyncResult         *result,
                                                              GError              **error);
-
-/**
- * XdpRemoteDesktopFlags:
- * @XDP_REMOTE_DESKTOP_FLAG_NONE: No options
- * @XDP_REMOTE_DESKTOP_FLAG_MULTIPLE: allow opening multiple streams
- *
- * Options for starting remote desktop sessions.
- */
-typedef enum {
-  XDP_REMOTE_DESKTOP_FLAG_NONE     = 0,
-  XDP_REMOTE_DESKTOP_FLAG_MULTIPLE = 1 << 0
-} XdpRemoteDesktopFlags;
-
 XDP_PUBLIC
 void        xdp_portal_create_remote_desktop_session        (XdpPortal              *portal,
                                                              XdpDeviceType           devices,
@@ -187,18 +225,6 @@ void      xdp_session_pointer_position  (XdpSession *session,
                                          guint       stream,
                                          double      x,
                                          double      y);
-/**
- * XdpButtonState:
- * @XDP_BUTTON_RELEASED: the button is down
- * @XDP_BUTTON_PRESSED: the button is up
- *
- * The XdpButtonState enumeration is used to describe
- * the state of buttons.
- */
-typedef enum {
-  XDP_BUTTON_RELEASED = 0,
-  XDP_BUTTON_PRESSED = 1
-} XdpButtonState;
 
 XDP_PUBLIC
 void      xdp_session_pointer_button (XdpSession     *session,
@@ -211,36 +237,10 @@ void      xdp_session_pointer_axis   (XdpSession     *session,
                                       double          dx,
                                       double          dy);
 
-/**
- * XdpDiscreteAxis:
- * @XDP_AXIS_HORIZONTAL_SCROLL: the horizontal scroll axis
- * @XDP_AXIS_VERTICAL_SCROLL: the horizontal scroll axis
- *
- * The `XdpDiscreteAxis` enumeration is used to describe
- * the discrete scroll axes.
- */
-typedef enum {
-  XDP_AXIS_HORIZONTAL_SCROLL = 0,
-  XDP_AXIS_VERTICAL_SCROLL   = 1
-} XdpDiscreteAxis;
-
 XDP_PUBLIC
 void      xdp_session_pointer_axis_discrete (XdpSession *session,
                                              XdpDiscreteAxis  axis,
                                              int              steps);
-
-/**
- * XdpKeyState:
- * @XDP_KEY_RELEASED: the key is down
- * @XDP_KEY_PRESSED: the key is up
- *
- * The `XdpKeyState` enumeration is used to describe
- * the state of keys.
- */
-typedef enum {
-  XDP_KEY_RELEASED = 0,
-  XDP_KEY_PRESSED = 1
-} XdpKeyState;
 
 XDP_PUBLIC
 void      xdp_session_keyboard_key   (XdpSession *session,
