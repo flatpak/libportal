@@ -39,6 +39,11 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   <meta name="twitter:card" content="summary"/>
 
   
+  
+  
+  <link rel="search" type="application/opensearchdescription+xml" title="Xdp" href="opensearch.xml">
+  
+  
 
   <link rel="stylesheet" href="style.css" type="text/css" />
 
@@ -244,20 +249,20 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="n">xdp_portal_save_files</span> <span class="p">(</span>
-  <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span><span class="p">,</span>
-  <span class="n">XdpParent</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">title</span><span class="p">,</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">current_name</span><span class="p">,</span>
-  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">current_folder</span><span class="p">,</span>
-  <span class="n">GVariant</span><span class="o">*</span> <span class="n">files</span><span class="p">,</span>
-  <span class="n">GVariant</span><span class="o">*</span> <span class="n">choices</span><span class="p">,</span>
-  <span class="n">XdpSaveFileFlags</span> <span class="n">flags</span><span class="p">,</span>
-  <span class="n">GCancellable</span><span class="o">*</span> <span class="n">cancellable</span><span class="p">,</span>
-  <span class="n">GAsyncReadyCallback</span> <span class="n">callback</span><span class="p">,</span>
-  <span class="n">gpointer</span> <span class="n">data</span>
-<span class="p">)</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="n">xdp_portal_save_files</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">XdpPortal</span><span class="o">*</span><span class="w"> </span><span class="n">portal</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">XdpParent</span><span class="o">*</span><span class="w"> </span><span class="n">parent</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">current_name</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">current_folder</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">GVariant</span><span class="o">*</span><span class="w"> </span><span class="n">files</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">GVariant</span><span class="o">*</span><span class="w"> </span><span class="n">choices</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">XdpSaveFileFlags</span><span class="w"> </span><span class="n">flags</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">GCancellable</span><span class="o">*</span><span class="w"> </span><span class="n">cancellable</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">GAsyncReadyCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">gpointer</span><span class="w"> </span><span class="n">data</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 </pre></div>
 </code></pre>
       </div>
@@ -285,6 +290,9 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
 
       <div class="docblock">
         <table>
+          
+          
+          
           
           
           
@@ -338,7 +346,7 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          <tr><td>&nbsp;</td><td>The value is a NUL terminated UTF-8 string.</td></tr>
           
           <tr class="arg-name">
             <td><code>current_name</code></td>
@@ -356,7 +364,7 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          <tr><td>&nbsp;</td><td>The value is a NUL terminated UTF-8 string.</td></tr>
           
           <tr class="arg-name">
             <td><code>current_folder</code></td>
@@ -374,11 +382,11 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          <tr><td>&nbsp;</td><td>The value is a NUL terminated UTF-8 string.</td></tr>
           
           <tr class="arg-name">
             <td><code>files</code></td>
-            <td><code>GVariant*</code></td>
+            <td><a href="javascript:void(0)" data-link="struct.Variant.html" data-namespace="GLib" class="external"><code>GVariant</code></a></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
@@ -396,7 +404,7 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
           
           <tr class="arg-name">
             <td><code>choices</code></td>
-            <td><code>GVariant*</code></td>
+            <td><a href="javascript:void(0)" data-link="struct.Variant.html" data-namespace="GLib" class="external"><code>GVariant</code></a></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
@@ -432,7 +440,7 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
           
           <tr class="arg-name">
             <td><code>cancellable</code></td>
-            <td><code>GCancellable*</code></td>
+            <td><a href="javascript:void(0)" data-link="class.Cancellable.html" data-namespace="Gio" class="external"><code>GCancellable</code></a></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
@@ -450,14 +458,14 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
           
           <tr class="arg-name">
             <td><code>callback</code></td>
-            <td><code>GAsyncReadyCallback</code></td>
+            <td><a href="javascript:void(0)" data-link="callback.AsyncReadyCallback.html" data-namespace="Gio" class="external"><code>GAsyncReadyCallback</code></a></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
             <td><p>A callback to call when the request is&nbsp;done.</p></td>
           </tr>
           
-          
+          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
           
           
           
@@ -475,13 +483,13 @@ call <a href="method.Portal.save_file_finish.html"><code>xdp_portal_save_file_fi
             <td><p>Data to pass to <code>callback</code>.</p></td>
           </tr>
           
+          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
           
           
           
           
           
-          
-          
+          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
           
           
           
