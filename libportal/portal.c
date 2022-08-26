@@ -32,6 +32,20 @@
 #endif
 #include <stdio.h>
 
+const char *
+portal_get_bus_name (void)
+{
+  static const char *busname = NULL;
+
+  if (g_once_init_enter (&busname))
+    {
+      const char *env = g_getenv ("LIBPORTAL_PORTAL_BUS_NAME");
+      g_once_init_leave (&busname, env ?: "org.freedesktop.portal.Desktop");
+    }
+
+  return busname;
+}
+
 /**
  * XdpPortal
  *
