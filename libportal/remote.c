@@ -1405,5 +1405,5 @@ _xdp_session_set_session_state (XdpSession *session,
     }
 
   if (state == XDP_SESSION_CLOSED)
-    g_signal_emit_by_name (session, "closed", 0);
+    _xdp_session_close (session);
 }
