@@ -63,6 +63,9 @@ struct _PortalTestWin
   GtkWidget *screencast_label;
   GtkWidget *screencast_toggle;
 
+  GtkWidget *inputcapture_label;
+  GtkWidget *inputcapture_toggle;
+
   GFileMonitor *update_monitor;
   GtkWidget *update_dialog;
   GtkWidget *update_dialog2;
@@ -156,7 +159,7 @@ update_available (XdpPortal *portal,
                   PortalTestWin *win)
 {
   g_message ("Update  available");
-   
+
   gtk_label_set_label (GTK_LABEL (win->update_label), "Update available");
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (win->update_progressbar), 0.0);
 
@@ -188,7 +191,7 @@ update_progress (XdpPortal *portal,
     }
 
   if (status != XDP_UPDATE_STATUS_RUNNING)
-    g_signal_handlers_disconnect_by_func (win->portal, update_progress, win); 
+    g_signal_handlers_disconnect_by_func (win->portal, update_progress, win);
 }
 
 static void
@@ -298,7 +301,7 @@ opened_uri (GObject *object,
   gboolean res;
 
   open_dir = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (win->open_local_dir));
- 
+
   if (open_dir)
     res = xdp_portal_open_directory_finish (portal, result, &error);
   else
@@ -562,6 +565,87 @@ take_screenshot (GtkButton *button,
 }
 
 static void
+inputcapture_session_created (GObject *source,
+                              GAsyncResult *result,
+                              gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (source);
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  GList *zones;
+  g_autoptr (GString) s = NULL;
+  XdpInputCaptureSession *ic;
+
+  ic = xdp_portal_create_input_capture_session_finish (portal, result, &error);
+  if (ic == NULL)
+    {
+      g_warning ("Failed to create inputcapture session: %s", error->message);
+      return;
+    }
+  win->session = XDP_SESSION (ic);
+
+  zones = xdp_input_capture_session_get_zones (XDP_INPUT_CAPTURE_SESSION (win->session));
+  s = g_string_new ("");
+  for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
+    {
+      XdpInputCaptureZone *zone = elem->data;
+      guint w, h;
+      gint x, y;
+
+      g_object_get (zone,
+		    "width", &w,
+		    "height", &h,
+		    "x", &x,
+		    "y", &y,
+		    NULL);
+
+      g_string_append_printf (s, "%ux%u@%d,%d ", w, h, x, y);
+    }
+  gtk_label_set_label (GTK_LABEL (win->inputcapture_label), s->str);
+}
+
+static void
+start_input_capture (PortalTestWin *win)
+{
+  g_clear_object (&win->session);
+
+  xdp_portal_create_input_capture_session (win->portal,
+                                           NULL,
+                                           XDP_INPUT_CAPABILITY_POINTER | XDP_INPUT_CAPABILITY_KEYBOARD,
+                                           NULL,
+                                           inputcapture_session_created,
+                                           win);
+}
+
+static void
+stop_input_capture (PortalTestWin *win)
+{
+  if (win->session != NULL)
+    {
+      xdp_session_close (win->session);
+      g_clear_object (&win->session);
+      gtk_label_set_label (GTK_LABEL (win->inputcapture_label), "");
+    }
+}
+
+static void
+capture_input (GtkButton *button,
+               PortalTestWin *win)
+{
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+    start_input_capture (win);
+  else
+    stop_input_capture (win);
+}
+
+static void
+capture_input_release (GtkButton *button,
+                       PortalTestWin *win)
+{
+  /* FIXME */
+}
+
+static void
 session_started (GObject *source,
                  GAsyncResult *result,
                  gpointer data)
@@ -599,7 +683,7 @@ session_started (GObject *source,
 
   gtk_label_set_label (GTK_LABEL (win->screencast_label), s->str);
 }
-  
+
 static void
 session_created (GObject *source,
                  GAsyncResult *result,
@@ -616,7 +700,7 @@ session_created (GObject *source,
       g_warning ("Failed to create screencast session: %s", error->message);
       return;
     }
-  
+
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_session_start (win->session, parent, NULL, session_started, win);
   xdp_parent_free (parent);
@@ -650,7 +734,7 @@ stop_screencast (PortalTestWin *win)
 }
 
 static void
-screencast_toggled (GtkToggleButton *button, 
+screencast_toggled (GtkToggleButton *button,
                     PortalTestWin *win)
 {
   if (gtk_toggle_button_get_active (button))
@@ -726,7 +810,7 @@ compose_email_called (GObject *source,
   PortalTestWin *win = data;
   g_autoptr(GError) error = NULL;
 
-  if (!xdp_portal_compose_email_finish (win->portal, result, &error)) 
+  if (!xdp_portal_compose_email_finish (win->portal, result, &error))
     {
       g_warning ("Email error: %s", error->message);
       return;
@@ -1247,6 +1331,8 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, open_directory);
   gtk_widget_class_bind_template_callback (widget_class, open_local);
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
+  gtk_widget_class_bind_template_callback (widget_class, capture_input);
+  gtk_widget_class_bind_template_callback (widget_class, capture_input_release);
   gtk_widget_class_bind_template_callback (widget_class, screencast_toggled);
   gtk_widget_class_bind_template_callback (widget_class, notify_me);
   gtk_widget_class_bind_template_callback (widget_class, print_cb);
@@ -1269,6 +1355,8 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_logout);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_suspend);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_switch);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inputcapture_label);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inputcapture_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, username);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, realname);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, avatar);

@@ -726,6 +726,68 @@
             <property name="top-attach">19</property>
           </packing>
         </child>
+
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">1</property>
+            <property name="halign">end</property>
+            <property name="label">Input Capture</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">20</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="inputcapture_label">
+            <property name="visible">1</property>
+            <property name="halign">end</property>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">20</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">1</property>
+            <property name="hexpand">0</property>
+            <property name="orientation">horizontal</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkToggleButton" id="inputcapture_toggle">
+                <property name="visible">1</property>
+                <property name="hexpand">1</property>
+                <property name="label">Input Capture</property>
+                <signal name="clicked" handler="capture_input"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="enable">
+                <property name="visible">1</property>
+                <property name="tooltip-text">Enable</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">20</property>
+         </packing>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">1</property>
+            <property name="hexpand">1</property>
+            <property name="label">Release</property>
+            <signal name="clicked" handler="capture_input_release"/>
+          </object>
+          <packing>
+            <property name="left-attach">2</property>
+            <property name="top-attach">20</property>
+          </packing>
+        </child>
+
+
       </object>
     </child>
   </template>

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <libportal/remote.h>
+#include <libportal/inputcapture.h>
 
 struct _XdpSession {
   GObject parent_instance;
@@ -41,6 +42,8 @@ struct _XdpSession {
 
   gboolean uses_eis;
 
+  /* InputCapture */
+  XdpInputCaptureSession *input_capture_session; /* weak ref */
 };
 
 XdpSession * _xdp_session_new (XdpPortal *portal,
