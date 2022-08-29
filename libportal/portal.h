@@ -27,6 +27,7 @@
 #include <libportal/email.h>
 #include <libportal/filechooser.h>
 #include <libportal/inhibit.h>
+#include <libportal/inputcapture.h>
 #include <libportal/location.h>
 #include <libportal/notification.h>
 #include <libportal/openuri.h>
