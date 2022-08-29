@@ -27,6 +27,7 @@ struct _XdpSession {
   /* Generic Session implementation */
   XdpPortal *portal;
   char *id;
+  gboolean is_closed;
   XdpSessionType type;
   guint signal_id;
 
@@ -54,3 +55,5 @@ void         _xdp_session_set_devices (XdpSession *session,
 
 void         _xdp_session_set_streams (XdpSession *session,
                                        GVariant   *streams);
+
+void         _xdp_session_close (XdpSession *session);

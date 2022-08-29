@@ -129,6 +129,16 @@ _xdp_session_new (XdpPortal *portal,
   return session;
 }
 
+void
+_xdp_session_close (XdpSession *session)
+{
+  if (session->is_closed)
+    return;
+
+  session->is_closed = TRUE;
+  g_signal_emit_by_name (session, "closed");
+}
+
 /**
  * xdp_session_get_session_type:
  * @session: an [class@Session]
