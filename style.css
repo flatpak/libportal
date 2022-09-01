@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
  */
 
-@import url("solarized-light.css") (prefers-color-scheme: light);
-@import url("solarized-dark.css") (prefers-color-scheme: dark);
-
+@import url("pygment.css");
 @import url("fonts.css");
 
 /*********************************
@@ -15,8 +13,8 @@
 :root {
 
   /* colors */
-  --text-color: rgb(51, 51, 51);
-  --text-color-muted: rgba(51, 51, 51, 0.65);
+  --text-color: #333;
+  --text-color-muted: #999;
   --primary: rgb(28, 118, 228);
   --body-bg: #fff;
   --sidebar-primary: rgb(144, 194, 255);
@@ -36,7 +34,7 @@
   /* typography */
   --body-font-family: "Red Hat Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
   --body-font-scale: 0.95;
-  --body-font-size: calc(var(--body-font-scale) * clamp(16px, 1vw, 18px));
+  --body-font-size: calc(var(--body-font-scale) * clamp(16px, 1vw, 20px));
   --body-font-weight: normal;
 
   --monospace-font-family: "Source Code Pro", monospace;
@@ -63,7 +61,7 @@
   --table-font-size: 0.92em;    /* Tables often contain lots information. It's better to scale them down a big to get more sutff fitted inside */
 
   /* misc */
-  --preferred-content-width: 90ch; /* The preferred width for the readable content */
+  --prefered-content-width: 90ch; /* The preferred width for the readable content */
   --anchor-sign: "#";
 
 }
@@ -84,6 +82,11 @@
     --box-bg: rgba(135, 135, 135, 0.1);
     --box-text-color: #fff;
     --heading-docblock-color: #b7b7b7;
+  }
+
+  /* fix dark theme syntax highlighting with a filter (for now) */
+  .highlight pre span {
+  	filter: brightness(6);
   }
 }
 
@@ -524,10 +527,6 @@ footer {
   padding-top: .25em;
 }
 
-ul.toc-list > ul.toc-list {
-  padding-left: 1em;
-}
-
 /*********************************
  * ANCHORS & TOGGLERS
  *********************************/
@@ -604,7 +603,7 @@ ul.toc-list > ul.toc-list {
 .content {
   padding: 2em 4em;
   overflow: visible;
-  max-width: calc(var(--preferred-content-width) + 8em);
+  max-width: calc(var(--prefered-content-width) + 8em);
 }
 
 .content table:not(.table-display) {
@@ -634,15 +633,13 @@ ul.toc-list > ul.toc-list {
 
 kbd {
   display: inline-block;
-  padding: 8px;
-  font: 10px monospace;
+  padding: 3px 5px;
+  font: 15px monospace;
   line-height: 10px;
   vertical-align: middle;
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0 0 3px rgba(0,0,0,0.3);
-  margin: 3px;
-  background-color: var(--box-bg);
+  border: solid 1px;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0;
   cursor: default;
 }
 
@@ -867,8 +864,6 @@ table.returns tr.arg-description td {
 .type-funcs h6,
 .implements a,
 .ancestors a,
-.descendants a,
-.implementations a,
 .sidebar .links a
 .toc a
 {
