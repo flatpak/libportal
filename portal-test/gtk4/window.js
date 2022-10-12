@@ -36,6 +36,7 @@ var PortalTestWindow = GObject.registerClass({
     _init(application) {
         super._init({ application });
 
+        this._app = application;
         this._portal = new Xdp.Portal();
 
         this._restoreToken = null;
@@ -463,6 +464,40 @@ var PortalTestWindow = GObject.registerClass({
                     this._portal.request_background_finish(result);
                 } catch(e) {
                     logError(e);
+                }
+            });
+    }
+
+    _setBackgroundStatus() {
+        this._app.mark_busy();
+        this.hide();
+
+        this._portal.set_background_status(
+            'Updating 3 out of 5 files',
+            null,
+            (portal, result) => {
+                try {
+                    this._portal.set_background_status_finish(result);
+
+                    GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 20, () => {
+                        this.show();
+                        this._app.unmark_busy();
+
+                        this._portal.set_background_status(null, null, (portal, result) => {
+                            try {
+                                this._portal.set_background_status_finish(result);
+                            } catch(e) {
+                                logError(e);
+                            }
+                        });
+
+                        return GLib.SOURCE_REMOVE;
+                    });
+
+                } catch(e) {
+                    logError(e);
+                    this.show();
+                    this._app.unmark_busy();
                 }
             });
     }
