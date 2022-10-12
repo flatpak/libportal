@@ -545,6 +545,16 @@
           </object>
         </child>
         <child>
+          <object class="GtkButton">
+            <property name="label">Set Status</property>
+            <signal name="clicked" handler="_setBackgroundStatus"/>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">18</property>
+            </layout>
+          </object>
+        </child>"
+        <child>
           <object class="GtkLabel">
             <property name="halign">end</property>
             <property name="label">Wallpaper</property>
