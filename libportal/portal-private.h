@@ -51,6 +51,9 @@ struct _XdpPortal {
 
   /* screencast */
   guint screencast_interface_version;
+
+  /* background */
+  guint background_interface_version;
 };
 
 const char * portal_get_bus_name (void);

@@ -20,8 +20,115 @@
 
 #include "config.h"
 
+#include "session-private.h"
 #include "background.h"
 #include "portal-private.h"
+
+typedef struct {
+  XdpPortal *portal;
+  GTask *task;
+  char *status_message;
+} SetStatusCall;
+
+static void
+set_status_call_free (SetStatusCall *call)
+{
+  g_clear_pointer (&call->status_message, g_free);
+  g_clear_object (&call->portal);
+  g_clear_object (&call->task);
+  g_free (call);
+}
+
+static void
+set_status_returned (GObject      *object,
+                     GAsyncResult *result,
+                     gpointer      data)
+{
+  SetStatusCall *call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    g_task_return_error (call->task, error);
+  else
+    g_task_return_boolean (call->task, TRUE);
+
+  set_status_call_free (call);
+}
+
+static void
+set_status (SetStatusCall *call)
+{
+  GVariantBuilder options;
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+
+  if (call->status_message)
+    g_variant_builder_add (&options, "{sv}", "message", g_variant_new_string (call->status_message));
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Background",
+                          "SetStatus",
+                          g_variant_new ("(a{sv})", &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (call->task),
+                          set_status_returned,
+                          call);
+}
+
+static void
+get_background_version_returned (GObject      *object,
+                                 GAsyncResult *result,
+                                 gpointer      data)
+{
+  g_autoptr(GVariant) version_variant = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  SetStatusCall *call = data;
+  GError *error = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, error);
+      set_status_call_free (call);
+      return;
+    }
+
+  g_variant_get_child (ret, 0, "v", &version_variant);
+  call->portal->background_interface_version = g_variant_get_uint32 (version_variant);
+
+  if (call->portal->background_interface_version < 2)
+    {
+      g_task_return_new_error (call->task, G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                               "Background portal does not implement version 2 of the interface");
+      set_status_call_free (call);
+      return;
+    }
+
+  set_status (call);
+}
+
+static void
+get_background_interface_version (SetStatusCall *call)
+{
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.DBus.Properties",
+                          "Get",
+                          g_variant_new ("(ss)", "org.freedesktop.portal.Background", "version"),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (call->task),
+                          get_background_version_returned,
+                          call);
+}
 
 typedef struct {
   XdpPortal *portal;
@@ -279,6 +386,62 @@ xdp_portal_request_background_finish (XdpPortal *portal,
 {
   g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
   g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+/**
+ * xdp_portal_set_background_status:
+ * @portal: a [class@Portal]
+ * @status_message: (nullable): status message when running in background
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Sets the status information of the application, for when it's running
+ * in background.
+ */
+void
+xdp_portal_set_background_status (XdpPortal           *portal,
+                                  const char          *status_message,
+                                  GCancellable        *cancellable,
+                                  GAsyncReadyCallback  callback,
+                                  gpointer             data)
+{
+  SetStatusCall *call;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  call = g_new0 (SetStatusCall, 1);
+  call->portal = g_object_ref (portal);
+  call->status_message = g_strdup (status_message);
+  call->task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (call->task, xdp_portal_set_background_status);
+
+  if (portal->background_interface_version == 0)
+    get_background_interface_version (call);
+  else
+    set_status (call);
+}
+
+/**
+ * xdp_portal_set_background_status_finish:
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes setting the background status of the application.
+ *
+ * Returns: %TRUE if successfully set status, %FALSE otherwise
+ */
+gboolean
+xdp_portal_set_background_status_finish (XdpPortal     *portal,
+                                         GAsyncResult  *result,
+                                         GError       **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_set_background_status, FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }

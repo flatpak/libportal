@@ -52,5 +52,16 @@ gboolean   xdp_portal_request_background_finish (XdpPortal           *portal,
                                                  GAsyncResult        *result,
                                                  GError             **error);
 
+XDP_PUBLIC
+void        xdp_portal_set_background_status         (XdpPortal            *portal,
+                                                      const char           *status_message,
+                                                      GCancellable         *cancellable,
+                                                      GAsyncReadyCallback   callback,
+                                                      gpointer              data);
+
+XDP_PUBLIC
+gboolean    xdp_portal_set_background_status_finish  (XdpPortal            *portal,
+                                                      GAsyncResult         *result,
+                                                      GError              **error);
 
 G_END_DECLS
