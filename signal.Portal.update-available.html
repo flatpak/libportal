@@ -39,6 +39,11 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   <meta name="twitter:card" content="summary"/>
 
   
+  
+  
+  <link rel="search" type="application/opensearchdescription+xml" title="Xdp" href="opensearch.xml">
+  
+  
 
   <link rel="stylesheet" href="style.css" type="text/css" />
 
@@ -123,14 +128,14 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
       </h4>
 
       <div class="docblock">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="n">update_available</span> <span class="p">(</span>
-  <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span>
-  <span class="n">gchar</span><span class="o">*</span> <span class="n">running_commit</span><span class="p">,</span>
-  <span class="n">gchar</span><span class="o">*</span> <span class="n">local_commit</span><span class="p">,</span>
-  <span class="n">gchar</span><span class="o">*</span> <span class="n">remote_commit</span><span class="p">,</span>
-  <span class="n">gpointer</span> <span class="n">user_data</span>
-<span class="p">)</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
+<span class="n">update_available</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">XdpPortal</span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">gchar</span><span class="o">*</span><span class="w"> </span><span class="n">running_commit</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">gchar</span><span class="o">*</span><span class="w"> </span><span class="n">local_commit</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">gchar</span><span class="o">*</span><span class="w"> </span><span class="n">remote_commit</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 </pre></div>
 </code></pre>
       </div>
@@ -194,7 +199,7 @@ times if new updates&nbsp;appear.</p>
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          <tr><td>&nbsp;</td><td>The value is a NUL terminated UTF-8 string.</td></tr>
           
           <tr class="arg-name">
             <td><code>local_commit</code></td>
@@ -213,7 +218,7 @@ times if new updates&nbsp;appear.</p>
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          <tr><td>&nbsp;</td><td>The value is a NUL terminated UTF-8 string.</td></tr>
           
           <tr class="arg-name">
             <td><code>remote_commit</code></td>
@@ -232,7 +237,7 @@ times if new updates&nbsp;appear.</p>
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
+          <tr><td>&nbsp;</td><td>The value is a NUL terminated UTF-8 string.</td></tr>
           
           
         </table>

@@ -39,6 +39,11 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   <meta name="twitter:card" content="summary"/>
 
   
+  
+  
+  <link rel="search" type="application/opensearchdescription+xml" title="Xdp" href="opensearch.xml">
+  
+  
 
   <link rel="stylesheet" href="style.css" type="text/css" />
 
@@ -248,10 +253,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">int</span>
-<span class="n">xdp_portal_open_pipewire_remote_for_camera</span> <span class="p">(</span>
-  <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span>
-<span class="p">)</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"></span>
+<span class="n">xdp_portal_open_pipewire_remote_for_camera</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">XdpPortal</span><span class="o">*</span><span class="w"> </span><span class="n">portal</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 </pre></div>
 </code></pre>
       </div>
@@ -270,12 +275,15 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         <p>Opens a file descriptor to the pipewire remote where the camera
 nodes are&nbsp;available.</p>
 <p>The file descriptor should be used to create a pw_core object, by using
-<code>pw_context_connect_fd()</code>. Only the camera nodes will be available from this
+pw_context_connect_fd(). Only the camera nodes will be available from this
 pipewire&nbsp;node.</p>
       </div>
 
       <div class="docblock">
         <table>
+          
+          
+          
           
           
           
