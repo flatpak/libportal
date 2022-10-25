@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Portal.location_monitor_start</title>
+  <title>Xdp.Portal.set_background_status_finish</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -29,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
 
   
-  <meta priority="og:title" content="Xdp.Portal.location_monitor_start"/>
-  <meta priority="og:description" content="Reference for Xdp.Portal.location_monitor_start"/>
-  <meta name="twitter:title" content="Xdp.Portal.location_monitor_start"/>
-  <meta name="twitter:description" content="Reference for Xdp.Portal.location_monitor_start"/>
+  <meta priority="og:title" content="Xdp.Portal.set_background_status_finish"/>
+  <meta priority="og:description" content="Reference for Xdp.Portal.set_background_status_finish"/>
+  <meta name="twitter:title" content="Xdp.Portal.set_background_status_finish"/>
+  <meta name="twitter:description" content="Reference for Xdp.Portal.set_background_status_finish"/>
 
 
   
@@ -131,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.is_camera_present.html">is_camera_present</a>
   
-    <a class="method current" href="method.Portal.location_monitor_start.html">location_monitor_start</a>
+    <a class="method" href="method.Portal.location_monitor_start.html">location_monitor_start</a>
   
     <a class="method" href="method.Portal.location_monitor_start_finish.html">location_monitor_start_finish</a>
   
@@ -193,7 +193,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.set_background_status.html">set_background_status</a>
   
-    <a class="method" href="method.Portal.set_background_status_finish.html">set_background_status_finish</a>
+    <a class="method current" href="method.Portal.set_background_status_finish.html">set_background_status_finish</a>
   
     <a class="method" href="method.Portal.set_wallpaper.html">set_wallpaper</a>
   
@@ -234,7 +234,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <section id="main" class="content">
   <header>
     <h3>Method</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>location_monitor_start</h1>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>set_background_status_finish</h1>
   </header>
 
   <section>
@@ -243,22 +243,16 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/location.h#L52">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/background.h#L63">[src]</a>
         
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="n">xdp_portal_location_monitor_start</span> <span class="p">(</span>
+        <pre><code><div class="highlight"><pre><span></span><span class="n">gboolean</span>
+<span class="n">xdp_portal_set_background_status_finish</span> <span class="p">(</span>
   <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span><span class="p">,</span>
-  <span class="n">XdpParent</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span>
-  <span class="n">guint</span> <span class="n">distance_threshold</span><span class="p">,</span>
-  <span class="n">guint</span> <span class="n">time_threshold</span><span class="p">,</span>
-  <span class="n">XdpLocationAccuracy</span> <span class="n">accuracy</span><span class="p">,</span>
-  <span class="n">XdpLocationMonitorFlags</span> <span class="n">flags</span><span class="p">,</span>
-  <span class="n">GCancellable</span><span class="o">*</span> <span class="n">cancellable</span><span class="p">,</span>
-  <span class="n">GAsyncReadyCallback</span> <span class="n">callback</span><span class="p">,</span>
-  <span class="n">gpointer</span> <span class="n">data</span>
+  <span class="n">GAsyncResult</span><span class="o">*</span> <span class="n">result</span><span class="p">,</span>
+  <span class="n">GError</span><span class="o">**</span> <span class="n">error</span>
 <span class="p">)</span>
 </pre></div>
 </code></pre>
@@ -270,20 +264,12 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/location.c#L320">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/background.c#L427">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Makes <code>XdpPortal</code> start monitoring location&nbsp;changes.</p>
-<p>When the location changes, the <a href="signal.Portal.location-updated.html"><code>XdpPortal::location-updated</code></a>.
-signal is&nbsp;emitted.</p>
-<p>Use <a href="method.Portal.location_monitor_stop.html"><code>xdp_portal_location_monitor_stop()</code></a> to stop&nbsp;monitoring.</p>
-<p>Note that <a href="class.Portal.html"><code>XdpPortal</code></a> only maintains a single location monitor
-at a time. If you want to change the <code>distance_threshold</code>,
-<code>time_threshold</code> or <code>accuracy</code> of the current monitor, you
-first have to call <a href="method.Portal.location_monitor_stop.html"><code>xdp_portal_location_monitor_stop()</code></a> to
-stop&nbsp;monitoring.</p>
+        <p>Finishes setting the background status of the&nbsp;application.</p>
       </div>
 
       <div class="docblock">
@@ -308,15 +294,15 @@ stop&nbsp;monitoring.</p>
         <table class="arguments">
           
           <tr class="arg-name">
-            <td><code>parent</code></td>
-            <td><a href="struct.Parent.html"><code>XdpParent</code></a></td>
+            <td><code>result</code></td>
+            <td><code>GAsyncResult*</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>A <a href="struct.Parent.html"><code>XdpParent</code></a>, or <code>NULL</code></p></td>
+            <td><p>A <a href="javascript:void(0)" data-namespace="Gio" data-link="iface.AsyncResult.html" class="external"><code>GAsyncResult</code></a></p></td>
           </tr>
           
-          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
+          
           
           
           
@@ -325,127 +311,38 @@ stop&nbsp;monitoring.</p>
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
           
           
+          
           <tr class="arg-name">
-            <td><code>distance_threshold</code></td>
-            <td><code>guint</code></td>
+            <td><code>error</code></td>
+            <td><code>GError **</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>Distance threshold, in&nbsp;meters.</p></td>
+            <td>The return location for a <code>GError*</code>, or <code>NULL</code>.</td>
           </tr>
           
-          
-          
-          
-          
-          
-          
-          
-          
-          
+        </table>
+      </div>
+    </div>
+    
+
+    
+    <div class="return-value toggle-wrapper">
+      <h4 id="return-value">
+        Return value
+        <a href="#return-value" class="anchor"></a>
+      </h4>
+
+      <div class="docblock">
+        <table class="returns">
           <tr class="arg-name">
-            <td><code>time_threshold</code></td>
-            <td><code>guint</code></td>
+            <td>Returns:</td>
+            <td><code>gboolean</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>Time threshold, in&nbsp;seconds.</p></td>
+            <td><p><code>TRUE</code> if successfully set status, <code>FALSE</code> otherwise.</p></td>
           </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>accuracy</code></td>
-            <td><a href="enum.LocationAccuracy.html"><code>XdpLocationAccuracy</code></a></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Desired&nbsp;accuracy.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>flags</code></td>
-            <td><a href="enum.LocationMonitorFlags.html"><code>XdpLocationMonitorFlags</code></a></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Options for this&nbsp;call.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>cancellable</code></td>
-            <td><code>GCancellable*</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Optional <a href="javascript:void(0)" data-namespace="Gio" data-link="class.Cancellable.html" class="external"><code>GCancellable</code></a></p></td>
-          </tr>
-          
-          <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
-          
-          
-          
-          
-          
-          <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          
-          
-          <tr class="arg-name">
-            <td><code>callback</code></td>
-            <td><code>GAsyncReadyCallback</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>A callback to call when the request is&nbsp;done.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>data</code></td>
-            <td><code>gpointer</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Data to pass to <code>callback</code>.</p></td>
-          </tr>
-          
-          
-          
-          
-          
           
           
           
@@ -455,8 +352,6 @@ stop&nbsp;monitoring.</p>
         </table>
       </div>
     </div>
-    
-
     
 
   </section>

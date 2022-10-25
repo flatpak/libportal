@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Portal.location_monitor_start</title>
+  <title>Xdp.Portal.set_background_status</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -29,10 +29,10 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
 
   
-  <meta priority="og:title" content="Xdp.Portal.location_monitor_start"/>
-  <meta priority="og:description" content="Reference for Xdp.Portal.location_monitor_start"/>
-  <meta name="twitter:title" content="Xdp.Portal.location_monitor_start"/>
-  <meta name="twitter:description" content="Reference for Xdp.Portal.location_monitor_start"/>
+  <meta priority="og:title" content="Xdp.Portal.set_background_status"/>
+  <meta priority="og:description" content="Reference for Xdp.Portal.set_background_status"/>
+  <meta name="twitter:title" content="Xdp.Portal.set_background_status"/>
+  <meta name="twitter:description" content="Reference for Xdp.Portal.set_background_status"/>
 
 
   
@@ -131,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.is_camera_present.html">is_camera_present</a>
   
-    <a class="method current" href="method.Portal.location_monitor_start.html">location_monitor_start</a>
+    <a class="method" href="method.Portal.location_monitor_start.html">location_monitor_start</a>
   
     <a class="method" href="method.Portal.location_monitor_start_finish.html">location_monitor_start_finish</a>
   
@@ -191,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
   
     <a class="method" href="method.Portal.session_uninhibit.html">session_uninhibit</a>
   
-    <a class="method" href="method.Portal.set_background_status.html">set_background_status</a>
+    <a class="method current" href="method.Portal.set_background_status.html">set_background_status</a>
   
     <a class="method" href="method.Portal.set_background_status_finish.html">set_background_status_finish</a>
   
@@ -234,7 +234,7 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
 <section id="main" class="content">
   <header>
     <h3>Method</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>location_monitor_start</h1>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Portal.html">Portal</a><span class="sep"></span>set_background_status</h1>
   </header>
 
   <section>
@@ -243,19 +243,15 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/location.h#L52">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/background.h#L56">[src]</a>
         
       </h4>
 
       <div class="docblock c-decl">
         <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="n">xdp_portal_location_monitor_start</span> <span class="p">(</span>
+<span class="n">xdp_portal_set_background_status</span> <span class="p">(</span>
   <span class="n">XdpPortal</span><span class="o">*</span> <span class="n">portal</span><span class="p">,</span>
-  <span class="n">XdpParent</span><span class="o">*</span> <span class="n">parent</span><span class="p">,</span>
-  <span class="n">guint</span> <span class="n">distance_threshold</span><span class="p">,</span>
-  <span class="n">guint</span> <span class="n">time_threshold</span><span class="p">,</span>
-  <span class="n">XdpLocationAccuracy</span> <span class="n">accuracy</span><span class="p">,</span>
-  <span class="n">XdpLocationMonitorFlags</span> <span class="n">flags</span><span class="p">,</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">status_message</span><span class="p">,</span>
   <span class="n">GCancellable</span><span class="o">*</span> <span class="n">cancellable</span><span class="p">,</span>
   <span class="n">GAsyncReadyCallback</span> <span class="n">callback</span><span class="p">,</span>
   <span class="n">gpointer</span> <span class="n">data</span>
@@ -270,20 +266,13 @@ SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/location.c#L320">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/background.c#L393">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Makes <code>XdpPortal</code> start monitoring location&nbsp;changes.</p>
-<p>When the location changes, the <a href="signal.Portal.location-updated.html"><code>XdpPortal::location-updated</code></a>.
-signal is&nbsp;emitted.</p>
-<p>Use <a href="method.Portal.location_monitor_stop.html"><code>xdp_portal_location_monitor_stop()</code></a> to stop&nbsp;monitoring.</p>
-<p>Note that <a href="class.Portal.html"><code>XdpPortal</code></a> only maintains a single location monitor
-at a time. If you want to change the <code>distance_threshold</code>,
-<code>time_threshold</code> or <code>accuracy</code> of the current monitor, you
-first have to call <a href="method.Portal.location_monitor_stop.html"><code>xdp_portal_location_monitor_stop()</code></a> to
-stop&nbsp;monitoring.</p>
+        <p>Sets the status information of the application, for when it&#8217;s running
+in&nbsp;background.</p>
       </div>
 
       <div class="docblock">
@@ -308,12 +297,12 @@ stop&nbsp;monitoring.</p>
         <table class="arguments">
           
           <tr class="arg-name">
-            <td><code>parent</code></td>
-            <td><a href="struct.Parent.html"><code>XdpParent</code></a></td>
+            <td><code>status_message</code></td>
+            <td><code>const char*</code></td>
           </tr>
           <tr class="arg-description">
             <td>&nbsp;</td>
-            <td><p>A <a href="struct.Parent.html"><code>XdpParent</code></a>, or <code>NULL</code></p></td>
+            <td><p>Status message when running in&nbsp;background.</p></td>
           </tr>
           
           <tr><td>&nbsp;</td><td>The argument can be <code>NULL</code>.</td></tr>
@@ -323,79 +312,7 @@ stop&nbsp;monitoring.</p>
           
           
           <tr><td>&nbsp;</td><td title="transfer: none">The data is owned by the caller of the function.</td></tr>
-          
-          
-          <tr class="arg-name">
-            <td><code>distance_threshold</code></td>
-            <td><code>guint</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Distance threshold, in&nbsp;meters.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>time_threshold</code></td>
-            <td><code>guint</code></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Time threshold, in&nbsp;seconds.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>accuracy</code></td>
-            <td><a href="enum.LocationAccuracy.html"><code>XdpLocationAccuracy</code></a></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Desired&nbsp;accuracy.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          <tr class="arg-name">
-            <td><code>flags</code></td>
-            <td><a href="enum.LocationMonitorFlags.html"><code>XdpLocationMonitorFlags</code></a></td>
-          </tr>
-          <tr class="arg-description">
-            <td>&nbsp;</td>
-            <td><p>Options for this&nbsp;call.</p></td>
-          </tr>
-          
-          
-          
-          
-          
-          
-          
-          
-          
+          <tr><td>&nbsp;</td><td>The string is a NUL terminated UTF-8 string.</td></tr>
           
           <tr class="arg-name">
             <td><code>cancellable</code></td>
