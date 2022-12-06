@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libglib2.0 gettext dbus meson libgirepository1.0-dev libgtk-3-dev valac python3-pytest python3-dbusmock
       - name: Check out libportal
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Configure libportal
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Ddocs=false
       - name: Build libportal
@@ -41,7 +41,7 @@ jobs:
           pip3 install gi-docgen
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Check out libportal
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Configure libportal
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled
       - name: Build libportal
@@ -60,7 +60,7 @@ jobs:
         run: |
           dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel gi-docgen vala git python3-pytest python3-dbusmock
       - name: Check out libportal
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Configure libportal
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled
       - name: Build libportal
@@ -90,7 +90,9 @@ jobs:
           curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
           rm -rf check-abi/
       - name: Check out libportal
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Work around git safe directory check
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
       - name: Run ABI check
