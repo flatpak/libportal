@@ -19,7 +19,7 @@ jobs:
       options: --privileged
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build GTK3 portal test
         uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
@@ -36,7 +36,7 @@ jobs:
       options: --privileged
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build GTK4 portal test
         uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
@@ -53,7 +53,7 @@ jobs:
       options: --privileged
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build Qt5 portal test
         uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
