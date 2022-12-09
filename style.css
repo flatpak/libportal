@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-or-later
  */
 
-@import url("solarized-light.css") (prefers-color-scheme: light);
-@import url("solarized-dark.css") (prefers-color-scheme: dark);
-
+@import url("pygment.css");
 @import url("fonts.css");
 
 /*********************************
@@ -15,8 +13,8 @@
 :root {
 
   /* colors */
-  --text-color: rgb(51, 51, 51);
-  --text-color-muted: rgba(51, 51, 51, 0.65);
+  --text-color: #333;
+  --text-color-muted: #999;
   --primary: rgb(28, 118, 228);
   --body-bg: #fff;
   --sidebar-primary: rgb(144, 194, 255);
@@ -24,15 +22,7 @@
   --sidebar-selected-bg: var(--primary);
   --sidebar-hover-bg: rgba(127, 127, 127, 0.2);
   --sidebar-text-color: #fafafa;
-  --sidebar-search-bg: rgba(127, 127, 127, 0.25);
-  --sidebar-search-focus-bg: rgba(127, 127, 127, 0.3);
   --sidebar-padding: 1.5em;
-  --warning-bg-color: #e5a50a;
-  --warning-fg-color: rgba(0, 0, 0, 0.8);
-  --error-bg-color: #e01b24;
-  --error-fg-color: #ffffff;
-  --accent-bg-color: #3584e4;
-  --accent-fg-color: #ffffff;
 
   /* boxes, e.g. code blocks */
   --box-bg: rgba(135, 135, 135, 0.085);
@@ -44,7 +34,7 @@
   /* typography */
   --body-font-family: "Red Hat Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
   --body-font-scale: 0.95;
-  --body-font-size: calc(var(--body-font-scale) * clamp(16px, 1vw, 18px));
+  --body-font-size: calc(var(--body-font-scale) * clamp(16px, 1vw, 20px));
   --body-font-weight: normal;
 
   --monospace-font-family: "Source Code Pro", monospace;
@@ -71,7 +61,7 @@
   --table-font-size: 0.92em;    /* Tables often contain lots information. It's better to scale them down a big to get more sutff fitted inside */
 
   /* misc */
-  --preferred-content-width: 90ch; /* The preferred width for the readable content */
+  --prefered-content-width: 90ch; /* The preferred width for the readable content */
   --anchor-sign: "#";
 
 }
@@ -92,12 +82,11 @@
     --box-bg: rgba(135, 135, 135, 0.1);
     --box-text-color: #fff;
     --heading-docblock-color: #b7b7b7;
-    --warning-bg-color: #cd9309;
-    --warning-fg-color: rgba(0, 0, 0, 0.8);
-    --error-bg-color: #c01c28;
-    --error-fg-color: #ffffff;
-    --accent-bg-color: #3584e4;
-    --accent-fg-color: #ffffff;
+  }
+
+  /* fix dark theme syntax highlighting with a filter (for now) */
+  .highlight pre span {
+  	filter: brightness(6);
   }
 }
 
@@ -118,6 +107,28 @@
 ::selection {
   color: white;
   background: var(--primary);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(128, 128, 128, 0.6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 1);
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+* {
+  scrollbar-width: initial;
 }
 
 body {
@@ -330,13 +341,6 @@ blockquote > *:last-child > *:last-child > *:last-child {
   margin-bottom: 0;
 }
 
-/* allow easily adding a frame around images, by appending
- * #frame to the url
- */
-img[src$="#frame"] {
-  border: 1px solid var(--text-color);
-}
-
 /*********************************
  * PAGE STRUCTURE
  *********************************/
@@ -393,6 +397,7 @@ footer {
  * SIDEBAR
  *********************************/
 .sidebar {
+  scrollbar-width: thin;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-bg);
   min-width: 35ch;
@@ -403,7 +408,6 @@ footer {
   z-index: 2;
   height: 100vh;
   overflow-y: auto;
-  color-scheme: dark;
 }
 
 .sidebar a,
@@ -419,15 +423,6 @@ footer {
 
 .sidebar .section > ul > li {
   margin-right: -10px;
-}
-
-.sidebar .generator > p {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  font-size: 0.8em;
-  opacity: 0.8;
-  position: relative;
-  bottom: 0;
 }
 
 .sidebar .section h3, .sidebar .section h5 {
@@ -493,21 +488,15 @@ footer {
 }
 
 .sidebar .search input[type="text"] {
-  border: none;
+  border-color: transparent;
   width: 100%;
+  border: 1px solid #ccc;
   border-radius: 50px;
-  padding: 8px 14px;
+  padding: 6px 12px;
   display: inline-block;
   font-size: 14px;
-  outline: transparent;
-  background: var(--sidebar-search-bg);
-  color: var(--sidebar-text-color);
-  transition: background-color 150ms ease;
-}
-
-.sidebar .search input[type="text"]:hover,
-.sidebar .search input[type="text"]:focus {
-  background: var(--sidebar-search-focus-bg);
+  box-shadow: inset 0 1px 3px #ddd;
+  transition: border .3s linear;
 }
 
 .toc {
@@ -536,10 +525,6 @@ footer {
 
 .toc-list-item {
   padding-top: .25em;
-}
-
-ul.toc-list > ul.toc-list {
-  padding-left: 1em;
 }
 
 /*********************************
@@ -618,7 +603,7 @@ ul.toc-list > ul.toc-list {
 .content {
   padding: 2em 4em;
   overflow: visible;
-  max-width: calc(var(--preferred-content-width) + 8em);
+  max-width: calc(var(--prefered-content-width) + 8em);
 }
 
 .content table:not(.table-display) {
@@ -648,15 +633,13 @@ ul.toc-list > ul.toc-list {
 
 kbd {
   display: inline-block;
-  padding: 8px;
-  font: 10px monospace;
+  padding: 3px 5px;
+  font: 15px monospace;
   line-height: 10px;
   vertical-align: middle;
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0 0 3px rgba(0,0,0,0.3);
-  margin: 3px;
-  background-color: var(--box-bg);
+  border: solid 1px;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0;
   cursor: default;
 }
 
@@ -869,26 +852,6 @@ table.returns tr.arg-description td {
   background-color: var(--primary);
 }
 
-.emblem {
-  padding: 0 0.75em;
-  border-radius: 9999px;
-  font-size: 80%;
-}
-
-.emblem.available-next {
-  background-color: var(--warning-bg-color);
-  color: var(--warning-fg-color);
-}
-
-.emblem.deprecated {
-  background-color: var(--error-bg-color);
-  color: var(--error-fg-color);
-}
-
-.emblem.available {
-  background-color: var(--accent-bg-color);
-  color: var(--accent-fg-color);
-}
 
 /*************************************************************
  SYMBOLS
@@ -901,8 +864,6 @@ table.returns tr.arg-description td {
 .type-funcs h6,
 .implements a,
 .ancestors a,
-.descendants a,
-.implementations a,
 .sidebar .links a
 .toc a
 {
