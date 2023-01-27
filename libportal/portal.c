@@ -69,8 +69,11 @@ enum {
 };
 
 static guint signals[LAST_SIGNAL];
+static void xdp_portal_initable_iface_init (GInitableIface  *iface);
 
-G_DEFINE_TYPE (XdpPortal, xdp_portal, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE (XdpPortal, xdp_portal, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                xdp_portal_initable_iface_init))
 
 static void
 xdp_portal_finalize (GObject *object)
@@ -290,44 +293,78 @@ create_bus_from_address (const char *address,
   return g_steal_pointer (&bus);
 }
 
-static void
-xdp_portal_init (XdpPortal *portal)
+static gboolean
+xdp_portal_initable_init (GInitable     *initable,
+                          GCancellable  *cancellable,
+                          GError       **out_error)
 {
-  g_autoptr(GError) error = NULL;
   int i;
+
+  XdpPortal *portal = (XdpPortal*) initable;
 
   /* g_bus_get_sync() returns a singleton. In the test suite we may restart
    * the session bus, so we have to manually connect to the new bus */
   if (getenv ("LIBPORTAL_TEST_SUITE"))
-    portal->bus = create_bus_from_address (getenv ("DBUS_SESSION_BUS_ADDRESS"), &error);
+    portal->bus = create_bus_from_address (getenv ("DBUS_SESSION_BUS_ADDRESS"), out_error);
   else
-    portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
+    portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, out_error);
 
-  if (error)
-    {
-      g_critical ("Failed to create XdpPortal instance: %s\n", error->message);
-      abort ();
-    }
-
-  g_assert (portal->bus != NULL);
+  if (portal->bus == NULL)
+    return FALSE;
 
   portal->sender = g_strdup (g_dbus_connection_get_unique_name (portal->bus) + 1);
   for (i = 0; portal->sender[i]; i++)
     if (portal->sender[i] == '.')
       portal->sender[i] = '_';
+
+  return TRUE;
+}
+
+static void
+xdp_portal_initable_iface_init (GInitableIface *iface)
+{
+  iface->init = xdp_portal_initable_init;
+}
+
+static void
+xdp_portal_init (XdpPortal *portal)
+{
+}
+
+/**
+ * xdp_portal_initable_new:
+ * @error: A GError location to store the error occurring, or NULL to ignore.
+ *
+ * Creates a new [class@Portal] object.
+ *
+ * Returns: (nullable): a newly created [class@Portal] object or NULL on error
+ */
+XdpPortal *
+xdp_portal_initable_new (GError **error)
+{
+  return g_initable_new (XDP_TYPE_PORTAL, NULL, error, NULL);
 }
 
 /**
  * xdp_portal_new:
  *
- * Creates a new [class@Portal] object.
+ * Creates a new [class@Portal] object. If D-Bus is unavailable this API will abort.
+ * We recommend using xdp_portal_initable_new() to safely handle this failure.
  *
  * Returns: a newly created [class@Portal] object
  */
 XdpPortal *
 xdp_portal_new (void)
 {
-  return g_object_new (XDP_TYPE_PORTAL, NULL);
+  g_autoptr(GError) error = NULL;
+  XdpPortal *portal = xdp_portal_initable_new(&error);
+  if (error)
+    {
+      g_critical ("Failed to create XdpPortal instance: %s\n", error->message);
+      abort ();
+    }
+
+  return portal;
 }
 
 /* This function is copied from xdg-desktop-portal */
