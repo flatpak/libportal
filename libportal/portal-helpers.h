@@ -36,6 +36,9 @@ XDP_PUBLIC
 XdpPortal *xdp_portal_new                   (void);
 
 XDP_PUBLIC
+XdpPortal *xdp_portal_initable_new          (GError **error);
+
+XDP_PUBLIC
 gboolean   xdp_portal_running_under_flatpak (void);
 
 XDP_PUBLIC
