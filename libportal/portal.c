@@ -357,7 +357,7 @@ XdpPortal *
 xdp_portal_new (void)
 {
   g_autoptr(GError) error = NULL;
-  XdpPortal *portal = xdp_portal_initable_new(&error);
+  XdpPortal *portal = xdp_portal_initable_new (&error);
   if (error)
     {
       g_critical ("Failed to create XdpPortal instance: %s\n", error->message);
