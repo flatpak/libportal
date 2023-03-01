@@ -226,6 +226,8 @@ do_open (OpenCall *call)
           g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Failed to open '%s'", call->uri);
           open_call_free (call);
 
+          g_variant_builder_clear (&options);
+
           return;
         }
 
