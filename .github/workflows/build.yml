@@ -93,7 +93,5 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Work around git safe directory check
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
       - name: Run ABI check
         run: check-abi --old-parameters="-Dvapi=false -Ddocs=false -Dintrospection=false" --new-parameters="-Dvapi=false -Ddocs=false -Dtests=false -Dintrospection=false" ${LAST_ABI_BREAK} $GITHUB_SHA
