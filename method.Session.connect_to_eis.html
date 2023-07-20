@@ -7,7 +7,7 @@ SPDX-License-Identifier: LGPL-3.0-only
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Xdp.Session.touch_up</title>
+  <title>Xdp.Session.connect_to_eis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta charset="utf-8" />
@@ -23,10 +23,10 @@ SPDX-License-Identifier: LGPL-3.0-only
   
 
   
-  <meta priority="og:title" content="Xdp.Session.touch_up"/>
-  <meta priority="og:description" content="Reference for Xdp.Session.touch_up"/>
-  <meta name="twitter:title" content="Xdp.Session.touch_up"/>
-  <meta name="twitter:description" content="Reference for Xdp.Session.touch_up"/>
+  <meta priority="og:title" content="Xdp.Session.connect_to_eis"/>
+  <meta priority="og:description" content="Reference for Xdp.Session.connect_to_eis"/>
+  <meta name="twitter:title" content="Xdp.Session.connect_to_eis"/>
+  <meta name="twitter:description" content="Reference for Xdp.Session.connect_to_eis"/>
 
 
   
@@ -89,7 +89,7 @@ SPDX-License-Identifier: LGPL-3.0-only
   
     <a class="method" href="method.Session.close.html">close</a>
   
-    <a class="method" href="method.Session.connect_to_eis.html">connect_to_eis</a>
+    <a class="method current" href="method.Session.connect_to_eis.html">connect_to_eis</a>
   
     <a class="method" href="method.Session.get_devices.html">get_devices</a>
   
@@ -125,7 +125,7 @@ SPDX-License-Identifier: LGPL-3.0-only
   
     <a class="method" href="method.Session.touch_position.html">touch_position</a>
   
-    <a class="method current" href="method.Session.touch_up.html">touch_up</a>
+    <a class="method" href="method.Session.touch_up.html">touch_up</a>
   
   </div>
 </div>
@@ -141,7 +141,7 @@ SPDX-License-Identifier: LGPL-3.0-only
 <section id="main" class="content">
   <header>
     <h3>Method</h3>
-    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Session.html">Session</a><span class="sep"></span>touch_up</h1>
+    <h1><a href="index.html">Xdp</a><span class="sep"></span><a href="class.Session.html">Session</a><span class="sep"></span>connect_to_eis</h1>
   </header>
 
   <section>
@@ -154,15 +154,15 @@ SPDX-License-Identifier: LGPL-3.0-only
         Declaration
         <a class="anchor" href="#declaration"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/remote.h#L292">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/remote.h#L203">[src]</a>
         
       </h4>
 
       <div class="docblock c-decl">
-        <pre><code><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="n">xdp_session_touch_up</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<span class="w">  </span><span class="n">XdpSession</span><span class="o">*</span><span class="w"> </span><span class="n">session</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="n">guint</span><span class="w"> </span><span class="n">slot</span><span class="w"></span>
+        <pre><code><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"></span>
+<span class="n">xdp_session_connect_to_eis</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">XdpSession</span><span class="o">*</span><span class="w"> </span><span class="n">session</span><span class="w"></span>
+<span class="w">  </span><span class="n">GError</span><span class="o">**</span><span class="w"> </span><span class="n">error</span><span class="w"></span>
 <span class="p">)</span><span class="w"></span>
 </pre></div>
 </code></pre>
@@ -174,14 +174,17 @@ SPDX-License-Identifier: LGPL-3.0-only
         Description
         <a class="anchor" href="#description"></a>
         
-        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/remote.c#L1249">[src]</a>
+        <a class="srclink" title="go to source location" href="https://github.com/flatpak/libportal/blob/main/libportal/remote.c#L912">[src]</a>
         
       </h4>
 
       <div class="docblock">
-        <p>Notify about a new touch up&nbsp;event.</p>
-<p>May only be called on a remote desktop session
-with <code>XDP_DEVICE_TOUCHSCREEN</code> access.</p>
+        <p>Connect this XdpRemoteDesktopSession to an <span class="caps">EIS</span> implementation and return the fd.
+This fd can be passed into ei_setup_backend_fd(). See the libei
+documentation for&nbsp;details.</p>
+<p>This call must be issued before xdp_session_start(). If successful, all input
+event emulation must be handled via the <span class="caps">EIS</span> connection and calls to
+<code>xdp_session_pointer_motion()</code> etc. are silently&nbsp;ignored.</p>
       </div>
 
       <div class="docblock">
@@ -197,19 +200,21 @@ with <code>XDP_DEVICE_TOUCHSCREEN</code> access.</p>
     </div>
 
     
-    <div class="parameters toggle-wrapper">
-      <h4 id="parameters">
-        Parameters
-        <a href="#parameters" class="anchor"></a>
+
+    
+    <div class="return-value toggle-wrapper">
+      <h4 id="return-value">
+        Return value
+        <a href="#return-value" class="anchor"></a>
       </h4>
 
       <div class="docblock">
-        <dl class="arguments">
-          
-          <dt class="arg-name"><code>slot</code></dt>
-          <dd class="arg-description">
-            <p><em>Type:</em>&nbsp;<code>guint</code></p>
-            <p><p>Touch slot that&nbsp;changed.</p></p>
+        <div class="returns">
+          <div class="arg-description">
+            <p><em>Type:</em>&nbsp;<code>int</code></p>
+            <p><p>The file descriptor to the <span class="caps">EIS</span>&nbsp;implementation.</p></p>
+          </div>
+          <div>
             <table>
             
             
@@ -217,19 +222,11 @@ with <code>XDP_DEVICE_TOUCHSCREEN</code> access.</p>
             
             
             
-            
-            
-            
             </table>
-          </dd>
-          
-
-          
-        </dl>
+          </div>
+        </div>
       </div>
     </div>
-    
-
     
 
   </section>
