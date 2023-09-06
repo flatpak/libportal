@@ -1,5 +1,5 @@
 project('libportal','c',
-        version: '0.6',
+        version: '0.7',
         default_options: ['warning_level=2'],
         meson_version: '>= 0.49.0')
 

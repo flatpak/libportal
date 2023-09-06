@@ -1,3 +1,12 @@
+Changes in 0.7, 06-09-2023
+==========================
+
+- Add support for the new SetStatus() method of the Background portal
+- Add support for the new ConnectToEIS() method of the Remote Desktop portal
+- Improve unit and integration tests
+- Documentation improvements
+- CI improvements
+
 Changes in 0.6, 21-03-2022
 ==========================
 
