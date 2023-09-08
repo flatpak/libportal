@@ -80,6 +80,8 @@ xdp_portal_finalize (GObject *object)
 {
   XdpPortal *portal = XDP_PORTAL (object);
 
+  g_clear_error (&portal->init_error);
+
   /* inhibit */
   if (portal->inhibit_handles)
     g_hash_table_unref (portal->inhibit_handles);
@@ -293,30 +295,44 @@ create_bus_from_address (const char *address,
   return g_steal_pointer (&bus);
 }
 
-static gboolean
-xdp_portal_initable_init (GInitable     *initable,
-                          GCancellable  *cancellable,
-                          GError       **out_error)
+/* Historically, g_object_new() on an XdpPortal initialized it. We follow
+ * that here by doing the actual initialization early, and only dealing
+ * with the result in initable_init(). */
+static void
+xdp_portal_init (XdpPortal *portal)
 {
   int i;
-
-  XdpPortal *portal = (XdpPortal*) initable;
 
   /* g_bus_get_sync() returns a singleton. In the test suite we may restart
    * the session bus, so we have to manually connect to the new bus */
   if (getenv ("LIBPORTAL_TEST_SUITE"))
-    portal->bus = create_bus_from_address (getenv ("DBUS_SESSION_BUS_ADDRESS"), out_error);
+    portal->bus = create_bus_from_address (getenv ("DBUS_SESSION_BUS_ADDRESS"), &portal->init_error);
   else
-    portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, out_error);
+    portal->bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &portal->init_error);
 
   if (portal->bus == NULL)
-    return FALSE;
+    return;
 
   portal->sender = g_strdup (g_dbus_connection_get_unique_name (portal->bus) + 1);
   for (i = 0; portal->sender[i]; i++)
     if (portal->sender[i] == '.')
       portal->sender[i] = '_';
+}
 
+static gboolean
+xdp_portal_initable_init (GInitable     *initable,
+                          GCancellable  *cancellable,
+                          GError       **out_error)
+{
+  XdpPortal *portal = (XdpPortal*) initable;
+
+  if (portal->init_error != NULL)
+    {
+      g_propagate_error (out_error, g_error_copy (portal->init_error));
+      return FALSE;
+    }
+
+  g_assert (portal->bus != NULL);
   return TRUE;
 }
 
@@ -324,11 +340,6 @@ static void
 xdp_portal_initable_iface_init (GInitableIface *iface)
 {
   iface->init = xdp_portal_initable_init;
-}
-
-static void
-xdp_portal_init (XdpPortal *portal)
-{
 }
 
 /**

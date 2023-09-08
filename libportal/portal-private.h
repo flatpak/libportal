@@ -25,6 +25,7 @@
 struct _XdpPortal {
   GObject parent_instance;
 
+  GError *init_error;
   GDBusConnection *bus;
   char *sender;
 
