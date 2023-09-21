@@ -53,7 +53,7 @@ jobs:
     container: fedora:${{ matrix.fedora-version }}
     strategy:
       matrix:
-        fedora-version: ['35', '36']
+        fedora-version: ['37', '38']
 
     steps:
       - name: Install dependencies
@@ -77,7 +77,7 @@ jobs:
   abi-check:
     name: ABI check
     runs-on: ubuntu-latest
-    container: fedora:35
+    container: fedora:37
     env:
       LAST_ABI_BREAK: "467a397fd7996557f837cdc26ac07c01c62810e5"
 
