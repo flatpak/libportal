@@ -7,14 +7,14 @@ src = [
   'portal-test-qt.cpp',
 ]
 
-prep = qt.preprocess(
+prep = qt5.preprocess(
   moc_headers : 'portal-test-qt.h',
   moc_extra_arguments: ['-DMAKES_MY_MOC_HEADER_COMPILE'],
   ui_files : 'portal-test-qt.ui',
   dependencies: libportal_qt5_dep,
 )
 
-executable('portal-test-qt',
+executable('portal-test-qt5',
   [src, prep],
   include_directories: [top_inc, libportal_inc],
   dependencies: [libportal_qt5_dep],

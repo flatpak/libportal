@@ -13,7 +13,7 @@ add_project_arguments(cc.get_supported_arguments(cflags), language: 'c')
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
 
-qt = import('qt5')
+qt5 = import('qt5')
 
 conf = configuration_data()
 conf.set_quoted('G_LOG_DOMAIN', 'libportal')

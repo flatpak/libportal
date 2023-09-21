@@ -62,7 +62,7 @@ ninja -C _build
 ### `portal-tests`
 
 To generate test binaries, set the `portal-tests` option to any combination of
-`gtk3`, `gtk4`, or `qt` e.g. `-Dportal-tests=gtk3,gtk4,qt`. Then run the desired 
+`gtk3`, `gtk4`, or `qt5` e.g. `-Dportal-tests=gtk3,gtk4,qt5`. Then run the desired
 test binary, e.g.:
 
 ```
@@ -72,7 +72,7 @@ test binary, e.g.:
 or
 
 ```
-./_build/portal-test/portal-test/qt/portal-test-qt
+./_build/portal-test/portal-test/qt/portal-test-qt5
 ```
 
 [1]: https://mesonbuild.com/Getting-meson.html
