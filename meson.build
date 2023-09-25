@@ -15,6 +15,14 @@ pkgconfig = import('pkgconfig')
 
 qt5 = import('qt5')
 
+if get_option('backend-qt6').enabled() and meson.version().version_compare('< 0.59.0')
+  error('qt6 backend requires meson 0.59.0 or newer')
+endif
+
+if meson.version().version_compare('>= 0.59.0')
+  qt6 = import('qt6')
+endif
+
 conf = configuration_data()
 conf.set_quoted('G_LOG_DOMAIN', 'libportal')
 conf.set_quoted('PACKAGE_NAME', 'libportal')

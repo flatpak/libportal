@@ -4,6 +4,8 @@ option('backend-gtk4', type: 'feature', value: 'auto',
   description: 'Build the GTK4 portal backend')
 option('backend-qt5', type: 'feature', value: 'auto',
   description: 'Build the Qt5 portal backend')
+option('backend-qt6', type: 'feature', value: 'auto',
+  description: 'Build the Qt6 portal backend')
 option('portal-tests', type: 'boolean', value: false,
   description : 'Build portal tests of each backend')
 option('introspection', type: 'boolean', value: true,

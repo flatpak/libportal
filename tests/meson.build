@@ -1,6 +1,9 @@
 if 'qt5' in enabled_backends
   subdir('qt5')
 endif
+if 'qt6' in enabled_backends
+  subdir('qt6')
+endif
 
 if meson.version().version_compare('>= 0.56.0')
   pytest = find_program('pytest-3', 'pytest', required: false)
