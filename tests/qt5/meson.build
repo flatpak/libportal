@@ -20,4 +20,4 @@ exe = executable('qt5-test',
   cpp_args : '-std=c++11',
 )
 
-test('Qt5 unit test', exe)
+test('Qt 5 unit test', exe)

@@ -62,7 +62,7 @@ ninja -C _build
 ### `portal-tests`
 
 To generate test binaries, set the `portal-tests` option to any combination of
-`gtk3`, `gtk4`, or `qt5` e.g. `-Dportal-tests=gtk3,gtk4,qt5`. Then run the desired
+`gtk3`, `gtk4`, `qt5`, or `qt6` e.g. `-Dportal-tests=gtk3,gtk4,qt5,qt6`. Then run the desired
 test binary, e.g.:
 
 ```

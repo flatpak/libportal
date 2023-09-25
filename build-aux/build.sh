@@ -7,7 +7,7 @@ OLD_DIR=`pwd`
 
 cd "$TOP_DIR"
 
-for backend in Gtk3 Gtk4 Qt5; do
+for backend in Gtk3 Gtk4 Qt5 Qt6; do
     flatpak-builder --force-clean --ccache --repo=_build/repo --install --user "_build/app-$backend" "build-aux/org.gnome.PortalTest.${backend}.json"
 done
 

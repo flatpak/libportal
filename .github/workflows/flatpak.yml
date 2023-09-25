@@ -61,3 +61,20 @@ jobs:
           bundle: portal-test-qt5.flatpak
           manifest-path: build-aux/org.gnome.PortalTest.Qt5.json
           cache-key: qt5-${{ github.sha }}
+
+  build-flatpak-qt6:
+    name: Qt6
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-6.5
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Qt6 portal test
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: portal-test-qt6.flatpak
+          manifest-path: build-aux/org.gnome.PortalTest.Qt6.json
+          cache-key: qt6-${{ github.sha }}

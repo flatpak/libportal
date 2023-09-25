@@ -264,6 +264,44 @@ if have_cpp and qt5_dep.found()
   enabled_backends += ['qt5']
 endif
 
+########
+# Qt 6 #
+########
+
+if meson.version().version_compare('>= 0.59.0')
+   have_cpp = add_languages('cpp', required: get_option('backend-qt6'))
+   qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'], required: get_option('backend-qt6'))
+
+   if have_cpp and qt6_dep.found()
+     qt6_headers = ['portal-qt6.h']
+     qt6_sources = ['portal-qt6.cpp']
+
+     install_headers(qt6_headers, subdir: 'libportal-qt6')
+
+     libportal_qt6 = library('portal-qt6',
+       qt6_sources,
+       version: version,
+       include_directories: [top_inc, libportal_inc],
+       cpp_args : '-std=c++17',
+       install: true,
+       dependencies: [libportal_dep, qt6_dep],
+       gnu_symbol_visibility: 'hidden',
+     )
+
+     pkgconfig.generate(libportal_qt6,
+       description: 'Portal API wrappers (Qt 6)',
+       name: 'libportal-qt6',
+       requires: [qt6_dep, libportal],
+     )
+
+     libportal_qt6_dep = declare_dependency(
+       dependencies: [libportal_dep, qt6_dep],
+       link_with: libportal_qt6,
+     )
+     enabled_backends += ['qt6']
+   endif
+endif
+
 if meson.version().version_compare('>= 0.54.0')
   summary({'enabled backends': enabled_backends}, section: 'Backends', list_sep: ',')
 endif

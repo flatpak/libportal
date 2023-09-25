@@ -58,11 +58,11 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel gi-docgen vala git python3-pytest python3-dbusmock
+          dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel gi-docgen vala git python3-pytest python3-dbusmock qt5-qtbase-devel qt5-qtx11extras-devel qt6-qtbase-devel
       - name: Check out libportal
         uses: actions/checkout@v3
       - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled
+        run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled -Dbackend-qt5=enabled -Dbackend-qt6=enabled
       - name: Build libportal
         run: ninja -C_build
       - name: Deploy Docs
@@ -84,7 +84,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel qt5-qtbase-devel qt5-qtx11extras-devel git libabigail
+          dnf install -y meson gcc gobject-introspection-devel gtk3-devel gtk4-devel qt5-qtbase-devel qt5-qtx11extras-devel qt6-qtbase-devel git libabigail
       - name: Install check-abi
         run: |
           curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
