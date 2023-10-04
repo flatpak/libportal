@@ -63,6 +63,9 @@ struct _PortalTestWin
   GtkWidget *screencast_label;
   GtkWidget *screencast_toggle;
 
+  GtkWidget *remote_desktop_label;
+  GtkWidget *remote_desktop_toggle;
+
   GFileMonitor *update_monitor;
   GtkWidget *update_dialog;
   GtkWidget *update_dialog2;
@@ -562,7 +565,7 @@ take_screenshot (GtkButton *button,
 }
 
 static void
-session_started (GObject *source,
+screencast_session_started (GObject *source,
                  GAsyncResult *result,
                  gpointer data)
 {
@@ -601,7 +604,7 @@ session_started (GObject *source,
 }
   
 static void
-session_created (GObject *source,
+screencast_session_created (GObject *source,
                  GAsyncResult *result,
                  gpointer data)
 {
@@ -618,7 +621,7 @@ session_created (GObject *source,
     }
   
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
-  xdp_session_start (win->session, parent, NULL, session_started, win);
+  xdp_session_start (win->session, parent, NULL, screencast_session_started, win);
   xdp_parent_free (parent);
 }
 
@@ -634,7 +637,7 @@ start_screencast (PortalTestWin *win)
                                         XDP_PERSIST_MODE_NONE,
                                         NULL,
                                         NULL,
-                                        session_created,
+                                        screencast_session_created,
                                         win);
 }
 
@@ -657,6 +660,103 @@ screencast_toggled (GtkToggleButton *button,
     start_screencast (win);
   else
     stop_screencast (win);
+}
+
+static void
+remote_desktop_session_started (GObject *source,
+                 GAsyncResult *result,
+                 gpointer data)
+{
+  XdpSession *session = (XdpSession*) source;
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  guint id;
+  g_autoptr(GVariantIter) iter = NULL;
+  GVariant *props;
+  g_autoptr (GString) s = NULL;
+
+  if (!xdp_session_start_finish (session, result, &error))
+    {
+      g_warning ("Failed to start remote desktop session: %s", error->message);
+      g_clear_object (&win->session);
+      gtk_label_set_label (GTK_LABEL (win->remote_desktop_label), "");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (win->remote_desktop_toggle), FALSE);
+      return;
+    }
+
+  s = g_string_new ("");
+
+  iter = g_variant_iter_new (xdp_session_get_streams (session));
+  while (g_variant_iter_next (iter, "(u@a{sv})", &id, &props))
+    {
+      int x, y, w, h;
+      g_variant_lookup (props, "position", "(ii)", &x, &y);
+      g_variant_lookup (props, "size", "(ii)", &w, &h);
+      if (s->len > 0)
+        g_string_append (s, "\n");
+      g_string_append_printf (s, "Stream %d: %dx%d @ %d,%d", id, w, h, x, y);
+      g_variant_unref (props);
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->remote_desktop_label), s->str);
+}
+
+static void
+remote_desktop_session_created (GObject *source,
+                                GAsyncResult *result,
+                                gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (source);
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  XdpParent *parent = NULL;
+
+  win->session = xdp_portal_create_remote_desktop_session_finish (portal, result, &error);
+  if (win->session == NULL)
+    {
+      g_warning ("Failed to create remote desktop session: %s", error->message);
+      return;
+    }
+  
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+  xdp_session_start (win->session, parent, NULL, remote_desktop_session_started, win);
+  xdp_parent_free (parent);
+}
+
+static void
+start_remote_desktop (PortalTestWin *win)
+{
+  g_clear_object (&win->session);
+
+  xdp_portal_create_remote_desktop_session (win->portal,
+                                            XDP_DEVICE_POINTER,
+                                            XDP_OUTPUT_MONITOR | XDP_OUTPUT_WINDOW,
+                                            XDP_REMOTE_DESKTOP_FLAG_NONE,
+                                            XDP_CURSOR_MODE_HIDDEN,
+                                            NULL,
+                                            remote_desktop_session_created,
+                                            win);
+}
+
+static void
+stop_remote_desktop (PortalTestWin *win)
+{
+  if (win->session != NULL)
+    {
+      xdp_session_close (win->session);
+      g_clear_object (&win->session);
+      gtk_label_set_label (GTK_LABEL (win->remote_desktop_label), "");
+    }
+}
+
+static void
+remote_desktop_toggled (GtkToggleButton *button, 
+                    PortalTestWin *win)
+{
+  if (gtk_toggle_button_get_active (button))
+    start_remote_desktop (win);
+  else
+    stop_remote_desktop (win);
 }
 
 static void
@@ -1248,6 +1348,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, open_local);
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
   gtk_widget_class_bind_template_callback (widget_class, screencast_toggled);
+  gtk_widget_class_bind_template_callback (widget_class, remote_desktop_toggled);
   gtk_widget_class_bind_template_callback (widget_class, notify_me);
   gtk_widget_class_bind_template_callback (widget_class, print_cb);
   gtk_widget_class_bind_template_callback (widget_class, inhibit_changed);
@@ -1275,6 +1376,8 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, save_how);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_toggle);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, remote_desktop_label);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, remote_desktop_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog2);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_progressbar);
