@@ -85,6 +85,9 @@ def load(mock, parameters={}):
     # signal
     mock.disabled_after = parameters.get("disabled-after", 0)
 
+    # How many ms to signal Session.Closed after Start
+    mock.close_after_enable = parameters.get("close-after-enable", 0)
+
     mock.AddProperties(
         MAIN_IFACE,
         dbus.Dictionary(
@@ -326,6 +329,10 @@ def Enable(self, session_handle, options, sender):
                 )
 
             GLib.timeout_add(self.disabled_after, send_disabled)
+
+        if self.close_after_enable > 0:
+            session = self.active_sessions[session_handle]
+            session.close({}, self.close_after_enable)
 
     except Exception as e:
         logger.critical(e)

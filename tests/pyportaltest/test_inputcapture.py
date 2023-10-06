@@ -24,11 +24,13 @@ class SessionSetup:
         zones: Optional[List[Xdp.InputCaptureZone]] = None,
         barriers: Optional[List[Xdp.InputCapturePointerBarrier]] = None,
         failed_barriers: Optional[List[Xdp.InputCapturePointerBarrier]] = None,
+        session_handle_token: Optional[str] = None,
     ):
         self.session = session
         self.zones = zones or []
         self.barriers = barriers or []
         self.failed_barriers = failed_barriers or []
+        self.session_handle_token = session_handle_token
 
 
 class SessionCreationFailed(Exception):
@@ -88,6 +90,17 @@ class TestInputCapture(PortalTest):
         if session_error is not None:
             raise SessionCreationFailed(session_error)
         assert session is not None
+        assert session.get_session().get_session_type() == Xdp.SessionType.INPUT_CAPTURE
+
+        # Extract our expected session id. This isn't available from
+        # XdpSession so we need to go around it. We can't easily get the
+        # sender id so the full path is hard. Let's just extract the token and
+        # pretend that's good enough.
+        method_calls = self.mock_interface.GetMethodCalls("CreateSession")
+        assert len(method_calls) >= 1
+        _, args = method_calls.pop()  # Assume the latest has our session
+        (_, options) = args
+        session_handle = options["session_handle_token"]
 
         zones = session.get_zones()
 
@@ -147,6 +160,7 @@ class TestInputCapture(PortalTest):
             zones=zones,
             barriers=active_barriers,
             failed_barriers=failed_barriers,
+            session_handle_token=session_handle,
         )
 
     def test_version(self):
@@ -590,3 +604,56 @@ class TestInputCapture(PortalTest):
         self.mainloop.run()
 
         assert disabled_signal_received
+
+    def test_close_session(self):
+        """
+        Ensure that closing our session explicitly closes the session on DBus.
+        """
+        setup = self.create_session_with_barriers()
+        session = setup.session
+        xdp_session = setup.session.get_session()
+
+        was_closed = False
+
+        def method_called(method_name, method_args, path):
+            nonlocal was_closed
+
+            if method_name == "Close" and path.endswith(setup.session_handle_token):
+                was_closed = True
+                self.mainloop.quit()
+
+        bus = self.get_dbus()
+        bus.add_signal_receiver(
+            handler_function=method_called,
+            signal_name="MethodCalled",
+            dbus_interface="org.freedesktop.DBus.Mock",
+            path_keyword="path",
+        )
+
+        xdp_session.close()
+        self.mainloop.run()
+
+        assert was_closed is True
+
+    def test_close_session_signal(self):
+        """
+        Ensure that we get the GObject signal when our session is closed
+        externally.
+        """
+        params = {"close-after-enable": 500}
+        setup = self.create_session_with_barriers(params)
+        session = setup.session
+        xdp_session = setup.session.get_session()
+
+        session_closed_signal_received = False
+
+        def session_closed(session):
+            nonlocal session_closed_signal_received
+            session_closed_signal_received = True
+
+        xdp_session.connect("closed", session_closed)
+
+        session.enable()
+        self.mainloop.run()
+
+        assert session_closed_signal_received is True

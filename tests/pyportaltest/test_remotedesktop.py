@@ -490,3 +490,25 @@ class TestRemoteDesktop(PortalTest):
         self.mainloop.run()
 
         assert was_closed is True
+
+    def test_close_session_signal(self):
+        """
+        Ensure that we get the GObject signal when our session is closed
+        externally.
+        """
+        params = {"close-after-start": 500}
+        setup = self.create_session(params=params)
+        session = setup.session
+
+        session_closed_signal_received = False
+
+        def session_closed(session):
+            nonlocal session_closed_signal_received
+            session_closed_signal_received = True
+            self.mainloop.quit()
+
+        session.connect("closed", session_closed)
+
+        self.mainloop.run()
+
+        assert session_closed_signal_received is True
