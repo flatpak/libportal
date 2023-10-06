@@ -113,7 +113,7 @@ class Session:
         def respond():
             logger.debug(f"Session.Closed on {self.handle}: {details}")
             self.mock.EmitSignalDetailed(
-                "", "Closed", "a{sv}", [details], destination=self.sender
+                "", "Closed", "a{sv}", [details], details={"destination": self.sender}
             )
 
         if delay > 0:

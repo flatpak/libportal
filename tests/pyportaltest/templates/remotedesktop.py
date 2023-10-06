@@ -22,7 +22,7 @@ _restore_tokens = count()
 
 
 def load(mock, parameters):
-    logger.debug(f"loading {MAIN_IFACE} template")
+    logger.debug(f"loading {MAIN_IFACE} template with params {parameters}")
 
     params = MockParams.get(mock, MAIN_IFACE)
     params.delay = 500
@@ -30,6 +30,7 @@ def load(mock, parameters):
     params.response = parameters.get("response", 0)
     params.devices = parameters.get("devices", 0b111)
     params.sessions: Dict[str, Session] = {}
+    params.close_after_start = parameters.get("close-after-start", 0)
 
     mock.AddProperties(
         MAIN_IFACE,
@@ -107,6 +108,10 @@ def Start(self, session_handle, parent_window, options, sender):
         response = Response(params.response, results)
 
         request.respond(response, delay=params.delay)
+
+        if params.close_after_start > 0:
+            session = params.sessions[session_handle]
+            session.close({}, params.close_after_start)
 
         return request.handle
     except Exception as e:
