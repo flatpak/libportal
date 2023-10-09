@@ -165,6 +165,19 @@ void        xdp_portal_create_remote_desktop_session        (XdpPortal          
                                                              gpointer                data);
 
 XDP_PUBLIC
+void        xdp_portal_create_remote_desktop_session_full   (XdpPortal              *portal,
+                                                             XdpDeviceType           devices,
+                                                             XdpOutputType           outputs,
+                                                             XdpRemoteDesktopFlags   flags,
+                                                             XdpCursorMode           cursor_mode,
+                                                             XdpPersistMode          persist_mode,
+                                                             const char             *restore_token,
+                                                             GCancellable           *cancellable,
+                                                             GAsyncReadyCallback     callback,
+                                                             gpointer                data);
+
+
+XDP_PUBLIC
 XdpSession *xdp_portal_create_remote_desktop_session_finish (XdpPortal              *portal,
                                                              GAsyncResult           *result,
                                                              GError                **error);
