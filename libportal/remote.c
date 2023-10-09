@@ -237,6 +237,12 @@ select_devices (CreateCall *call)
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   g_variant_builder_add (&options, "{sv}", "types", g_variant_new_uint32 (call->devices));
+  if (call->portal->remote_desktop_interface_version >= 2)
+    {
+      g_variant_builder_add (&options, "{sv}", "persist_mode", g_variant_new_uint32 (call->persist_mode));
+      if (call->restore_token)
+        g_variant_builder_add (&options, "{sv}", "restore_token", g_variant_new_string (call->restore_token));
+    }
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
@@ -552,6 +558,48 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
                                           GAsyncReadyCallback  callback,
                                           gpointer data)
 {
+  xdp_portal_create_remote_desktop_session_full (portal,
+                                                 devices,
+                                                 outputs,
+                                                 flags,
+                                                 cursor_mode,
+                                                 XDP_PERSIST_MODE_NONE,
+                                                 NULL,
+                                                 cancellable,
+                                                 callback,
+                                                 data);
+}
+
+/**
+ * xdp_portal_create_remote_desktop_session_full:
+ * @portal: a [class@Portal]
+ * @devices: which kinds of input devices to ofer in the new dialog
+ * @outputs: which kinds of source to offer in the dialog
+ * @flags: options for this call
+ * @cursor_mode: the cursor mode of the session
+ * @persist_mode: the persist mode of the session
+ * @restore_token: (nullable): the token of a previous screencast session to restore
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Creates a session for remote desktop.
+ *
+ * When the request is done, @callback will be called. You can then
+ * call [method@Portal.create_remote_desktop_session_finish] to get the results.
+ */
+void
+xdp_portal_create_remote_desktop_session_full (XdpPortal *portal,
+                                               XdpDeviceType devices,
+                                               XdpOutputType outputs,
+                                               XdpRemoteDesktopFlags flags,
+                                               XdpCursorMode cursor_mode,
+                                               XdpPersistMode persist_mode,
+                                               const char *restore_token,
+                                               GCancellable *cancellable,
+                                               GAsyncReadyCallback  callback,
+                                               gpointer data)
+{
   CreateCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
@@ -563,8 +611,8 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
   call->devices = devices;
   call->outputs = outputs;
   call->cursor_mode = cursor_mode;
-  call->persist_mode = XDP_PERSIST_MODE_NONE;
-  call->restore_token = NULL;
+  call->persist_mode = persist_mode;
+  call->restore_token = g_strdup (restore_token);
   call->multiple = (flags & XDP_REMOTE_DESKTOP_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
@@ -1021,7 +1069,7 @@ xdp_session_pointer_motion (XdpSession *session,
  *
  * Moves the pointer to a new position in the given streams logical
  * coordinate space.
- * 
+ *
  * May only be called on a remote desktop session
  * with `XDP_DEVICE_POINTER` access.
  */

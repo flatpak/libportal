@@ -54,6 +54,8 @@ class TestRemoteDesktop(PortalTest):
         flags=Xdp.RemoteDesktopFlags.NONE,
         cursor_mode=Xdp.CursorMode.HIDDEN,
         start_session=True,
+        persist_mode=None,
+        restore_token=None,
     ) -> SessionSetup:
         params = params or {}
         # To make the tests easier, load ScreenCast automatically if we have
@@ -79,16 +81,28 @@ class TestRemoteDesktop(PortalTest):
                 session_error = e
             self.mainloop.quit()
 
-        xdp.create_remote_desktop_session(
-            devices=devices,
-            outputs=outputs,
-            flags=flags,
-            cursor_mode=cursor_mode,
-            cancellable=cancellable,
-            callback=create_session_done,
-            data=None,
-        )
-
+        if restore_token is not None and persist_mode is not None:
+            xdp.create_remote_desktop_session_full(
+                devices=devices,
+                outputs=outputs,
+                flags=flags,
+                cursor_mode=cursor_mode,
+                persist_mode=persist_mode,
+                restore_token=restore_token,
+                cancellable=cancellable,
+                callback=create_session_done,
+                data=None,
+            )
+        else:
+            xdp.create_remote_desktop_session(
+                devices=devices,
+                outputs=outputs,
+                flags=flags,
+                cursor_mode=cursor_mode,
+                cancellable=cancellable,
+                callback=create_session_done,
+                data=None,
+            )
         self.mainloop.run()
         assert create_session_done_invoked
         if session_error is not None:
@@ -166,8 +180,10 @@ class TestRemoteDesktop(PortalTest):
         assert list(options.keys()) == [
             "handle_token",
             "types",
+            "persist_mode",
         ]
         assert options["types"] == devices
+        assert options["persist_mode"] == Xdp.PersistMode.NONE
 
         method_calls = self.mock_interface.GetMethodCalls("SelectSources")
         assert len(method_calls) == 1
@@ -180,6 +196,73 @@ class TestRemoteDesktop(PortalTest):
             "multiple",
             "cursor_mode",
             "persist_mode",
+        ]
+
+        assert options["types"] == outputs
+        assert options["multiple"] == flags
+        assert options["cursor_mode"] == cursor_mode
+        assert options["persist_mode"] == Xdp.PersistMode.NONE
+
+    def test_create_session_restore(self):
+        """
+        Create a session with some "random" values and ensure that they're
+        passed through to the portal.
+        """
+        devices = Xdp.DeviceType.POINTER | Xdp.DeviceType.KEYBOARD
+        outputs = Xdp.OutputType.MONITOR | Xdp.OutputType.WINDOW
+        cursor_mode = Xdp.CursorMode.METADATA
+        flags = Xdp.RemoteDesktopFlags.MULTIPLE
+        persist_mode = Xdp.PersistMode.PERSISTENT
+        restore_token = "12345"
+
+        self.create_session(
+            devices=devices,
+            outputs=outputs,
+            flags=flags,
+            cursor_mode=cursor_mode,
+            persist_mode=persist_mode,
+            restore_token=restore_token,
+            start_session=False,
+        )
+
+        # Now verify our DBus calls were correct
+        method_calls = self.mock_interface.GetMethodCalls("CreateSession")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        (options,) = args
+
+        assert list(options.keys()) == [
+            "handle_token",
+            "session_handle_token",
+        ]
+
+        method_calls = self.mock_interface.GetMethodCalls("SelectDevices")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, options = args
+
+        assert list(options.keys()) == [
+            "handle_token",
+            "types",
+            "persist_mode",
+            "restore_token",
+        ]
+        assert options["types"] == devices
+        assert options["persist_mode"] == persist_mode
+        assert options["restore_token"] == restore_token
+
+        method_calls = self.mock_interface.GetMethodCalls("SelectSources")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, options = args
+
+        assert list(options.keys()) == [
+            "handle_token",
+            "types",
+            "multiple",
+            "cursor_mode",
+            "persist_mode",
+            "restore_token",
         ]
 
         assert options["types"] == outputs
@@ -223,8 +306,10 @@ class TestRemoteDesktop(PortalTest):
         assert list(options.keys()) == [
             "handle_token",
             "types",
+            "persist_mode",
         ]
         assert options["types"] == devices
+        assert options["persist_mode"] == Xdp.PersistMode.NONE
 
         # No outputs means this should never get called
         method_calls = self.mock_interface.GetMethodCalls("SelectSources")
