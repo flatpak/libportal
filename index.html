@@ -228,6 +228,42 @@ SPDX-License-Identifier: LGPL-3.0-only
           <tbody>
           
           <tr class="section-item">
+            <td><a title="InputCapturePointerBarrier" class="symbol" href="class.InputCapturePointerBarrier.html">InputCapturePointerBarrier</a></td>
+            
+            <td class="docblock-summary">
+            <p>A representation of a pointer barrier on an <code>XdpInputCaptureZone</code>.
+Barriers can be assigned with
+<code>xdp_input_capture_session_set_pointer_barriers()</code>, once the Portal
+interaction is complete the barrier&#8217;s &#8220;is-active&#8221; state indicates whether
+the barrier is active. Barriers can only be used once, subsequent calls to
+<code>xdp_input_capture_session_set_pointer_barriers()</code> will invalidate all
+current&nbsp;barriers.</p>
+            <p></p>
+            </td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="InputCaptureSession" class="symbol" href="class.InputCaptureSession.html">InputCaptureSession</a></td>
+            
+            <td class="docblock-summary">
+            <p>A representation of a long-lived input capture portal&nbsp;interaction.</p>
+            <p></p>
+            </td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="InputCaptureZone" class="symbol" href="class.InputCaptureZone.html">InputCaptureZone</a></td>
+            
+            <td class="docblock-summary">
+            <p>A representation of a zone that supports input&nbsp;capture.</p>
+            <p></p>
+            </td>
+            
+          </tr>
+          
+          <tr class="section-item">
             <td><a title="Portal" class="symbol" href="class.Portal.html">Portal</a></td>
             
             <td class="docblock-summary">
@@ -546,6 +582,16 @@ the current progress of an&nbsp;installation.</p>
             
             <td class="docblock-summary">
             <p>Flags that determine what session status changes are&nbsp;inhibited.</p>
+            <p></p>
+            </td>
+            
+          </tr>
+          
+          <tr class="section-item">
+            <td><a title="InputCapability" class="symbol" href="flags.InputCapability.html">InputCapability</a></td>
+            
+            <td class="docblock-summary">
+            <p>Flags to specify what input device capabilities should be&nbsp;captured.</p>
             <p></p>
             </td>
             
