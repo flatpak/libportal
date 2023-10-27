@@ -321,7 +321,7 @@ request_background (BackgroundCall *call)
  * xdp_portal_request_background:
  * @portal: a [class@Portal]
  * @parent: (nullable): parent window information
- * @commandline: (element-type utf8) (transfer container): command line to autostart
+ * @commandline: (nullable) (element-type utf8) (transfer container): command line to autostart
  * @reason: (nullable): reason to present to user for request
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
