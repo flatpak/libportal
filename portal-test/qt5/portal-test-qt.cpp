@@ -11,7 +11,7 @@ PortalTestQt::PortalTestQt(QWidget *parent, Qt::WindowFlags f)
 {
     m_mainWindow->setupUi(this);
 
-    connect(m_mainWindow->openFileButton, &QPushButton::clicked, [=] (bool clicked) {
+    connect(m_mainWindow->openFileButton, &QPushButton::clicked, [=] (G_GNUC_UNUSED bool clicked) {
         XdpParent *parent;
         XdpOpenFileFlags flags = XDP_OPEN_FILE_FLAG_NONE;
 

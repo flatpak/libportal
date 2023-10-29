@@ -58,7 +58,7 @@ _xdp_parent_export_qt (XdpParent *parent,
   return FALSE;
 }
 
-static inline void _xdp_parent_unexport_qt (XdpParent *parent)
+static inline void _xdp_parent_unexport_qt (G_GNUC_UNUSED XdpParent *parent)
 {
 }
 
@@ -225,7 +225,7 @@ filechooserResultFromGVariant(GVariant *variant)
 static GVariant*
 QVariantToGVariant(const QVariant &variant)
 {
-    switch (variant.type()) {
+    switch (variant.typeId()) {
     case QVariant::Bool:
         return g_variant_new_boolean(variant.toBool());
     case QVariant::ByteArray:
