@@ -100,694 +100,700 @@
       </object>
     </child>
     <child>
-      <object class="GtkGrid">
+      <object class="GtkScrolledWindow">
         <property name="visible">1</property>
-        <property name="margin">20</property>
-        <property name="row-spacing">10</property>
-        <property name="column-spacing">10</property>
+        <property name="vexpand">1</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">1</property>
+            <property name="margin">20</property>
+            <property name="row-spacing">10</property>
+            <property name="column-spacing">10</property>
 
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Sandbox</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel" id="sandbox_status">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkComboBoxText" id="save_how">
-            <property name="visible">1</property>
-            <items>
-              <item id="atomically">Atomic</item>
-              <item id="posix">POSIX</item>
-              <item id="gio">GIO</item>
-            </items>
-            <property name="active-id">atomically</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">File Chooser</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">1</property>
-            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkFileChooserButton" id="file_chooser_button">
+              <object class="GtkLabel">
                 <property name="visible">1</property>
-                <property name="title">File Chooser Portal</property>
+                <property name="halign">end</property>
+                <property name="label">Sandbox</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel" id="sandbox_status">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkComboBoxText" id="save_how">
+                <property name="visible">1</property>
+                <items>
+                  <item id="atomically">Atomic</item>
+                  <item id="posix">POSIX</item>
+                  <item id="gio">GIO</item>
+                </items>
+                <property name="active-id">atomically</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">File Chooser</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">1</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkFileChooserButton" id="file_chooser_button">
+                    <property name="visible">1</property>
+                    <property name="title">File Chooser Portal</property>
+                    <property name="action">open</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">1</property>
+                    <property name="label">Open directory</property>
+                    <signal name="clicked" handler="open_directory"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="label">Save as…</property>
+                <signal name="clicked" handler="save_dialog"/>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="encoding">
+                <property name="visible">1</property>
+              </object>
+              <packing>
+                <property name="left-attach">3</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Directory Chooser</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFileChooserButton">
+                <property name="visible">1</property>
+                <property name="title">Directory Chooser Portal</property>
+                <property name="action">select-folder</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Local</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFileChooserButton">
+                <property name="visible">1</property>
+                <property name="title">Local File Chooser</property>
                 <property name="action">open</property>
+                <property name="dialog">filechooser</property>
               </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Open Local</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">4</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton">
                 <property name="visible">1</property>
-                <property name="label">Open directory</property>
-                <signal name="clicked" handler="open_directory"/>
+                <property name="label">test.txt</property>
+                <signal name="clicked" handler="open_local"/>
               </object>
-            </child>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="label">Save as…</property>
-            <signal name="clicked" handler="save_dialog"/>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="encoding">
-            <property name="visible">1</property>
-          </object>
-          <packing>
-            <property name="left-attach">3</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Directory Chooser</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFileChooserButton">
-            <property name="visible">1</property>
-            <property name="title">Directory Chooser Portal</property>
-            <property name="action">select-folder</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">2</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Local</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFileChooserButton">
-            <property name="visible">1</property>
-            <property name="title">Local File Chooser</property>
-            <property name="action">open</property>
-            <property name="dialog">filechooser</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">3</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Open Local</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="label">test.txt</property>
-            <signal name="clicked" handler="open_local"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">1</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkCheckButton" id="open_local_ask">
-                <property name="visible">1</property>
-                <property name="label">Ask</property>
-              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">4</property>
+              </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="open_local_dir">
+              <object class="GtkBox">
                 <property name="visible">1</property>
-                <property name="label">Open Folder</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkCheckButton" id="open_local_ask">
+                    <property name="visible">1</property>
+                    <property name="label">Ask</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="open_local_dir">
+                    <property name="visible">1</property>
+                    <property name="label">Open Folder</property>
+                  </object>
+                </child>
               </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">4</property>
+              </packing>
             </child>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">4</property>
-          </packing>
-        </child>
 
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Links</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLinkButton">
-            <property name="visible">1</property>
-            <property name="uri">http://www.gnome.org</property>
-            <property name="label">GNOME</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">5</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Screenshot</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">6</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">1</property>
-            <property name="hexpand">0</property>
-            <property name="orientation">horizontal</property>
-            <property name="spacing">6</property>
             <child>
-              <object class="GtkButton">
+              <object class="GtkLabel">
                 <property name="visible">1</property>
-                <property name="hexpand">1</property>
+                <property name="halign">end</property>
+                <property name="label">Links</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLinkButton">
+                <property name="visible">1</property>
+                <property name="uri">http://www.gnome.org</property>
+                <property name="label">GNOME</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
                 <property name="label">Screenshot</property>
-                <signal name="clicked" handler="take_screenshot"/>
               </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">6</property>
+              </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="interactive">
+              <object class="GtkBox">
                 <property name="visible">1</property>
-                <property name="tooltip-text">Show options</property>
+                <property name="hexpand">0</property>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">1</property>
+                    <property name="hexpand">1</property>
+                    <property name="label">Screenshot</property>
+                    <signal name="clicked" handler="take_screenshot"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="interactive">
+                    <property name="visible">1</property>
+                    <property name="tooltip-text">Show options</property>
+                  </object>
+                </child>
               </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">6</property>
+              </packing>
             </child>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">6</property>
-         </packing>
-        </child>
-        <child>
-          <object class="GtkImage" id="image">
-            <property name="visible">1</property>
-            <property name="icon-name">image-missing</property>
-            <property name="icon-size">1</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">6</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Screencast</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">7</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleButton" id="screencast_toggle">
-            <property name="visible">1</property>
-            <property name="label">Screencast</property>
-            <signal name="toggled" handler="screencast_toggled"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">7</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="screencast_label">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">7</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Network</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">8</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="monitor_name">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">8</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="network_status">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">8</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Proxy</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">9</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="resolver_name">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">9</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="proxies">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">9</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Notification</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">10</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Notify me!</property>
-            <signal name="clicked" handler="notify_me" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">10</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkImage" id="ack_image">
-            <property name="visible">0</property>
-            <property name="xalign">0</property>
-            <property name="icon-name">object-select-symbolic</property>
-            <property name="icon-size">2</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">10</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Printing</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">11</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Print</property>
-            <signal name="clicked" handler="print_cb"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">11</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Inhibit</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">12</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">1</property>
             <child>
-              <object class="GtkCheckButton" id="inhibit_idle">
+              <object class="GtkImage" id="image">
+                <property name="visible">1</property>
+                <property name="icon-name">image-missing</property>
+                <property name="icon-size">1</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">6</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Screencast</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="screencast_toggle">
+                <property name="visible">1</property>
+                <property name="label">Screencast</property>
+                <signal name="toggled" handler="screencast_toggled"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="screencast_label">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Network</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">8</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="monitor_name">
                 <property name="visible">1</property>
                 <property name="xalign">0</property>
-                <property name="label">Idle</property>
-                <signal name="toggled" handler="inhibit_changed"/>
               </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">8</property>
+              </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="inhibit_logout">
+              <object class="GtkLabel" id="network_status">
                 <property name="visible">1</property>
                 <property name="xalign">0</property>
-                <property name="label">Logout</property>
-                <signal name="toggled" handler="inhibit_changed"/>
               </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">8</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Proxy</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">9</property>
+              </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="inhibit_suspend">
+              <object class="GtkLabel" id="resolver_name">
                 <property name="visible">1</property>
                 <property name="xalign">0</property>
-                <property name="label">Suspend</property>
-                <signal name="toggled" handler="inhibit_changed"/>
               </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">9</property>
+              </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="inhibit_switch">
+              <object class="GtkLabel" id="proxies">
                 <property name="visible">1</property>
                 <property name="xalign">0</property>
-                <property name="label">Switch</property>
-                <signal name="toggled" handler="inhibit_changed"/>
               </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">9</property>
+                <property name="width">2</property>
+              </packing>
             </child>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">12</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
 
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Sound</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">13</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Play</property>
-            <signal name="clicked" handler="play_clicked"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">13</property>
-          </packing>
-        </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Notification</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">10</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Notify me!</property>
+                <signal name="clicked" handler="notify_me" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">10</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="ack_image">
+                <property name="visible">0</property>
+                <property name="xalign">0</property>
+                <property name="icon-name">object-select-symbolic</property>
+                <property name="icon-size">2</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">10</property>
+              </packing>
+            </child>
 
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Account</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">14</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Update</property>
-            <signal name="clicked" handler="get_user_information" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">14</property>
-          </packing>
-        </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Printing</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">11</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Print</property>
+                <signal name="clicked" handler="print_cb"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">11</property>
+              </packing>
+            </child>
 
-        <child>
-          <object class="GtkLabel" id="username">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">15</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkImage" id="avatar">
-            <property name="visible">1</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">14</property>
-            <property name="height">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="realname">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label"></property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">16</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Email</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Inhibit</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">12</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">1</property>
+                <child>
+                  <object class="GtkCheckButton" id="inhibit_idle">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="label">Idle</property>
+                    <signal name="toggled" handler="inhibit_changed"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="inhibit_logout">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="label">Logout</property>
+                    <signal name="toggled" handler="inhibit_changed"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="inhibit_suspend">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="label">Suspend</property>
+                    <signal name="toggled" handler="inhibit_changed"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="inhibit_switch">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="label">Switch</property>
+                    <signal name="toggled" handler="inhibit_changed"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">12</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Sound</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">13</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Play</property>
+                <signal name="clicked" handler="play_clicked"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">13</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Account</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">14</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Update</property>
+                <signal name="clicked" handler="get_user_information" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">14</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel" id="username">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">15</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="avatar">
+                <property name="visible">1</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">14</property>
+                <property name="height">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="realname">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label"></property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">16</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Email</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
             <property name="top-attach">17</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Compose</property>
-            <signal name="clicked" handler="compose_email" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">17</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Background</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">18</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Request</property>
-            <signal name="clicked" handler="request_background" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">18</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Wallpaper</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">19</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="xalign">0</property>
-            <property name="label">Set</property>
-            <signal name="clicked" handler="set_wallpaper" swapped="yes"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">19</property>
-          </packing>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-            <property name="label">Input Capture</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">20</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="inputcapture_label">
-            <property name="visible">1</property>
-            <property name="halign">end</property>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">20</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">1</property>
-            <property name="hexpand">0</property>
-            <property name="orientation">horizontal</property>
-            <property name="spacing">6</property>
+              </packing>
+            </child>
             <child>
-              <object class="GtkToggleButton" id="inputcapture_toggle">
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Compose</property>
+                <signal name="clicked" handler="compose_email" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">17</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Background</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">18</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Request</property>
+                <signal name="clicked" handler="request_background" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">18</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Wallpaper</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">19</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">1</property>
+                <property name="xalign">0</property>
+                <property name="label">Set</property>
+                <signal name="clicked" handler="set_wallpaper" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">19</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Input Capture</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="inputcapture_label">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">1</property>
+                <property name="hexpand">0</property>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkToggleButton" id="inputcapture_toggle">
+                    <property name="visible">1</property>
+                    <property name="hexpand">1</property>
+                    <property name="label">Input Capture</property>
+                    <signal name="clicked" handler="capture_input"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="enable">
+                    <property name="visible">1</property>
+                    <property name="tooltip-text">Enable</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
                 <property name="visible">1</property>
                 <property name="hexpand">1</property>
-                <property name="label">Input Capture</property>
-                <signal name="clicked" handler="capture_input"/>
+                <property name="label">Release</property>
+                <signal name="clicked" handler="capture_input_release"/>
               </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">20</property>
+              </packing>
             </child>
-            <child>
-              <object class="GtkCheckButton" id="enable">
-                <property name="visible">1</property>
-                <property name="tooltip-text">Enable</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">20</property>
-         </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">1</property>
-            <property name="hexpand">1</property>
-            <property name="label">Release</property>
-            <signal name="clicked" handler="capture_input_release"/>
-          </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">20</property>
-          </packing>
-        </child>
 
 
+          </object>
+        </child>
       </object>
     </child>
   </template>
