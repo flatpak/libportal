@@ -42,13 +42,13 @@ meson configure _build
 To change an option, re-configure the project:
 
 ```
-meson configure _build -Dportal-tests=gtk3
+meson configure _build -Dportal-tests=true
 ```
 
 You can also pass in options right from the start, e.g. with:
 
 ```
-meson _build -Dportal-tests=gtk3
+meson _build -Dportal-tests=true
 ```
 
 Then build:
@@ -61,18 +61,18 @@ ninja -C _build
 
 ### `portal-tests`
 
-To generate test binaries, set the `portal-tests` option to any combination of
-`gtk3`, `gtk4`, `qt5`, or `qt6` e.g. `-Dportal-tests=gtk3,gtk4,qt5,qt6`. Then run the desired
-test binary, e.g.:
+To generate test binaries, set the `portal-tests` option to `true`,
+e.g. `-Dportal-tests=true`, to build the portal tests for the backend
+built. Then run the desired test binary, e.g.:
 
 ```
-./_build/portal-test/portal-test/gtk3/portal-test-gtk3
+./_build/portal-test/gtk3/portal-test-gtk3
 ```
 
 or
 
 ```
-./_build/portal-test/portal-test/qt/portal-test-qt5
+./_build/portal-test/qt5/portal-test-qt5
 ```
 
 [1]: https://mesonbuild.com/Getting-meson.html
