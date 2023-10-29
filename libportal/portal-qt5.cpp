@@ -57,7 +57,7 @@ _xdp_parent_export_qt (XdpParent *parent,
   return FALSE;
 }
 
-static inline void _xdp_parent_unexport_qt (XdpParent *parent)
+static inline void _xdp_parent_unexport_qt (G_GNUC_UNUSED XdpParent *parent)
 {
 }
 
