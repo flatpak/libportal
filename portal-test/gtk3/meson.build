@@ -32,6 +32,8 @@ executable('portal-linking-test-gtk3',
   dependencies: [libportal_gtk3_dep],
 )
 
-run_target('portal-test-gtk3',
-  command: portal_test_gtk3,
-)
+if meson.can_run_host_binaries()
+  run_target('portal-test-gtk3',
+    command: portal_test_gtk3,
+  )
+endif
