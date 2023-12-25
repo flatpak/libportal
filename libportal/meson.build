@@ -277,7 +277,7 @@ endif
 
 if meson.version().version_compare('>= 0.59.0')
    have_cpp = add_languages('cpp', required: get_option('backend-qt6'))
-   qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'], required: get_option('backend-qt6'))
+   qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'], private_headers: true, required: get_option('backend-qt6'))
 
    if have_cpp and qt6_dep.found()
      qt6_headers = ['portal-qt6.h']
