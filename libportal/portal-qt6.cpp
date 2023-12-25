@@ -27,29 +27,35 @@
 #include <QBuffer>
 #include <QGuiApplication>
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#include <qpa/qplatformintegration.h>
+#include <private/qguiapplication_p.h>
+#include <private/qgenericunixservices_p.h>
+#endif
+
 static gboolean
 _xdp_parent_export_qt (XdpParent *parent,
                        XdpParentExported callback,
                        gpointer data)
 {
+  QWindow *w = (QWindow *) parent->data;
+  if (!w) {
+    return FALSE;
+  }
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+  if (const auto services = dynamic_cast<QGenericUnixServices*>(QGuiApplicationPrivate::platformIntegration()->services()))
+    {
+      g_autofree char *handle = g_strdup(services->portalWindowIdentifier(w).toUtf8().constData());
+      callback (parent, handle, data);
+      return TRUE;
+    }
+#endif
+
   if (QGuiApplication::platformName() == QLatin1String("xcb"))
     {
-      QWindow *w = (QWindow *) parent->data;
-      if (w) {
-        guint32 xid = (guint32) w->winId ();
-        g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
-        callback (parent, handle, data);
-        return TRUE;
-      }
-    }
-  else
-    {
-      /* TODO: QtWayland doesn't support xdg-foreign protocol yet
-       * Upstream bugs: https://bugreports.qt.io/browse/QTBUG-73801
-       *                https://bugreports.qt.io/browse/QTBUG-76983
-       */
-      g_warning ("QtWayland doesn't support xdg-foreign protocol yet");
-      g_autofree char *handle = g_strdup ("");
+      guint32 xid = (guint32) w->winId ();
+      g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
       callback (parent, handle, data);
       return TRUE;
     }
