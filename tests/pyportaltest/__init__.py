@@ -83,6 +83,14 @@ class PortalTest(dbusmock.DBusTestCase):
         except AttributeError:
             pytest.skip("Updated version of dbusmock required")
 
+        cls.__have_session_bus = False
+
+    @classmethod
+    def ensure_session_bus(cls):
+        if not cls.__have_session_bus:
+            cls.__have_session_bus = True
+            cls.start_session_bus()
+
     def setUp(self):
         self.p_mock = None
         self._mainloop = None
@@ -96,7 +104,7 @@ class PortalTest(dbusmock.DBusTestCase):
         portal name as first value and the param dict to be passed to that
         template as second value, e.g. ("ScreenCast", {...}).
         """
-        self.start_session_bus()
+        self.ensure_session_bus()
         self.p_mock, self.obj_portal = self.spawn_server_template(
             template=f"pyportaltest/templates/{self.PORTAL_NAME.lower()}.py",
             parameters=params,
