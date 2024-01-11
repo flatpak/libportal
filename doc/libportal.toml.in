@@ -41,4 +41,8 @@ content_files = [
 ]
 content_images = [
   "libportal.svg",
+  "favicon-32x32.png",
+  "favicon-128x128.png",
+  "favicon-180x180.png",
+  "favicon-192x192.png",
 ]
