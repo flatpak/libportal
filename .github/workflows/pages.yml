@@ -1,0 +1,61 @@
+name: Documentation
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y \
+            gcc \
+            gi-docgen \
+            git \
+            gobject-introspection-devel \
+            meson \
+            python3-pytest \
+            python3-dbusmock
+
+      - name: Check out libportal
+        uses: actions/checkout@v4
+
+      - name: Configure libportal
+        run: meson setup --prefix=/usr builddir -Dtests=false -Dvapi=false
+
+      - name: Build libportal
+        run: ninja -C builddir doc/libportal-1
+
+      - name: Prepare docs
+        working-directory: builddir/doc
+        run: |
+          mv ./libportal-1 ../../_site
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  # Deployment job
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
