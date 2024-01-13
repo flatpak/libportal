@@ -177,7 +177,6 @@ class TestInputCapture(PortalTest):
             "zones": [(1920, 1080, 0, 0), (1080, 1920, 1920, 1080)],
             "zone-set": 1234,
         }
-        self.setup_daemon(params)
 
         capabilities = Xdp.InputCapability.POINTER | Xdp.InputCapability.KEYBOARD
 
@@ -222,7 +221,6 @@ class TestInputCapture(PortalTest):
         Create a session but cancel while waiting for the CreateSession request
         """
         params = {"delay": 1000}
-        self.setup_daemon(params)
         cancellable = Gio.Cancellable()
         GLib.timeout_add(300, cancellable.cancel)
 
@@ -239,7 +237,6 @@ class TestInputCapture(PortalTest):
         # one that is cancelled should be the GetZones one.
         # Can't guarantee it but this is the best we can do
         params = {"delay": 500}
-        self.setup_daemon(params)
         cancellable = Gio.Cancellable()
         GLib.timeout_add(700, cancellable.cancel)
 
@@ -256,7 +253,6 @@ class TestInputCapture(PortalTest):
             "zone-set": -1,
         }
 
-        self.setup_daemon(params)
         with pytest.raises(SessionCreationFailed):
             self.create_session_with_barriers(params)
 
@@ -269,7 +265,6 @@ class TestInputCapture(PortalTest):
             "zones": [(0, 0, 0, 0)],
         }
 
-        self.setup_daemon(params)
         with pytest.raises(SessionCreationFailed):
             self.create_session_with_barriers(params)
 
@@ -321,7 +316,6 @@ class TestInputCapture(PortalTest):
         The basic test of retrieving the EIS handle
         """
         params = {}
-        self.setup_daemon(params)
         setup = self.create_session_with_barriers(params)
         assert setup.session is not None
 
@@ -348,7 +342,6 @@ class TestInputCapture(PortalTest):
         b2 = Xdp.InputCapturePointerBarrier(id=2, x1=1920, x2=1920, y1=0, y2=1080)
 
         params = {}
-        self.setup_daemon(params)
         setup = self.create_session_with_barriers(params, barriers=[b1, b2])
         assert setup.barriers == [b1, b2]
 
@@ -378,7 +371,6 @@ class TestInputCapture(PortalTest):
         b4 = Xdp.InputCapturePointerBarrier(id=4, x1=1920, x2=1920, y1=0, y2=1080)
 
         params = {"failed-barriers": [2, 3]}
-        self.setup_daemon(params)
         setup = self.create_session_with_barriers(
             params, barriers=[b1, b2, b3, b4], allow_failed_barriers=True
         )
@@ -408,7 +400,6 @@ class TestInputCapture(PortalTest):
         Test enable/disable calls
         """
         params = {}
-        self.setup_daemon(params)
 
         setup = self.create_session_with_barriers(params)
         session = setup.session
@@ -443,7 +434,6 @@ class TestInputCapture(PortalTest):
         Test the release_at call with a cursor position
         """
         params = {}
-        self.setup_daemon(params)
 
         setup = self.create_session_with_barriers(params)
         session = setup.session
@@ -476,7 +466,6 @@ class TestInputCapture(PortalTest):
             "deactivated-after": 20,
             "deactivated-position": (20.0, 30.0),
         }
-        self.setup_daemon(params)
 
         setup = self.create_session_with_barriers(params)
         session = setup.session
@@ -541,7 +530,6 @@ class TestInputCapture(PortalTest):
             "change-zones-after": 200,
             "zone-set": 567,
         }
-        self.setup_daemon(params)
 
         setup = self.create_session_with_barriers(params)
         session = setup.session
@@ -585,7 +573,6 @@ class TestInputCapture(PortalTest):
         params = {
             "disabled-after": 20,
         }
-        self.setup_daemon(params)
 
         setup = self.create_session_with_barriers(params)
         session = setup.session
