@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018, Matthias Clasen
+ * Copyright (C) 2024 GNOME Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -15,6 +16,10 @@
  * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: LGPL-3.0-only
+ *
+ * Authors:
+ *    Matthias Clasen
+ *    Hubert Figuière <hub@figuiere.net>
  */
 
 #include "config.h"
@@ -22,6 +27,7 @@
 #include "portal-helpers.h"
 #include "portal-private.h"
 #include "portal-enums.h"
+#include "settings-private.h"
 
 #include <unistd.h>
 #include <string.h>
@@ -541,4 +547,18 @@ gboolean
 xdp_portal_running_under_sandbox (void)
 {
   return xdp_portal_running_under_flatpak () || xdp_portal_running_under_snap (NULL);
+}
+
+/**
+ * xdp_portal_get_settings:
+ *
+ * This function returns an object to access settings exposed through
+ * the portal.
+ *
+ * Returns: (transfer full): a [class@Settings] new settings object.
+ */
+XdpSettings *
+xdp_portal_get_settings (XdpPortal *portal)
+{
+  return _xdp_settings_new (portal);
 }

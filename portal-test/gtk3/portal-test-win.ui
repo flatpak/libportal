@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires gtk+ 3.8 -->
+  <!-- interface-requires gtk+ 3.10 -->
   <object class="GtkDialog" id="update_dialog">
     <property name="transient-for">PortalTestWin</property>
     <property name="modal">1</property>
@@ -665,11 +665,58 @@
               <object class="GtkLabel">
                 <property name="visible">1</property>
                 <property name="halign">end</property>
+                <property name="label">Settings</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">17</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">1</property>
+                <property name="hexpand">0</property>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="settings_value">
+                    <property name="visible">1</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">1</property>
+                    <property name="label">no update yet</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="label">[]</property>
+                    <signal name="clicked" handler="reload_settings" swapped="yes"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="settings_count">
+                    <property name="visible">1</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">0</property>
+                    <property name="label">0</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">17</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
                 <property name="label">Email</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-            <property name="top-attach">17</property>
+            <property name="top-attach">18</property>
               </packing>
             </child>
             <child>
@@ -681,7 +728,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">17</property>
+                <property name="top-attach">18</property>
               </packing>
             </child>
             <child>
@@ -692,7 +739,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">18</property>
+                <property name="top-attach">19</property>
               </packing>
             </child>
             <child>
@@ -704,7 +751,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">18</property>
+                <property name="top-attach">19</property>
               </packing>
             </child>
             <child>
@@ -715,7 +762,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">19</property>
+                <property name="top-attach">20</property>
               </packing>
             </child>
             <child>
@@ -727,7 +774,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">19</property>
+                <property name="top-attach">20</property>
               </packing>
             </child>
 
@@ -739,7 +786,7 @@
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">20</property>
+                <property name="top-attach">21</property>
               </packing>
             </child>
             <child>
@@ -749,7 +796,7 @@
               </object>
               <packing>
                 <property name="left-attach">2</property>
-                <property name="top-attach">20</property>
+                <property name="top-attach">21</property>
               </packing>
             </child>
             <child>
@@ -775,7 +822,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">20</property>
+                <property name="top-attach">21</property>
               </packing>
             </child>
             <child>
@@ -787,7 +834,7 @@
               </object>
               <packing>
                 <property name="left-attach">2</property>
-                <property name="top-attach">20</property>
+                <property name="top-attach">21</property>
               </packing>
             </child>
 

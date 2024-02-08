@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2018, Matthias Clasen
  * Copyright (C) 2024 GNOME Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
@@ -18,43 +17,37 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  *
  * Authors:
- *    Matthias Clasen
  *    Hubert Figuière <hub@figuiere.net>
  */
 
 #pragma once
 
-#include <gio/gio.h>
-
 #include <libportal/types.h>
 
 G_BEGIN_DECLS
 
-#ifndef XDP_PUBLIC
-#define XDP_PUBLIC extern
-#endif
-
-#define XDP_TYPE_PORTAL (xdp_portal_get_type ())
+#define XDP_TYPE_SETTINGS (xdp_settings_get_type ())
 
 XDP_PUBLIC
-G_DECLARE_FINAL_TYPE (XdpPortal, xdp_portal, XDP, PORTAL, GObject)
+G_DECLARE_FINAL_TYPE (XdpSettings, xdp_settings, XDP, SETTINGS, GObject)
 
 XDP_PUBLIC
-XdpPortal *xdp_portal_new                   (void);
+GVariant *xdp_settings_read_value (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error);
 
 XDP_PUBLIC
-XdpPortal *xdp_portal_initable_new          (GError **error);
+void
+xdp_settings_read (XdpSettings *settings, const char *namespace,
+                   const gchar *key,
+                   GCancellable *cancellable, GError **error,
+                   const gchar *format, ...);
 
 XDP_PUBLIC
-gboolean   xdp_portal_running_under_flatpak (void);
+guint xdp_settings_read_uint (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error);
 
 XDP_PUBLIC
-gboolean   xdp_portal_running_under_snap    (GError **error);
+char *xdp_settings_read_string (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error);
 
 XDP_PUBLIC
-gboolean   xdp_portal_running_under_sandbox (void);
-
-XDP_PUBLIC
-XdpSettings *xdp_portal_get_settings        (XdpPortal *portal);
+GVariant *xdp_settings_read_all_values (XdpSettings *settings, const char *const *namespaces, GCancellable *cancellable, GError **error);
 
 G_END_DECLS
