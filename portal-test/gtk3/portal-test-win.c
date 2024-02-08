@@ -1,3 +1,27 @@
+/*
+ * Copyright (C) 2018, Matthias Clasen
+ * Copyright (C) 2024 GNOME Foundation, Inc.
+ *
+ * This file is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, version 3.0 of the
+ * License.
+ *
+ * This file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-only
+ *
+ * Authors:
+ *    Matthias Clasen <mclasen@redhat.com>
+ *    Hubert Figuière <hub@figuiere.net>
+ */
+
 #include "config.h"
 
 #include <gtk/gtk.h>
@@ -11,6 +35,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "libportal/settings.h"
 #include "libportal/portal-gtk3.h"
 
 #include "portal-test-app.h"
@@ -59,6 +84,9 @@ struct _PortalTestWin
   GtkWidget *open_local_dir;
   GtkWidget *file_chooser_button;
 
+  XdpSettings *settings;
+  GtkWidget *settings_value;
+  GtkWidget *settings_count;
 
   GtkWidget *screencast_label;
   GtkWidget *screencast_toggle;
@@ -232,6 +260,45 @@ update_dialog2_response (GtkDialog     *dialog,
 }
 
 static void
+reload_settings (PortalTestWin *win, GtkButton* button)
+{
+  g_autoptr(GError) error = NULL;
+  const char *ns[] = { "org.freedesktop.appearance", NULL };
+  guint32 value = xdp_settings_read_uint (win->settings, ns[0], "contrast", NULL, &error);
+  g_autoptr(GVariant) value2 = NULL;
+
+  if (!error)
+    {
+      guint32 uvalue2;
+      g_autofree char *label = g_strdup_printf ("got %u", value);
+      gtk_label_set_text (GTK_LABEL (win->settings_value), label);
+
+      xdp_settings_read (win->settings, ns[0], "contrast", NULL, &error, "u", &uvalue2);
+      if (!error)
+	g_assert (uvalue2 == value);
+    }
+
+
+  value2 = xdp_settings_read_all_values (win->settings, ns, NULL, NULL);
+  if (value2)
+    {
+      gsize count = g_variant_n_children (value2);
+      g_autofree char *count_label = g_strdup_printf ("%lu", count);
+
+      gtk_label_set_text (GTK_LABEL (win->settings_count), count_label);
+    }
+}
+
+static void
+settings_changed (XdpSettings* settings, const gchar *namespace, const gchar *key, GVariant *value, gpointer data)
+{
+  PortalTestWin *win = data;
+  g_autofree char *label = g_strdup_printf ("chg %s %s", namespace, key);
+
+  gtk_label_set_text (GTK_LABEL (win->settings_value), label);
+}
+
+static void
 portal_test_win_init (PortalTestWin *win)
 {
   const char *status;
@@ -287,6 +354,9 @@ portal_test_win_init (PortalTestWin *win)
   xdp_portal_update_monitor_start (win->portal, 0, NULL, NULL, NULL);
   g_signal_connect (win->portal, "update-available", G_CALLBACK (update_available), win);
   g_signal_connect (win->update_dialog2, "response", G_CALLBACK (update_dialog2_response), win);
+
+  win->settings = xdp_portal_get_settings (win->portal);
+  g_signal_connect (win->settings, "changed", G_CALLBACK (settings_changed), win);
 }
 
 static void
@@ -1340,6 +1410,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, play_clicked);
   gtk_widget_class_bind_template_callback (widget_class, get_user_information);
   gtk_widget_class_bind_template_callback (widget_class, compose_email);
+  gtk_widget_class_bind_template_callback (widget_class, reload_settings);
   gtk_widget_class_bind_template_callback (widget_class, request_background);
   gtk_widget_class_bind_template_callback (widget_class, set_wallpaper);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, sandbox_status);
@@ -1361,6 +1432,8 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, realname);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, avatar);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, save_how);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, settings_value);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, settings_count);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog);

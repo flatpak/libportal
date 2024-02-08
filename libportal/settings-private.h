@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021, Georges Basile Stavracas Neto
+ * Copyright (C) 2024 GNOME Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -15,14 +15,19 @@
  * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: LGPL-3.0-only
+ *
+ * Authors:
+ *    Hubert Figuière <hub@figuiere.net>
  */
 
 #pragma once
 
-#include <glib.h>
-#include <glib-object.h>
-#include <gio/gio.h>
+#include <libportal/types.h>
 
-typedef struct _XdpParent XdpParent;
-typedef struct _XdpPortal XdpPortal;
-typedef struct _XdpSettings XdpSettings;
+#include "settings.h"
+
+G_BEGIN_DECLS
+
+XdpSettings * _xdp_settings_new (XdpPortal *portal);
+
+G_END_DECLS

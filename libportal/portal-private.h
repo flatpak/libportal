@@ -66,6 +66,7 @@ const char * portal_get_bus_name (void);
 #define SESSION_PATH_PREFIX "/org/freedesktop/portal/desktop/session/"
 #define REQUEST_INTERFACE "org.freedesktop.portal.Request"
 #define SESSION_INTERFACE "org.freedesktop.portal.Session"
+#define SETTINGS_INTERFACE "org.freedesktop.portal.Settings"
 
 #define FLATPAK_PORTAL_BUS_NAME "org.freedesktop.portal.Flatpak"
 #define FLATPAK_PORTAL_OBJECT_PATH "/org/freedesktop/portal/Flatpak"
