@@ -15,7 +15,10 @@
             "buildsystem": "meson",
             "builddir": true,
             "config-opts": [
+              "-Dbackend-gtk3=disabled",
+              "-Dbackend-gtk4=disabled",
               "-Dbackend-qt5=enabled",
+              "-Dbackend-qt6=disabled",
               "-Dportal-tests=true",
               "-Dintrospection=false",
               "-Dvapi=false",

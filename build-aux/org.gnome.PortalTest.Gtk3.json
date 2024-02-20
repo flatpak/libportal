@@ -32,6 +32,9 @@
             "builddir": true,
             "config-opts": [
               "-Dbackend-gtk3=enabled",
+              "-Dbackend-gtk4=disabled",
+              "-Dbackend-qt5=disabled",
+              "-Dbackend-qt6=disabled",
               "-Dportal-tests=true",
               "-Ddocs=false"
             ],
