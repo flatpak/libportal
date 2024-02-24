@@ -674,7 +674,7 @@ remote_desktop_session_started (GObject *source,
   guint id;
   g_autoptr(GVariantIter) iter = NULL;
   GVariant *props;
-  g_autoptr (GString) s = NULL;
+  g_autoptr(GString) s = NULL;
 
   if (!xdp_session_start_finish (session, result, &error))
     {
