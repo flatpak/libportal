@@ -696,7 +696,7 @@ remote_desktop_session_started (GObject *source,
       if (s->len > 0)
         g_string_append (s, "\n");
       g_string_append_printf (s, "Stream %d: %dx%d @ %d,%d", id, w, h, x, y);
-      g_variant_unref (props);
+      g_clear_pointer (&props, g_variant_unref);
     }
 
   gtk_label_set_label (GTK_LABEL (win->remote_desktop_label), s->str);
