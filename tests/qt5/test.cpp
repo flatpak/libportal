@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022, Jan Grulich
+ * Copyright (C) 2024 GNOME Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -38,7 +39,8 @@ void Test::testFileChooserPortal()
 
     g_autoptr(GVariant) filterVar = XdpQt::filechooserFiltersToGVariant({filter});
     const QString expectedFilterVarStr = QStringLiteral("[('Images', [(1, 'image/jpeg')])]");
-    const QString filterVarStr = g_variant_print(filterVar, false);
+    g_autofree char *variantStr = g_variant_print(filterVar, false);
+    const QString filterVarStr = variantStr;
     QCOMPARE(expectedFilterVarStr, filterVarStr);
 
     XdpQt::FileChooserFilterRule rule2;
@@ -48,7 +50,8 @@ void Test::testFileChooserPortal()
 
     g_autoptr(GVariant) filterVar2 = XdpQt::filechooserFiltersToGVariant({filter});
     const QString expectedFilterVarStr2 = "[('Images', [(1, 'image/jpeg'), (0, '*.png')])]";
-    const QString filterVarStr2 = g_variant_print(filterVar2, false);
+    g_autofree char *variantStr2 = g_variant_print(filterVar2, false);
+    const QString filterVarStr2 = variantStr2;
     QCOMPARE(expectedFilterVarStr2, filterVarStr2);
 
     XdpQt::FileChooserChoice choice;
@@ -60,7 +63,8 @@ void Test::testFileChooserPortal()
 
     g_autoptr(GVariant) choiceVar = XdpQt::filechooserChoicesToGVariant({choice});
     const QString expectedChoiceVarStr = "[('choice-id', 'choice-label', [('option1-id', 'option1-value'), ('option2-id', 'option2-value')], 'option1-id')]";
-    const QString choiceVarStr = g_variant_print(choiceVar, false);
+    g_autofree char *variantChoiceStr = g_variant_print(choiceVar, false);
+    const QString choiceVarStr = variantChoiceStr;
     QCOMPARE(expectedChoiceVarStr, choiceVarStr);
 }
 
@@ -78,7 +82,8 @@ void Test::testNotificationPortal()
 
     g_autoptr(GVariant) notificationVar = XdpQt::notificationToGVariant(notification);
     const QString expectedNotificationVarStr = "{'title': <'Test notification'>, 'body': <'Testing notification portal'>, 'icon': <('themed', <['applications-development', 'applications-development-symbolic']>)>, 'buttons': <[{'label': <'Some label'>, 'action': <'Some action'>}]>}";
-    const QString notificationStr = g_variant_print(notificationVar, false);
+    g_autofree char *variantStr = g_variant_print(notificationVar, false);
+    const QString notificationStr = variantStr;
     QCOMPARE(expectedNotificationVarStr, notificationStr);
 }
 
