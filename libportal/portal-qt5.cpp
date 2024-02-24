@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2021, Georges Basile Stavracas Neto
-                 2020-2022, Jan Grulich
+ *               2020-2022, Jan Grulich
+ * Copyright (C) 2024 GNOME Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -306,7 +307,9 @@ notificationToGVariant(const Notification &notification) {
     }
 
     if (!notification.icon.isEmpty()) {
-        g_variant_builder_add(&builder, "{sv}", "icon", g_icon_serialize(g_themed_icon_new(notification.icon.toUtf8().constData())));
+        g_autoptr(GIcon) icon = g_themed_icon_new(notification.icon.toUtf8().constData());
+        g_autoptr(GVariant) iconVariant = g_icon_serialize(icon);
+        g_variant_builder_add(&builder, "{sv}", "icon", iconVariant);
     } else if (!notification.pixmap.isNull()) {
         g_autoptr(GBytes) bytes = nullptr;
         QByteArray array;
@@ -314,7 +317,9 @@ notificationToGVariant(const Notification &notification) {
         buffer.open(QIODevice::WriteOnly);
         notification.pixmap.save(&buffer, "PNG");
         bytes = g_bytes_new(array.data(), array.size());
-        g_variant_builder_add(&builder, "{sv}", "icon", g_icon_serialize(g_bytes_icon_new(bytes)));
+        g_autoptr(GIcon) icon = g_bytes_icon_new(bytes);
+        g_autoptr(GVariant) iconVariant = g_icon_serialize(icon);
+        g_variant_builder_add(&builder, "{sv}", "icon", iconVariant);
     }
 
     if (!notification.defaultAction.isEmpty()) {
