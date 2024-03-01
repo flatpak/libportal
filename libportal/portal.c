@@ -264,7 +264,8 @@ xdp_portal_class_init (XdpPortalClass *klass)
    * @portal: the [class@Portal]
    * @id: the notification ID
    * @action: the action name
-   * @parameter: (nullable): the target parameter for the action
+   * @platform_data: the platform data for the action
+   * @parameter: the target parameter for the action
    *
    * Emitted when a non-exported action is activated on a notification.
    */
@@ -275,9 +276,10 @@ xdp_portal_class_init (XdpPortalClass *klass)
                   0,
                   NULL, NULL,
                   NULL,
-                  G_TYPE_NONE, 3,
+                  G_TYPE_NONE, 4,
                   G_TYPE_STRING,
                   G_TYPE_STRING,
+                  G_TYPE_VARIANT,
                   G_TYPE_VARIANT);
 }
 
