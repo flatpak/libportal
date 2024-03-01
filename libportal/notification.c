@@ -72,6 +72,69 @@ ensure_action_invoked_connection (XdpPortal *portal)
                                            NULL);
 }
 
+static int
+bytes_to_memfd (const gchar  *name,
+                GBytes       *bytes,
+                GError      **error)
+{
+  g_autofd int fd = -1;
+  gconstpointer bytes_data;
+  gpointer shm;
+  gsize bytes_len;
+
+  fd = memfd_create (name, MFD_ALLOW_SEALING);
+  if (fd == -1)
+    {
+      int saved_errno = errno;
+
+      g_set_error (error,
+                   G_IO_ERROR,
+                   g_io_error_from_errno (saved_errno),
+                   "memfd_create: %s", g_strerror (saved_errno));
+      return -1;
+    }
+
+  bytes_data = g_bytes_get_data (bytes, &bytes_len);
+
+  if (ftruncate (fd, bytes_len) == -1)
+    {
+      int saved_errno = errno;
+
+      g_set_error (error,
+                   G_IO_ERROR,
+                   g_io_error_from_errno (saved_errno),
+                   "ftruncate: %s", g_strerror (saved_errno));
+      return -1;
+    }
+
+  shm = mmap (NULL, bytes_len, PROT_WRITE, MAP_SHARED, fd, 0);
+  if (shm == MAP_FAILED)
+    {
+      int saved_errno = errno;
+
+      g_set_error (error,
+                   G_IO_ERROR,
+                   g_io_error_from_errno (saved_errno),
+                   "mmap: %s", g_strerror (saved_errno));
+      return -1;
+    }
+
+  memcpy (shm, bytes_data, bytes_len);
+
+  if (munmap (shm, bytes_len) == -1)
+    {
+      int saved_errno = errno;
+
+      g_set_error (error,
+                   G_IO_ERROR,
+                   g_io_error_from_errno (saved_errno),
+                   "munmap: %s", g_strerror (saved_errno));
+      return -1;
+    }
+
+  return g_steal_fd (&fd);
+}
+
 typedef struct {
   GUnixFDList *fd_list;
   GVariantBuilder *builder;
@@ -140,6 +203,189 @@ call_done_cb (GObject      *source,
 }
 
 static void
+splice_cb (GObject      *source_object,
+           GAsyncResult *res,
+           gpointer      user_data)
+{
+  g_autoptr(GTask) task = G_TASK (user_data);
+  g_autoptr(GError) error = NULL;
+  GOutputStream *stream_out = G_OUTPUT_STREAM (source_object);
+
+  if (!g_output_stream_splice_finish (G_OUTPUT_STREAM (source_object), res, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  if (G_IS_MEMORY_OUTPUT_STREAM (stream_out))
+    {
+      g_autoptr(GBytes) bytes = NULL;
+      g_autoptr(GVariant) media_out = NULL;
+
+      bytes = g_memory_output_stream_steal_as_bytes (G_MEMORY_OUTPUT_STREAM (stream_out));
+      media_out = g_variant_ref_sink (g_variant_new ("(sv)", "bytes",
+                                                     g_variant_new_from_bytes (G_VARIANT_TYPE_BYTESTRING, bytes, TRUE)));
+
+      g_task_set_task_data (task, g_steal_pointer (&media_out), (GDestroyNotify) g_variant_unref);
+      g_task_return_int (task, -1);
+    }
+  else if (G_IS_UNIX_OUTPUT_STREAM (stream_out))
+    {
+      int fd;
+      fd = g_unix_output_stream_get_fd (G_UNIX_OUTPUT_STREAM (stream_out));
+      lseek (fd, 0, SEEK_SET);
+      g_task_return_int (task, fd);
+    }
+  else
+    {
+      g_assert_not_reached ();
+    }
+}
+
+static void
+file_read_cb (GObject      *source_object,
+              GAsyncResult *res,
+              gpointer      user_data)
+{
+  g_autoptr(GTask) task = G_TASK (user_data);
+  GOutputStream *stream_out = G_OUTPUT_STREAM (g_task_get_task_data (task));
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GFileInputStream) stream_in = NULL;
+
+  stream_in = g_file_read_finish (G_FILE (source_object), res, &error);
+  if (!stream_in)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_output_stream_splice_async (stream_out,
+                                G_INPUT_STREAM (stream_in),
+                                G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE | G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET,
+                                g_task_get_priority (task),
+                                g_task_get_cancellable (task),
+                                splice_cb,
+                                g_object_ref (task));
+}
+
+static void
+parse_media (GVariant            *media,
+             uint                 version,
+             GCancellable        *cancellable,
+             GAsyncReadyCallback  callback,
+             gpointer             user_data)
+{
+  g_autoptr(GTask) task = NULL;
+  g_autoptr(GVariant) value = NULL;
+  const char *key;
+
+  task = g_task_new (NULL, cancellable, callback, user_data);
+  g_task_set_source_tag (task, parse_media);
+
+  if (!g_variant_is_of_type (media, G_VARIANT_TYPE("(sv)")))
+    {
+      g_task_return_boolean (task, TRUE);
+      return;
+    }
+
+  g_variant_get (media, "(&sv)", &key, &value);
+
+  if (strcmp (key, "bytes") == 0 && version > 1)
+    {
+      g_autoptr(GBytes) bytes = NULL;
+      g_autoptr(GError) error = NULL;
+      g_autoptr(GVariant) media_out = NULL;
+      g_autoptr(GOutputStream) stream_out = NULL;
+      g_autofd int fd = -1;
+
+      bytes = g_variant_get_data_as_bytes (value);
+
+      fd = bytes_to_memfd ("notification-media", bytes, &error);
+      if (fd == -1)
+        {
+          g_task_return_error (task, g_steal_pointer (&error));
+          return;
+        }
+
+      g_task_return_int (task, g_steal_fd (&fd));
+    }
+  else if (strcmp (key, "file") == 0)
+    {
+      g_autoptr(GFile) file = NULL;
+      g_autoptr(GOutputStream) stream_out = NULL;
+
+      if (version < 2)
+        {
+          stream_out = g_memory_output_stream_new_resizable ();
+        }
+      else
+        {
+          g_autofd int fd = -1;
+
+          fd = memfd_create ("notification-media", MFD_ALLOW_SEALING);
+          if (fd == -1)
+            {
+              int saved_errno = errno;
+
+              g_task_return_new_error (task,
+                                       G_IO_ERROR,
+                                       g_io_error_from_errno (saved_errno),
+                                       "memfd_create: %s", g_strerror (saved_errno));
+              return;
+            }
+
+          stream_out = g_unix_output_stream_new (g_steal_fd (&fd), FALSE);
+        }
+
+      g_task_set_task_data (task, g_steal_pointer (&stream_out), g_object_unref);
+
+      file = g_file_new_for_commandline_arg (g_variant_get_string (value, NULL));
+      g_file_read_async (file,
+                         g_task_get_priority (task),
+                         cancellable,
+                         file_read_cb,
+                         g_object_ref (task));
+    }
+  else
+    {
+      g_task_set_task_data (task, g_variant_ref (media), (GDestroyNotify) g_variant_unref);
+      g_task_return_int (task, -1);
+    }
+}
+
+static GVariant*
+parse_media_finish (GAsyncResult  *result,
+                    GUnixFDList   *fd_list,
+                    GError       **error)
+{
+  GTask *task = G_TASK (result);
+  g_autofd int fd = -1;
+
+  g_return_val_if_fail (g_task_get_source_tag (task) == parse_media, NULL);
+
+  fd = g_task_propagate_int (G_TASK (result), error);
+
+  if (*error)
+    return NULL;
+
+  if (fd != -1)
+    {
+      int fd_in;
+
+      fd_in = g_unix_fd_list_append (fd_list, fd, error);
+      if (fd_in == -1)
+          return NULL;
+
+      return g_variant_ref_sink (g_variant_new ("(sv)", "file-descriptor", g_variant_new_handle (fd_in)));
+    }
+  else
+    {
+      g_assert (g_task_get_task_data (task) != NULL);
+      return g_variant_ref (g_task_get_task_data (task));
+    }
+}
+
+static void
 parse_buttons_v1 (GVariantBuilder *builder,
                   GVariant        *value)
 {
@@ -171,6 +417,54 @@ parse_buttons_v1 (GVariantBuilder *builder,
   g_variant_builder_close (builder);
   g_variant_builder_close (builder);
   g_variant_builder_close (builder);
+}
+
+static void
+parse_icon_cb (GObject      *source_object,
+               GAsyncResult *res,
+               gpointer      user_data)
+{
+  g_autoptr(GTask) task = G_TASK (user_data);
+  ParserData *data = g_task_get_task_data (task);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) media_out = NULL;
+
+  media_out = parse_media_finish (res, data->fd_list, &error);
+
+  if (!media_out)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_variant_builder_add (data->builder, "{sv}", "icon", media_out);
+
+  if (parser_data_release (data))
+    g_task_return_boolean (task, TRUE);
+}
+
+static void
+parse_sound_cb (GObject      *source_object,
+                GAsyncResult *res,
+                gpointer      user_data)
+{
+  g_autoptr(GTask) task = G_TASK (user_data);
+  ParserData *data = g_task_get_task_data (task);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) media_out = NULL;
+
+  media_out = parse_media_finish (res, data->fd_list, &error);
+
+  if (!media_out)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_variant_builder_add (data->builder, "{sv}", "sound", media_out);
+
+  if (parser_data_release (data))
+    g_task_return_boolean (task, TRUE);
 }
 
 static void
@@ -226,7 +520,29 @@ parse_notification (GVariant            *notification,
             }
         }
 
-      g_variant_builder_add (data->builder, "{sv}", key, value);
+      if (strcmp (key, "icon") == 0)
+        {
+          parser_data_hold (data);
+          parse_media (value,
+                       version,
+                       cancellable,
+                       parse_icon_cb,
+                       g_object_ref (task));
+
+        }
+      else if (strcmp (key, "sound") == 0)
+        {
+          parser_data_hold (data);
+          parse_media (value,
+                       version,
+                       cancellable,
+                       parse_sound_cb,
+                       g_object_ref (task));
+        }
+      else
+        {
+          g_variant_builder_add (data->builder, "{sv}", key, value);
+        }
     }
 
   if (parser_data_release (data))
@@ -308,10 +624,19 @@ get_properties_cb (GObject      *source_object,
       return;
     }
 
+  g_clear_pointer (&portal->supported_notification_options, g_variant_unref);
+
   g_variant_get (ret, "(@a{sv})", &vardict);
 
   if (!g_variant_lookup (vardict, "version", "u", &portal->notification_interface_version))
     portal->notification_interface_version = 1;
+  if (!g_variant_lookup (vardict, "SupportedOptions", "v", &portal->supported_notification_options))
+    {
+      GVariantBuilder builder;
+
+      g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+      portal->supported_notification_options = g_variant_ref_sink (g_variant_builder_end (&builder));
+    }
 
   g_task_return_boolean (task, TRUE);
 }
@@ -397,19 +722,33 @@ get_supported_features_cb (GObject      *source_object,
  *
  * - title `s`: a user-visible string to display as title
  * - body `s`: a user-visible string to display as body
- * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize])
+ * - markup-body `s`: a user-visible string to display as body with support for markup
+ * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize]
+ *   for class@Gio.ThemedIcon, class@Gio.FileIcon and class@Gio.BytesIcon)
+ * - sound `v`: a serialized sound
  * - priority `s`: "low", "normal", "high" or "urgent"
  * - default-action `s`: name of an action that
  *     will be activated when the user clicks on the notification
  * - default-action-target `v`: target parameter to send along when
  *     activating the default action.
  * - buttons `aa{sv}`: array of serialized buttons
+ * - display-hint `as`: An array of display hints.
+ * - category `s`: A category for this notification. [See the spec for supported categories](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Notification.html#org-freedesktop-portal-notification-addnotification)
+ *
+ * The serialized sound consists of a `s` or `sv`:
+ * - default : Play the default sound for the notification.
+ * - silent : Don't ever play a sound for the notification.
+ * - file `s`: A path to a sound file.
+ * - bytes `ay`: An array of bytes.
+ *
+ * The supported sound formats are ogg/opus, ogg/vorbis and wav/pcm.
  *
  * Each serialized button is a dictionary with the following supported keys:
  *
- * - label `s`: user-visible lable for the button. Mandatory
+ * - label `s`: user-visible label for the button. Mandatory without a purpose.
  * - action `s`: name of an action that will be activated when
  *     the user clicks on the button. Mandatory
+ * - purpose `s`: information used by the server to style the button specially.
  * - target `v`: target parameter to send along when activating
  *     the button
  *
@@ -500,4 +839,54 @@ xdp_portal_remove_notification (XdpPortal  *portal,
                           NULL,
                           NULL,
                           NULL);
+}
+
+/**
+ * xdp_portal_get_supported_notification_options:
+ * @portal: a [class@Portal]
+ * @error: return location for an error
+ *
+ * Returns: (transfer none): a vardict of supported options for properties that have options.
+ *
+ * Since: 0.7.2
+ */
+GVariant *
+xdp_portal_get_supported_notification_options (XdpPortal  *portal,
+                                               GError    **error)
+{
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) vardict = NULL;
+
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+
+  if (portal->supported_notification_options)
+    return portal->supported_notification_options;
+
+  ret = g_dbus_connection_call_sync (portal->bus,
+                                     PORTAL_BUS_NAME,
+                                     PORTAL_OBJECT_PATH,
+                                     "org.freedesktop.DBus.Properties",
+                                     "GetAll",
+                                     g_variant_new ("(s)",
+                                                    "org.freedesktop.portal.Notification"),
+                                     G_VARIANT_TYPE ("(a{sv})"),
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     NULL,
+                                     error);
+  if (!ret)
+    return NULL;
+
+  g_variant_get (ret, "(&a{sv})", &vardict);
+  if (!g_variant_lookup (vardict, "version", "u", &portal->notification_interface_version))
+    portal->notification_interface_version = 1;
+  if (!g_variant_lookup (vardict, "SupportedOptions", "v", &portal->supported_notification_options))
+    {
+      GVariantBuilder builder;
+
+      g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+      portal->supported_notification_options = g_variant_ref_sink (g_variant_builder_end (&builder));
+    }
+
+  return portal->supported_notification_options;
 }

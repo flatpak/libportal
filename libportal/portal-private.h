@@ -51,6 +51,7 @@ struct _XdpPortal {
   /* notification */
   guint action_invoked_signal;
   guint notification_interface_version;
+  GVariant *supported_notification_options;
 
   /* screencast */
   guint screencast_interface_version;
