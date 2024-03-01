@@ -45,4 +45,8 @@ XDP_PUBLIC
 void       xdp_portal_remove_notification     (XdpPortal             *portal,
                                                const char            *id);
 
+XDP_PUBLIC
+GVariant  *xdp_portal_get_supported_notification_options (XdpPortal  *portal,
+                                                          GError    **error);
+
 G_END_DECLS
