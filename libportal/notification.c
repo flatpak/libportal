@@ -82,6 +82,8 @@ prepare_notification (GVariantBuilder  *builder,
 
       if (strcmp (key, "icon") == 0)
         prepare_media (builder, value, fd_list);
+      else if (strcmp (key, "sound") == 0)
+        prepare_media (builder, value, fd_list);
       else
         g_variant_builder_add_value (builder, value);
 
@@ -163,6 +165,7 @@ call_done (GObject *source,
  * - title `s`: a user-visible string to display as title
  * - body `s`: a user-visible string to display as body
  * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize])
+ * - sound `v`: a serialized sound
  * - priority `s`: "low", "normal", "high" or "urgent"
  * - default-action `s`: name of an action that
  *     will be activated when the user clicks on the notification
