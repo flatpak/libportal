@@ -79,6 +79,8 @@ prepare_notification (GVariantBuilder *builder,
 
       if (strcmp (key, "icon") == 0)
         prepare_media (builder, value, fd_list);
+      else if (strcmp (key, "sound") == 0)
+        prepare_media (builder, value, fd_list);
       else
         g_variant_builder_add_value (builder, value);
 
@@ -161,12 +163,19 @@ call_done (GObject *source,
  * - body `s`: a user-visible string to display as body
  * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize]
  *   for class@Gio.ThemedIcon, class@Gio.FileIcon and class@Gio.BytesIcon)
+ * - sound `v`: a serialized sound
  * - priority `s`: "low", "normal", "high" or "urgent"
  * - default-action `s`: name of an action that
  *     will be activated when the user clicks on the notification
  * - default-action-target `v`: target parameter to send along when
  *     activating the default action.
  * - buttons `aa{sv}`: array of serialized buttons
+ *
+ * The serialized sound consists of a `s` or `sv`:
+ * - default : Play the default sound for the notification.
+ * - silent : Don't ever play a sound for the notification.
+ * - file `s`: A path to a sound file in oga or wav.
+ * - bytes `ay`: An array of bytes containing a sound in oga or wav.
  *
  * Each serialized button is a dictionary with the following supported keys:
  *
