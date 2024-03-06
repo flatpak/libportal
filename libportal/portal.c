@@ -355,6 +355,8 @@ xdp_portal_initable_iface_init (GInitableIface *iface)
  * Creates a new [class@Portal] object.
  *
  * Returns: (nullable): a newly created [class@Portal] object or NULL on error
+ *
+ * Since: 0.7
  */
 XdpPortal *
 xdp_portal_initable_new (GError **error)
