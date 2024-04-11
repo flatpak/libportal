@@ -161,6 +161,7 @@ call_done (GObject *source,
  *
  * - title `s`: a user-visible string to display as title
  * - body `s`: a user-visible string to display as body
+ * - markup-body `s`: a user-visible string to display as body with support for markup
  * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize]
  *   for class@Gio.ThemedIcon, class@Gio.FileIcon and class@Gio.BytesIcon)
  * - sound `v`: a serialized sound
@@ -170,6 +171,9 @@ call_done (GObject *source,
  * - default-action-target `v`: target parameter to send along when
  *     activating the default action.
  * - buttons `aa{sv}`: array of serialized buttons
+ * - desktop-file-id `s`: A desktop file id containing the .desktop suffix.
+ * - display-hint `as`: An array of display hints.
+ * - category `s`: A category for this notification.
  *
  * The serialized sound consists of a `s` or `sv`:
  * - default : Play the default sound for the notification.
@@ -179,9 +183,10 @@ call_done (GObject *source,
  *
  * Each serialized button is a dictionary with the following supported keys:
  *
- * - label `s`: user-visible lable for the button. Mandatory
+ * - label `s`: user-visible lable for the button. Mandatory without a purpose.
  * - action `s`: name of an action that will be activated when
  *     the user clicks on the button. Mandatory
+ * - purpose `s`: information used by the server to style the button specially.
  * - target `v`: target parameter to send along when activating
  *     the button
  *
