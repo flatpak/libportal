@@ -296,3 +296,44 @@ xdp_portal_remove_notification (XdpPortal  *portal,
                           NULL,
                           NULL);
 }
+
+/**
+ * xdp_portal_get_supported_options:
+ * @portal: a [class@Portal]
+ *
+ * Returns: a vardict of supported options for properties that have options.
+ *
+ * Since: 0.7.2
+ */
+GVariant *
+xdp_portal_get_supported_options (XdpPortal *portal)
+{
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) options = NULL;
+
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+
+  ret = g_dbus_connection_call_sync (portal->bus,
+                                     PORTAL_BUS_NAME,
+                                     PORTAL_OBJECT_PATH,
+                                     "org.freedesktop.DBus.Properties",
+                                     "Get",
+                                     g_variant_new ("(ss)",
+                                                    "org.freedesktop.portal.Notification",
+                                                    "SupportedOptions"),
+                                     G_VARIANT_TYPE ("(v)"),
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     NULL,
+                                     &error);
+  if (!ret)
+    {
+      g_warning ("Failed to get SupportedOptions property: %s", error->message);
+      return FALSE;
+    }
+
+  g_variant_get (ret, "(v)", &options);
+
+  return g_steal_pointer (&options);
+}
