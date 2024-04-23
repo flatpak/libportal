@@ -256,7 +256,7 @@ compose_email (EmailCall *call)
       for (i = 0; call->attachments[i]; i++)
         {
           g_autoptr(GError) error = NULL;
-          int fd;
+          g_autofd int fd = -1;
           int fd_in;
 
           fd = g_open (call->attachments[i], O_PATH | O_CLOEXEC);
