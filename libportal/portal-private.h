@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "glib-backports.h"
 #include "parent-private.h"
 #include "portal-helpers.h"
 
