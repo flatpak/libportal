@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <errno.h>
+
 #include "parent-private.h"
 #include "portal-helpers.h"
 
@@ -71,3 +73,30 @@ const char * portal_get_bus_name (void);
 #define FLATPAK_PORTAL_BUS_NAME "org.freedesktop.portal.Flatpak"
 #define FLATPAK_PORTAL_OBJECT_PATH "/org/freedesktop/portal/Flatpak"
 #define FLATPAK_PORTAL_INTERFACE "org.freedesktop.portal.Flatpak"
+
+static inline int
+portal_steal_fd (int *fdp)
+{
+  int fd = *fdp;
+  *fdp = -1;
+  return fd;
+}
+
+static inline void
+portal_close_fd (int *fdp)
+{
+  int errsv;
+
+  g_assert (fdp);
+
+  int fd = portal_steal_fd (fdp);
+  if (fd >= 0)
+    {
+      errsv = errno;
+      if (close (fd) < 0)
+        g_assert (errno != EBADF);
+      errno = errsv;
+    }
+}
+
+#define portal_autofd __attribute__((cleanup(portal_close_fd)))
