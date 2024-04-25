@@ -11,6 +11,7 @@ headers = [
   'dynamic-launcher.h',
   'email.h',
   'filechooser.h',
+  'glib-backports.h',
   'inhibit.h',
   'inputcapture.h',
   'inputcapture-zone.h',
