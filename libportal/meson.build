@@ -168,7 +168,7 @@ if gtk3_dep.found()
     if vapi
       libportal_gtk3_vapi = gnome.generate_vapi('libportal-gtk3',
         sources: libportal_gtk3_gir[0],
-        packages: ['gio-2.0', 'gtk+-3.0', 'libportal'],
+        packages: ['gio-2.0', 'gtk+-3.0', libportal_vapi],
         gir_dirs: [meson.current_build_dir()],
         vapi_dirs: [meson.current_build_dir()],
         install: true,
@@ -227,7 +227,7 @@ if gtk4_dep.found()
     if vapi
       libportal_gtk4_vapi = gnome.generate_vapi('libportal-gtk4',
         sources: libportal_gtk4_gir[0],
-        packages: ['gio-2.0', 'gtk4', 'libportal'],
+        packages: ['gio-2.0', 'gtk4', libportal_vapi],
         gir_dirs: [meson.current_build_dir()],
         vapi_dirs: [meson.current_build_dir()],
         install: true,
