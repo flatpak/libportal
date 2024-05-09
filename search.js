@@ -27,49 +27,6 @@ const QUERY_TYPES = [
 ];
 const QUERY_PATTERN = new RegExp("^(" + QUERY_TYPES.join('|') + ")\\s*:\\s*", 'i');
 
-const TYPE_NAMES = {
-    "alias": "alias",
-    "bitfield": "flags",
-    "callback": "callback",
-    "class": "class",
-    "constant": "constant",
-    "content": "content",
-    "ctor": "constructor",
-    "domain": "error",
-    "enum": "enum",
-    "function_macro": "macro",
-    "function": "function",
-    "interface": "interface",
-    "method": "method",
-    "property": "property",
-    "record": "struct",
-    "signal": "signal",
-    "type_func": "function",
-    "union": "union",
-    "vfunc": "vfunc",
-};
-
-const TYPE_CLASSES = {
-    "alias": "alias",
-    "bitfield": "flags",
-    "callback": "callback",
-    "class": "class",
-    "constant": "constant",
-    "content": "extra_content",
-    "ctor": "ctor",
-    "domain": "domain",
-    "enum": "enum",
-    "function_macro": "function_macro",
-    "function": "function",
-    "interface": "interface",
-    "method": "method",
-    "property": "property",
-    "record": "record",
-    "signal": "signal",
-    "type_func": "type_func",
-    "union": "union",
-    "vfunc": "vfunc",
-};
 
 const fzy = window.fzy;
 const searchParams = getSearchParams();
@@ -152,7 +109,6 @@ function searchQuery(query) {
             text: getLabelForDocument(doc, searchIndex.meta),
             href: getLinkForDocument(doc),
             summary: doc.summary,
-            deprecated: doc.deprecated,
         };
     });
 
@@ -192,18 +148,17 @@ function renderResults(query, results) {
         html += "No results found.";
     }
     else {
-        html += "<div class=\"results\"><dl>";
+        html += "<table class=\"results\">" +
+                  "<tr><th>Name</th><th>Description</th></tr>";
         results.forEach(function(item) {
-            html += "<dt class=\"result " + TYPE_CLASSES[item.type] + "\">" +
-                      "<a href=\"" + item.href + "\">" + item.text + "</a>" +
-                      "&nbsp;<span class=\"result emblem " + TYPE_CLASSES[item.type] + "\">" + TYPE_NAMES[item.type] + "</span>";
-            if (item.deprecated) {
-                html += "&nbsp;<span class=\"emblem deprecated\">deprecated:&nbsp;" + item.deprecated + "</span>";
-            }
-            html += "</dt>" +
-                    "<dd>" + item.summary + "</dd>";
+            html += "<tr>" +
+                        "<td class=\"result " + item.type + "\">" +
+                        "<a href=\"" + item.href + "\">" + item.text + "</a>" +
+                        "</td>" +
+                        "<td>" + item.summary + "</td>" +
+                    "</tr>";
         });
-        html += "</dl></div>";
+        html += "</table>";
     }
 
     html += "</div>";
@@ -292,7 +247,7 @@ function getLabelForDocument(doc, meta) {
 
         // NOTE: meta.ns added for more consistent results, otherwise
         // searching for "Button" would return all signals, properties
-        // and vfuncs (eg "Button.clicked") before the actual object
+        // and vfuncs (eg "Button.clicked") before the actual object 
         // (eg "GtkButton") because "Button" matches higher with starting
         // sequences.
         case "property":
@@ -333,7 +288,7 @@ function getTextForDocument(doc, meta) {
 
         // NOTE: meta.ns added for more consistent results, otherwise
         // searching for "Button" would return all signals, properties
-        // and vfuncs (eg "Button.clicked") before the actual object
+        // and vfuncs (eg "Button.clicked") before the actual object 
         // (eg "GtkButton") because "Button" matches higher with starting
         // sequences.
         case "property":
