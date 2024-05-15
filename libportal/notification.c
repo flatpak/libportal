@@ -35,22 +35,43 @@ action_invoked (GDBusConnection *bus,
   const char *id;
   const char *action;
   g_autoptr(GVariant) parameter = NULL;
+  g_autoptr(GVariant) platform_data = NULL;
 
-  g_variant_get (parameters, "(&s&s@av)", &id, &action, &parameter);
+  if (g_str_equal (signal_name, "ActionInvoked2"))
+    {
+      g_variant_get (parameters, "(&s&s@a{sv}@av)",
+                     &id, &action, &platform_data, &parameter);
+    }
+  else
+    {
+      GVariantBuilder n;
+
+      g_variant_get (parameters, "(&s&s@av)", &id, &action, &parameter);
+
+      g_variant_builder_init (&n, G_VARIANT_TYPE_VARDICT);
+      platform_data = g_variant_ref_sink (g_variant_builder_end (&n));
+    }
 
   g_signal_emit_by_name (portal, "notification-action-invoked",
-                         id, action, parameter);
+                         id, action, platform_data, parameter);
 }
 
 static void
 ensure_action_invoked_connection (XdpPortal *portal)
 {
+  const char *signal_name;
+
+  if (portal->notification_interface_version >= 2)
+    signal_name = "ActionInvoked2";
+  else
+    signal_name = "ActionInvoked";
+
   if (portal->action_invoked_signal == 0)
     portal->action_invoked_signal =
        g_dbus_connection_signal_subscribe (portal->bus,
                                            PORTAL_BUS_NAME,
                                            "org.freedesktop.portal.Notification",
-                                           "ActionInvoked",
+                                           signal_name,
                                            PORTAL_OBJECT_PATH,
                                            NULL,
                                            G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
@@ -59,23 +80,97 @@ ensure_action_invoked_connection (XdpPortal *portal)
                                            NULL);
 }
 
-typedef struct {
-  XdpPortal *portal;
-  GAsyncReadyCallback callback;
-  gpointer data;
-} CallDoneData;
-
 static void
 call_done (GObject *source,
            GAsyncResult *result,
            gpointer data)
 {
-  CallDoneData *call_done_data = data;
+  g_autoptr(GVariant) res = NULL;
+  g_autoptr(GTask) task = data;
+  GError *error = NULL;
+  XdpPortal *portal;
 
-  call_done_data->callback (G_OBJECT (call_done_data->portal), result, call_done_data->data);
+  portal = g_task_get_source_object (task);
+  res = g_dbus_connection_call_finish (portal->bus, result, &error);
 
-  g_object_unref (call_done_data->portal);
-  g_free (call_done_data);
+  if (error)
+    g_task_return_error (task, error);
+  else
+    g_task_return_boolean (task, !!res);
+}
+
+static void
+add_notification_internal (XdpPortal *portal,
+                           GVariant *parameters,
+                           GCancellable *cancellable,
+                           GTask *task)
+{
+  GAsyncReadyCallback call_done_cb = task ? call_done : NULL;
+
+  ensure_action_invoked_connection (portal);
+
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.Notification",
+                          "AddNotification",
+                          parameters,
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          call_done_cb,
+                          task);
+}
+
+static void
+get_version_returned (GObject *object,
+                      GAsyncResult *result,
+                      gpointer data)
+{
+  g_autoptr(GVariant) version_variant = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GTask) task = data;
+  XdpPortal *portal = g_task_get_source_object (task);
+  GError *error = NULL;
+  GVariant *notification_params;
+  GCancellable *cancellable;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (task, error);
+      return;
+    }
+
+  g_variant_get_child (ret, 0, "v", &version_variant);
+  portal->notification_interface_version = g_variant_get_uint32 (version_variant);
+
+  g_debug ("Notification version: %u", portal->notification_interface_version);
+
+  notification_params = g_task_get_task_data (task);
+  cancellable = g_task_get_cancellable (task);
+
+  add_notification_internal (portal, notification_params, cancellable,
+                             g_steal_pointer (&task));
+}
+
+static void
+get_notification_interface_version (XdpPortal *portal,
+                                    GTask *task)
+{
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.DBus.Properties",
+                          "Get",
+                          g_variant_new ("(ss)", "org.freedesktop.portal.Notification", "version"),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (task),
+                          get_version_returned,
+                          task);
 }
 
 /**
@@ -129,35 +224,29 @@ xdp_portal_add_notification (XdpPortal *portal,
                              GAsyncReadyCallback callback,
                              gpointer data)
 {
-  GAsyncReadyCallback call_done_cb = NULL;
-  CallDoneData *call_done_data = NULL;
+  GTask *task = NULL;
+  GVariant *parameters;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (flags == XDP_NOTIFICATION_FLAG_NONE);
 
-  ensure_action_invoked_connection (portal);
+  parameters = g_variant_new ("(s@a{sv})", id, notification);
 
-  if (callback)
+  if (callback || !portal->notification_interface_version)
     {
-      call_done_cb = call_done; 
-      call_done_data = g_new (CallDoneData, 1);
-      call_done_data->portal = g_object_ref (portal);
-      call_done_data->callback = callback,
-      call_done_data->data = data;
+      task = g_task_new (portal, cancellable, callback, data);
+      g_task_set_task_data (task, g_variant_ref_sink (parameters),
+                            (GDestroyNotify) g_variant_unref);
     }
 
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.Notification",
-                          "AddNotification",
-                          g_variant_new ("(s@a{sv})", id, notification),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          cancellable,
-                          call_done_cb,
-                          call_done_data);
+  if (!portal->notification_interface_version)
+    {
+      get_notification_interface_version (portal, task);
+    }
+  else
+    {
+      add_notification_internal (portal, parameters, cancellable, task);
+    }
 }
 
 /**
@@ -177,11 +266,10 @@ xdp_portal_add_notification_finish (XdpPortal     *portal,
                                     GAsyncResult  *result,
                                     GError       **error)
 {
-  g_autoptr(GVariant) res = NULL;
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
 
-  res = g_dbus_connection_call_finish (portal->bus, result, error);
-
-  return !!res;
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**
