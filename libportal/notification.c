@@ -19,8 +19,75 @@
 
 #include "config.h"
 
+#include <fcntl.h>
+
+#include <glib/gstdio.h>
+#include <gio/gunixfdlist.h>
+
 #include "notification.h"
 #include "portal-private.h"
+
+static void
+prepare_media (GVariantBuilder *builder,
+              GVariant         *serialized_media,
+              GUnixFDList      *fd_list)
+{
+  g_autoptr(GVariant) value = NULL;
+  g_autoptr(GFile) file = NULL;
+  const char *key;
+  g_autofree char *path = NULL;
+  portal_autofd int fd = -1;
+  int fd_in = 0;
+
+  if (g_variant_is_of_type (serialized_media, G_VARIANT_TYPE("(sv)")))
+    g_variant_get (serialized_media, "(&sv)", &key, &value);
+
+  if (key && value && strcmp (key, "file") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_STRING))
+    file = g_file_new_for_commandline_arg (g_variant_get_string (value, NULL));
+
+  /* Pass through everything that isn't a native GFile */
+  if (!G_IS_FILE (file) || !g_file_is_native (file))
+    {
+      g_variant_builder_add_value (builder, serialized_media);
+      return;
+    }
+
+  path = g_file_get_path (file);
+  fd = g_open (path, O_RDONLY | O_CLOEXEC);
+
+  fd_in = g_unix_fd_list_append (fd_list, fd, NULL);
+
+  g_variant_builder_add (builder, "(sv)", "file-descriptor", g_variant_new_handle (fd_in));
+}
+
+static void
+prepare_notification (GVariantBuilder *builder,
+                      GVariant        *notification,
+                      GUnixFDList     *fd_list)
+{
+  GVariantIter iter;
+  const char *key;
+  GVariant *value;
+
+  g_variant_iter_init (&iter, notification);
+
+  while (g_variant_iter_loop (&iter, "{sv}", &key, &value))
+    {
+      g_variant_builder_open (builder, G_VARIANT_TYPE ("{sv}"));
+      g_variant_builder_add (builder, "s", key);
+      g_variant_builder_open (builder, G_VARIANT_TYPE_VARIANT);
+
+      if (strcmp (key, "icon") == 0)
+        prepare_media (builder, value, fd_list);
+      else if (strcmp (key, "sound") == 0)
+        prepare_media (builder, value, fd_list);
+      else
+        g_variant_builder_add_value (builder, value);
+
+      g_variant_builder_close (builder);
+      g_variant_builder_close (builder);
+    }
+}
 
 static void
 action_invoked (GDBusConnection *bus,
@@ -94,19 +161,32 @@ call_done (GObject *source,
  *
  * - title `s`: a user-visible string to display as title
  * - body `s`: a user-visible string to display as body
- * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize])
+ * - markup-body `s`: a user-visible string to display as body with support for markup
+ * - icon `v`: a serialized icon (in the format produced by [method@Gio.Icon.serialize]
+ *   for class@Gio.ThemedIcon, class@Gio.FileIcon and class@Gio.BytesIcon)
+ * - sound `v`: a serialized sound
  * - priority `s`: "low", "normal", "high" or "urgent"
  * - default-action `s`: name of an action that
  *     will be activated when the user clicks on the notification
  * - default-action-target `v`: target parameter to send along when
  *     activating the default action.
  * - buttons `aa{sv}`: array of serialized buttons
+ * - desktop-file-id `s`: A desktop file id containing the .desktop suffix.
+ * - display-hint `as`: An array of display hints.
+ * - category `s`: A category for this notification.
+ *
+ * The serialized sound consists of a `s` or `sv`:
+ * - default : Play the default sound for the notification.
+ * - silent : Don't ever play a sound for the notification.
+ * - file `s`: A path to a sound file in oga or wav.
+ * - bytes `ay`: An array of bytes containing a sound in oga or wav.
  *
  * Each serialized button is a dictionary with the following supported keys:
  *
- * - label `s`: user-visible lable for the button. Mandatory
+ * - label `s`: user-visible lable for the button. Mandatory without a purpose.
  * - action `s`: name of an action that will be activated when
  *     the user clicks on the button. Mandatory
+ * - purpose `s`: information used by the server to style the button specially.
  * - target `v`: target parameter to send along when activating
  *     the button
  *
@@ -131,33 +211,44 @@ xdp_portal_add_notification (XdpPortal *portal,
 {
   GAsyncReadyCallback call_done_cb = NULL;
   CallDoneData *call_done_data = NULL;
+  g_autoptr(GUnixFDList) fd_list = NULL;
+  GVariantBuilder builder;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (flags == XDP_NOTIFICATION_FLAG_NONE);
 
+  fd_list = g_unix_fd_list_new ();
   ensure_action_invoked_connection (portal);
+
+  g_variant_builder_init (&builder, G_VARIANT_TYPE ("(sa{sv})"));
+  g_variant_builder_add (&builder, "s", id);
+
+  g_variant_builder_open (&builder, G_VARIANT_TYPE ("a{sv}"));
+  prepare_notification (&builder, notification, fd_list);
+  g_variant_builder_close (&builder);
 
   if (callback)
     {
-      call_done_cb = call_done; 
+      call_done_cb = call_done;
       call_done_data = g_new (CallDoneData, 1);
       call_done_data->portal = g_object_ref (portal);
       call_done_data->callback = callback,
       call_done_data->data = data;
     }
 
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.Notification",
-                          "AddNotification",
-                          g_variant_new ("(s@a{sv})", id, notification),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          cancellable,
-                          call_done_cb,
-                          call_done_data);
+  g_dbus_connection_call_with_unix_fd_list (portal->bus,
+                                            PORTAL_BUS_NAME,
+                                            PORTAL_OBJECT_PATH,
+                                            "org.freedesktop.portal.Notification",
+                                            "AddNotification",
+                                            g_variant_builder_end (&builder),
+                                            NULL,
+                                            G_DBUS_CALL_FLAGS_NONE,
+                                            -1,
+                                            fd_list,
+                                            cancellable,
+                                            call_done_cb,
+                                            call_done_data);
 }
 
 /**
@@ -179,7 +270,7 @@ xdp_portal_add_notification_finish (XdpPortal     *portal,
 {
   g_autoptr(GVariant) res = NULL;
 
-  res = g_dbus_connection_call_finish (portal->bus, result, error);
+  res = g_dbus_connection_call_with_unix_fd_list_finish (portal->bus, NULL, result, error);
 
   return !!res;
 }
@@ -209,4 +300,45 @@ xdp_portal_remove_notification (XdpPortal  *portal,
                           NULL,
                           NULL,
                           NULL);
+}
+
+/**
+ * xdp_portal_get_supported_options:
+ * @portal: a [class@Portal]
+ *
+ * Returns: a vardict of supported options for properties that have options.
+ *
+ * Since: 0.7.2
+ */
+GVariant *
+xdp_portal_get_supported_options (XdpPortal *portal)
+{
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) options = NULL;
+
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+
+  ret = g_dbus_connection_call_sync (portal->bus,
+                                     PORTAL_BUS_NAME,
+                                     PORTAL_OBJECT_PATH,
+                                     "org.freedesktop.DBus.Properties",
+                                     "Get",
+                                     g_variant_new ("(ss)",
+                                                    "org.freedesktop.portal.Notification",
+                                                    "SupportedOptions"),
+                                     G_VARIANT_TYPE ("(v)"),
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     NULL,
+                                     &error);
+  if (!ret)
+    {
+      g_warning ("Failed to get SupportedOptions property: %s", error->message);
+      return FALSE;
+    }
+
+  g_variant_get (ret, "(v)", &options);
+
+  return g_steal_pointer (&options);
 }
