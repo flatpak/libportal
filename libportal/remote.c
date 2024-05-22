@@ -424,7 +424,7 @@ get_screencast_interface_version_returned (GObject *object,
   g_variant_get_child (ret, 0, "v", &version_variant);
   call->portal->screencast_interface_version = g_variant_get_uint32 (version_variant);
 
-  get_remote_desktop_interface_version (call);
+  create_session (call);
 }
 
 static void
@@ -442,20 +442,6 @@ get_screencast_interface_version (CreateCall *call)
                           g_task_get_cancellable (call->task),
                           get_screencast_interface_version_returned,
                           call);
-}
-
-static void
-get_portal_interface_versions (CreateCall *call)
-{
-  g_assert (call != NULL);
-  g_assert (call->portal != NULL);
-
-  if (call->portal->screencast_interface_version == 0)
-    get_screencast_interface_version (call);
-  else if (call->portal->remote_desktop_interface_version == 0)
-    get_remote_desktop_interface_version (call);
-  else
-    create_session (call);
 }
 
 /**
@@ -502,7 +488,10 @@ xdp_portal_create_screencast_session (XdpPortal *portal,
   call->multiple = (flags & XDP_SCREENCAST_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
-  get_portal_interface_versions (call);
+  if (portal->screencast_interface_version == 0)
+    get_screencast_interface_version (call);
+  else
+    create_session (call);
 }
 
 /**
@@ -616,7 +605,10 @@ xdp_portal_create_remote_desktop_session_full (XdpPortal *portal,
   call->multiple = (flags & XDP_REMOTE_DESKTOP_FLAG_MULTIPLE) != 0;
   call->task = g_task_new (portal, cancellable, callback, data);
 
-  get_portal_interface_versions (call);
+  if (portal->remote_desktop_interface_version == 0)
+    get_remote_desktop_interface_version (call);
+  else
+    create_session (call);
 }
 
 /**
