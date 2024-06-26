@@ -388,7 +388,7 @@ _xdp_global_shortcuts_session_new (XdpPortal *portal, const char *session_path)
 void
 xdp_global_shortcuts_session_close (XdpGlobalShortcutsSession *session)
 {
-    _xdp_session_close (session->parent_session);
+    xdp_session_close (session->parent_session);
 }
 
 static void
