@@ -70,7 +70,7 @@ G_DEFINE_TYPE (XdpGlobalShortcutsSession, xdp_global_shortcuts_session, G_TYPE_O
 static gboolean
 _xdp_global_shortcuts_session_is_valid (XdpGlobalShortcutsSession *session)
 {
-  return XDP_IS_INPUT_CAPTURE_SESSION (session) && session->parent_session != NULL;
+  return XDP_IS_GLOBAL_SHORTCUTS_SESSION (session) && session->parent_session != NULL;
 }
 
 static void
@@ -103,7 +103,7 @@ xdp_global_shortcuts_session_finalize (GObject *object)
         }
 
       g_object_weak_unref (G_OBJECT (parent_session), parent_session_destroy, session);
-      session->parent_session->input_capture_session = NULL;
+      //session->parent_session->input_capture_session = NULL;
       g_clear_pointer (&session->parent_session, g_object_unref);
     }
 
@@ -193,10 +193,6 @@ typedef struct {
   char *request_path; /* object path for request */
   guint cancelled_id; /* signal id for cancelled gobject signal */
 
-  /* CreateSession only */
-  XdpParent *parent;
-  char *parent_handle;
-
   /* GetZones only */
   XdpGlobalShortcutsSession *session;
 
@@ -206,19 +202,10 @@ typedef struct {
 } Call;
 
 static void create_session (Call *call);
-static void get_zones (Call *call);
 
 static void
 call_free (Call *call)
 {
-  /* CreateSesssion */
-  if (call->parent)
-    {
-      call->parent->parent_unexport (call->parent);
-      xdp_parent_free (call->parent);
-    }
-  g_free (call->parent_handle);
-
   /* Generic */
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
@@ -330,8 +317,6 @@ shortcuts_changed (GDBusConnection *bus,
   call->portal = g_object_ref (portal);
   call->task = g_task_new (portal, NULL, shortcuts_changed_emit_signal, session);
   call->session = g_object_ref (session);
-
-  get_zones (call);
 }
 
 static void
@@ -389,14 +374,21 @@ deactivated (GDBusConnection *bus,
 static XdpGlobalShortcutsSession *
 _xdp_global_shortcuts_session_new (XdpPortal *portal, const char *session_path)
 {
-  g_autoptr(XdpSession) parent_session = _xdp_session_new (portal, session_path, XDP_SESSION_INPUT_CAPTURE);
-  g_autoptr(XdpGlobalShortcutsSession) session = g_object_new (XDP_TYPE_INPUT_CAPTURE_SESSION, NULL);
+  g_autoptr(XdpSession) parent_session = _xdp_session_new (portal, session_path, XDP_SESSION_GLOBAL_SHORTCUTS);
+  g_autoptr(XdpGlobalShortcutsSession) session = g_object_new (XDP_TYPE_GLOBAL_SHORTCUTS_SESSION, NULL);
 
   //parent_session->input_capture_session = session; /* weak ref */
   g_object_weak_ref (G_OBJECT (parent_session), parent_session_destroy, session);
   session->parent_session = g_object_ref(parent_session); /* strong ref */
 
   return g_object_ref(session);
+}
+
+
+void
+xdp_global_shortcuts_session_close (XdpGlobalShortcutsSession *session)
+{
+    _xdp_session_close (session->parent_session);
 }
 
 static void
@@ -471,16 +463,16 @@ get_zones_done (GDBusConnection *bus,
     }
 
   if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "InputCapture GetZones() canceled");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "GlobalShortcuts CreateSession() canceled");
   else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture GetZones() failed");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "GlobalShortcuts CreateSession() failed");
 
   if (response != 0)
     call_free (call);
 }
 
 static void
-get_zones (Call *call)
+bind_shortcuts (Call *call)
 {
   GVariantBuilder options;
   const char *session_id;
@@ -530,13 +522,16 @@ session_created (GDBusConnection *bus,
       g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
       call->signal_id = 0;
 
-      if (!g_variant_lookup (ret, "session_handle", "o", &call->session_path))
+      if (!g_variant_lookup (ret, "session_handle", "s", &call->session_path))
         {
           g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateSession failed to return a session handle");
           response = 2;
         }
-      else
-        get_zones (call);
+       else
+        {
+          call->session = _xdp_global_shortcuts_session_new (call->portal, call->session_path);
+          g_task_return_pointer (call->task, call->session, g_object_unref);
+        }
     }
   else if (response == 1)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "CreateSession canceled");
@@ -566,27 +561,11 @@ call_cancelled_cb (GCancellable *cancellable,
 }
 
 static void
-parent_exported (XdpParent *parent,
-                 const char *handle,
-                 gpointer data)
-{
-  Call *call = data;
-  call->parent_handle = g_strdup (handle);
-  create_session (call);
-}
-
-static void
 create_session (Call *call)
 {
   GVariantBuilder options;
   g_autofree char *session_token = NULL;
   GCancellable *cancellable;
-
-  if (call->parent_handle == NULL)
-    {
-      call->parent->parent_export (call->parent, parent_exported, call);
-      return;
-    }
 
   cancellable = g_task_get_cancellable (call->task);
   if (cancellable)
@@ -600,9 +579,9 @@ create_session (Call *call)
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.InputCapture",
+                          "org.freedesktop.portal.GlobalShortcuts",
                           "CreateSession",
-                          g_variant_new ("(sa{sv})", call->parent_handle, &options),
+                          g_variant_new ("(a{sv})", &options),
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
@@ -614,7 +593,6 @@ create_session (Call *call)
 /**
  * xdp_portal_create_global_shortcuts_session:
  * @portal: a [class@Portal]
- * @parent: (nullable): parent window information
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: (closure): data to pass to @callback
@@ -626,7 +604,6 @@ create_session (Call *call)
  */
 void
 xdp_portal_create_global_shortcuts_session (XdpPortal *portal,
-                                         XdpParent *parent,
                                          GCancellable *cancellable,
                                          GAsyncReadyCallback callback,
                                          gpointer data)
@@ -638,11 +615,6 @@ xdp_portal_create_global_shortcuts_session (XdpPortal *portal,
   call = g_new0 (Call, 1);
   call->portal = g_object_ref (portal);
   call->task = g_task_new (portal, cancellable, callback, data);
-
-  if (parent)
-    call->parent = xdp_parent_copy (parent);
-  else
-    call->parent_handle = g_strdup ("");
 
   create_session (call);
 }
@@ -718,7 +690,7 @@ xdp_global_shortcuts_session_connect_to_eis (XdpGlobalShortcutsSession  *session
 
   if (!_xdp_global_shortcuts_session_is_valid (session))
     {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, "Session is not an InputCapture session");
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, "Session is not a GlobalShortcuts session");
       return -1;
     }
 
@@ -883,147 +855,4 @@ xdp_global_shortcuts_session_list_shortcuts_finish (XdpGlobalShortcutsSession *s
   g_return_val_if_fail (g_task_is_valid (result, session), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
-}
-
-/**
- * xdp_global_shortcuts_session_enable:
- * @session: a [class@InputCaptureSession]
- *
- * Enables this input capture session. In the future, this client may receive
- * input events.
- */
-void
-xdp_global_shortcuts_session_enable (XdpGlobalShortcutsSession *session)
-{
-  XdpPortal *portal;
-  GVariantBuilder options;
-
-  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-
-  portal = session->parent_session->portal;
-
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-
-  g_dbus_connection_call  (portal->bus,
-                           PORTAL_BUS_NAME,
-                           PORTAL_OBJECT_PATH,
-                           "org.freedesktop.portal.InputCapture",
-                           "Enable",
-                           g_variant_new ("(oa{sv})",
-                                          session->parent_session->id,
-                                          &options),
-                           NULL,
-                           G_DBUS_CALL_FLAGS_NONE,
-                           1,
-                           NULL,
-                           NULL,
-                           NULL);
-}
-
-/**
- * xdp_global_shortcuts_session_disable:
- * @session: a [class@InputCaptureSession]
- *
- * Disables this input capture session.
- */
-void
-xdp_global_shortcuts_session_disable (XdpGlobalShortcutsSession *session)
-{
-  XdpPortal *portal;
-  GVariantBuilder options;
-
-  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-
-  portal = session->parent_session->portal;
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.InputCapture",
-                          "Disable",
-                          g_variant_new ("(oa{sv})",
-                                         session->parent_session->id,
-                                         &options),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          NULL,
-                          NULL,
-                          NULL);
-}
-
-static void
-release_session (XdpGlobalShortcutsSession   *session,
-                 guint                     activation_id,
-                 gboolean                  with_position,
-                 gdouble                   x,
-                 gdouble                   y)
-{
-  XdpPortal *portal;
-  GVariantBuilder options;
-
-  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_variant_builder_add (&options, "{sv}", "activation_id", g_variant_new_uint32 (activation_id));
-
-  if (with_position)
-    {
-      g_variant_builder_add (&options,
-                             "{sv}",
-                             "cursor_position",
-                             g_variant_new ("(dd)", x, y));
-    }
-
-  portal = session->parent_session->portal;
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.InputCapture",
-                          "Release",
-                          g_variant_new ("(oa{sv})",
-                                         session->parent_session->id,
-                                        &options),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          NULL,
-                          NULL,
-                          NULL);
-}
-
-/**
- * xdp_global_shortcuts_session_release:
- * @session: a [class@InputCaptureSession]
- *
- * Releases this input capture session without a suggested cursor position.
- */
-void
-xdp_global_shortcuts_session_release (XdpGlobalShortcutsSession *session,
-                                   guint                   activation_id)
-{
-  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-
-  release_session (session, activation_id, FALSE, 0, 0);
-}
-
-/**
- * xdp_global_shortcuts_session_release_at:
- * @session: a [class@InputCaptureSession]
- * @cursor_x_position: the suggested cursor x position once capture has been released
- * @cursor_y_position: the suggested cursor y position once capture has been released
- *
- * Releases this input capture session with a suggested cursor position.
- * Note that the implementation is not required to honour this position.
- */
-void
-xdp_global_shortcuts_session_release_at (XdpGlobalShortcutsSession *session,
-                                      guint                   activation_id,
-                                      gdouble                 cursor_x_position,
-                                      gdouble                 cursor_y_position)
-{
-  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-
-  release_session (session, activation_id, TRUE, cursor_x_position, cursor_y_position);
 }

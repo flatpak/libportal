@@ -850,11 +850,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkToggleButton">
                 <property name="visible">1</property>
                 <property name="xalign">0</property>
                 <property name="label">Request</property>
-                <signal name="clicked" handler="global_shortcuts_request" swapped="yes"/>
+                <signal name="clicked" handler="global_shortcuts_request"/>
               </object>
               <packing>
                 <property name="left-attach">1</property>
@@ -874,7 +874,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="globalshortcuts_activations">
                 <property name="visible">1</property>
                 <property name="halign">end</property>
                 <property name="label">activations</property>

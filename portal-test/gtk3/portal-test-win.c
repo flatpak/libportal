@@ -62,6 +62,7 @@ struct _PortalTestWin
 
   XdpPortal *portal;
   XdpSession *session;
+  XdpGlobalShortcutsSession *gs_session;
 
   GNetworkMonitor *monitor;
   GProxyResolver *resolver;
@@ -90,6 +91,8 @@ struct _PortalTestWin
 
   GtkWidget *screencast_label;
   GtkWidget *screencast_toggle;
+
+  GtkWidget *globalshortcuts_activations;
 
   GtkWidget *inputcapture_label;
   GtkWidget *inputcapture_toggle;
@@ -715,6 +718,77 @@ capture_input_release (GtkButton *button,
   /* FIXME */
 }
 
+
+static void
+globalshortcuts_session_created (GObject *source,
+                             GAsyncResult *result,
+                             gpointer data)
+{
+    XdpPortal *portal = XDP_PORTAL (source);
+    PortalTestWin *win = data;
+    g_autoptr(GError) error = NULL;
+    GList *zones;
+    g_autoptr (GString) s = NULL;
+    XdpGlobalShortcutsSession *session;
+
+    session = xdp_portal_create_global_shortcuts_session_finish (portal, result, &error);
+    if (session == NULL)
+    {
+        g_warning ("Failed to create GlobalShortcuts session: %s", error->message);
+        return;
+    }
+    win->gs_session = session;
+
+//    zones = xdp_input_capture_session_get_zones (XDP_INPUT_CAPTURE_SESSION (win->session));
+    s = g_string_new ("session");
+/*    for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
+    {
+        XdpInputCaptureZone *zone = elem->data;
+        guint w, h;
+        gint x, y;
+
+        g_object_get (zone,
+                     "width", &w,
+                     "height", &h,
+                     "x", &x,
+                     "y", &y,
+                     NULL);
+
+        g_string_append_printf (s, "%ux%u@%d,%d ", w, h, x, y);
+    }*/
+    gtk_label_set_label (GTK_LABEL (win->inputcapture_label), s->str);
+}
+
+static void
+globalshortcuts_session_start (PortalTestWin *win)
+{
+    g_clear_object (&win->session);
+
+    xdp_portal_create_global_shortcuts_session (win->portal,
+                                               NULL,
+                                               globalshortcuts_session_created,
+                                               win);
+}
+
+
+static void
+globalshortcuts_session_stop (PortalTestWin *win)
+{
+    xdp_global_shortcuts_session_close (win->gs_session);
+    g_clear_object (&win->gs_session);
+    gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "");
+}
+
+static void
+global_shortcuts_request (GtkButton *button,
+                         PortalTestWin *win)
+{
+    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+        globalshortcuts_session_start (win);
+    else
+        globalshortcuts_session_stop (win);
+}
+
 static void
 session_started (GObject *source,
                  GAsyncResult *result,
@@ -736,6 +810,8 @@ session_started (GObject *source,
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (win->screencast_toggle), FALSE);
       return;
     }
+
+
 
   s = g_string_new ("");
 
@@ -1401,6 +1477,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, open_directory);
   gtk_widget_class_bind_template_callback (widget_class, open_local);
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
+  gtk_widget_class_bind_template_callback (widget_class, global_shortcuts_request);
   gtk_widget_class_bind_template_callback (widget_class, capture_input);
   gtk_widget_class_bind_template_callback (widget_class, capture_input_release);
   gtk_widget_class_bind_template_callback (widget_class, screencast_toggled);
@@ -1426,6 +1503,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_logout);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_suspend);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_switch);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, globalshortcuts_activations);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inputcapture_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inputcapture_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, username);

@@ -33,13 +33,12 @@ G_DECLARE_FINAL_TYPE (XdpGlobalShortcutsSession, xdp_global_shortcuts_session, X
 
 XDP_PUBLIC
 void        xdp_portal_create_global_shortcuts_session (XdpPortal            *portal,
-                                                     XdpParent            *parent,
                                                      GCancellable         *cancellable,
                                                      GAsyncReadyCallback   callback,
                                                      gpointer              data);
 
 XDP_PUBLIC
-XdpGlobalShortcutsSession * xdp_portal_create_global_shortucuts_session_finish (XdpPortal     *portal,
+XdpGlobalShortcutsSession * xdp_portal_create_global_shortcuts_session_finish (XdpPortal     *portal,
                                                                          GAsyncResult  *result,
                                                                          GError       **error);
 
@@ -47,7 +46,7 @@ XDP_PUBLIC
 XdpSession  *xdp_global_shortcuts_session_get_session (XdpGlobalShortcutsSession *session);
 
 XDP_PUBLIC
-GList *     xdp_global_shortcuts_session_get_zones (XdpGlobalShortcutsSession *session);
+void xdp_global_shortcuts_session_close (XdpGlobalShortcutsSession *session);
 
 XDP_PUBLIC
 void        xdp_global_shortcuts_session_set_pointer_barriers (XdpGlobalShortcutsSession         *session,
@@ -62,23 +61,7 @@ GList *     xdp_global_shortcuts_session_set_pointer_barriers_finish (XdpGlobalS
                                                                    GError                 **error);
 
 XDP_PUBLIC
-void        xdp_global_shortcuts_session_enable (XdpGlobalShortcutsSession *session);
+void        xdp_global_shortcuts_session_release (XdpGlobalShortcutsSession *session);
 
-XDP_PUBLIC
-void        xdp_global_shortcuts_session_disable (XdpGlobalShortcutsSession *session);
-
-XDP_PUBLIC
-void        xdp_global_shortcuts_session_release_at (XdpGlobalShortcutsSession *session,
-                                                  guint                   activation_id,
-                                                  gdouble                 cursor_x_position,
-                                                  gdouble                 cursor_y_position);
-
-XDP_PUBLIC
-void        xdp_global_shortcuts_session_release (XdpGlobalShortcutsSession *session,
-                                               guint activation_id);
-
-XDP_PUBLIC
-int        xdp_global_shortcuts_session_connect_to_eis (XdpGlobalShortcutsSession  *session,
-                                                     GError                 **error);
 
 G_END_DECLS
