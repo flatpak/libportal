@@ -40,6 +40,13 @@ struct XdpGlobalShortcut {
     char *preferred_trigger;
 };
 
+struct XdpGlobalShortcutAssigned {
+    // Shortcut ID, Owned
+    char *name;
+    // Human-readable trigger description, Owned
+    char *trigger_description;
+};
+
 
 XDP_PUBLIC
 void        xdp_portal_create_global_shortcuts_session (XdpPortal            *portal,

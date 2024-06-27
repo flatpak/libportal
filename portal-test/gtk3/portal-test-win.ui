@@ -862,26 +862,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
-                <property name="visible">1</property>
-                <property name="hexpand">1</property>
-                <property name="label">Release</property>
-                <signal name="clicked" handler="global_shortcuts_release"/>
-              </object>
-              <packing>
-                <property name="left-attach">2</property>
-                <property name="top-attach">22</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel" id="globalshortcuts_activations">
                 <property name="visible">1</property>
                 <property name="halign">end</property>
                 <property name="label">activations</property>
               </object>
               <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">23</property>
+                <property name="left-attach">2</property>
+                <property name="top-attach">22</property>
               </packing>
             </child>
           </object>

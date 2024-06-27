@@ -728,47 +728,38 @@ globalshortcuts_bind_done (GObject *source,
     PortalTestWin *win = data;
     g_autoptr(GError) error = NULL;
     g_autoptr (GString) s = NULL;
-    XdpGlobalShortcutsSession *session;
+    XdpGlobalShortcutsSession *session = win->gs_session;
+    GArray *shortcuts;
 
-    session = xdp_global_shortcuts_session_bind_shortcuts_finish(session, result, &error);
-    if (session == NULL)
+    shortcuts = xdp_global_shortcuts_session_bind_shortcuts_finish(session, result, &error);
+    if (shortcuts == NULL)
     {
-        g_warning ("Failed to create GlobalShortcuts session: %s", error->message);
+        g_warning ("Failed to bind GlobalShortcuts: %s", error->message);
+        gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "failed to bind");
         return;
     }
-    win->gs_session = session;
 
-    s = g_string_new ("session");
-    /*    for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
+    s = g_string_new ("");
+    for (guint i = 0; i < shortcuts->len; i++)
     {
-        XdpInputCaptureZone *zone = elem->data;
-        guint w, h;
-        gint x, y;
-
-        g_object_get (zone,
-                     "width", &w,
-                     "height", &h,
-                     "x", &x,
-                     "y", &y,
-                     NULL);
-
-        g_string_append_printf (s, "%ux%u@%d,%d ", w, h, x, y);
-    }*/
-    gtk_label_set_label (GTK_LABEL (win->inputcapture_label), s->str);
+        struct XdpGlobalShortcutAssigned shortcut = ((struct XdpGlobalShortcutAssigned*)shortcuts->data)[i];
+        g_string_append_printf (s, "%s: %s ", shortcut.name, shortcut.trigger_description);
+    }
+    gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), s->str);
 }
 
 static void
-globalshortcuts_bind(XdpGlobalShortcutsSession *session)
+globalshortcuts_bind(PortalTestWin *win)
 {
     struct XdpGlobalShortcut s[2] = {{.description = "Do Foo", .name = "foo", .preferred_trigger = "CTRL+F"},
                                      {.description = "Do Bar", .name = "bar", .preferred_trigger = NULL}};
     GArray shortcuts = {.data=(char*)s, .len=2};
-    xdp_global_shortcuts_session_bind_shortcuts(session,
+    xdp_global_shortcuts_session_bind_shortcuts(win->gs_session,
                                                 &shortcuts,
                                                 NULL,
                                                 NULL,
                                                 globalshortcuts_bind_done,
-                                                NULL);
+                                                win);
 }
 
 static void
@@ -779,7 +770,6 @@ globalshortcuts_session_created (GObject *source,
     XdpPortal *portal = XDP_PORTAL (source);
     PortalTestWin *win = data;
     g_autoptr(GError) error = NULL;
-    g_autoptr (GString) s = NULL;
     XdpGlobalShortcutsSession *session;
 
     session = xdp_portal_create_global_shortcuts_session_finish (portal, result, &error);
@@ -790,24 +780,8 @@ globalshortcuts_session_created (GObject *source,
     }
     win->gs_session = session;
 
-    s = g_string_new ("session");
-/*    for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
-    {
-        XdpInputCaptureZone *zone = elem->data;
-        guint w, h;
-        gint x, y;
-
-        g_object_get (zone,
-                     "width", &w,
-                     "height", &h,
-                     "x", &x,
-                     "y", &y,
-                     NULL);
-
-        g_string_append_printf (s, "%ux%u@%d,%d ", w, h, x, y);
-    }*/
-    gtk_label_set_label (GTK_LABEL (win->inputcapture_label), s->str);
-    globalshortcuts_bind(win->gs_session);
+    gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "created");
+    globalshortcuts_bind(win);
 }
 
 static void

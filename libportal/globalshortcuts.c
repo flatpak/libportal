@@ -414,8 +414,6 @@ bind_shortcuts_done (GDBusConnection *bus,
 
   if (response == 0)
     {
-      GVariant *zones = NULL;
-      guint32 zone_set;
       XdpGlobalShortcutsSession *session = call->session;
 
       g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
@@ -460,12 +458,13 @@ bind_shortcuts_done (GDBusConnection *bus,
                                                 session,
                                                 NULL);
         }
+      g_task_return_pointer (call->task, ret, g_object_unref);
     }
 
   if (response == 1)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "GlobalShortcuts CreateSession() canceled");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "GlobalShortcuts BindShortcuts() canceled");
   else if (response == 2)
-    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "GlobalShortcuts CreateSession() failed");
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "GlobalShortcuts BindShortcuts() failed");
 
   if (response != 0)
     call_free (call);
@@ -868,14 +867,51 @@ xdp_global_shortcuts_session_bind_shortcuts_finish (XdpGlobalShortcutsSession *s
 {
     GVariant *r;
     g_return_val_if_fail (XDP_IS_GLOBAL_SHORTCUTS_SESSION (session), NULL);
-    g_return_val_if_fail (g_task_is_valid (result, session), NULL);
+    g_return_val_if_fail (g_task_is_valid (result, session->parent_session->portal), NULL);
 
     r = g_task_propagate_pointer (G_TASK (result), error);
+    if (r)
+    {
+        GVariantIter *items;
+        if (g_variant_lookup(r, "shortcuts", "a(sa{sv})", &items))
+        {
+            //GVariantIter items;
+            char *name;
+            GVariant *item;
+            struct XdpGlobalShortcutAssigned *shortcuts;
+            GArray *ret;
+            guint i = 0;
+            //g_print("%s", g_variant_print(s, TRUE));
+//            g_variant_iter_init(&items, s);
 
-    if (session)
-        return session;
+            shortcuts = g_new0(struct XdpGlobalShortcutAssigned,
+                               g_variant_iter_n_children(items));
+
+            while (g_variant_iter_next(items, "(s@a{sv})", &name, &item))
+            {
+                struct XdpGlobalShortcutAssigned *shortcut = &shortcuts[i];
+                shortcut->name = name;
+                g_variant_lookup(item, "s", "trigger_description", &shortcut->trigger_description);
+                i++;
+            }
+            ret = g_array_new_take(shortcuts,
+                                   g_variant_iter_n_children(items),
+                                   TRUE,
+                                   sizeof(struct XdpGlobalShortcutAssigned));
+
+            return ret;
+        }
+        else
+        {
+            g_debug("%s", g_variant_print(r, TRUE));
+            g_error("GlobalShortcuts::BindShortcuts() did not return \"shortcuts\" key.");
+            return NULL;
+        }
+    }
     else
+      {
         return NULL;
+      }
 }
 
 /**
