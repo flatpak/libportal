@@ -889,14 +889,10 @@ xdp_global_shortcuts_session_bind_shortcuts_finish (XdpGlobalShortcutsSession *s
 
             while (g_variant_iter_next(items, "(s@a{sv})", &name, &item))
             {
-                GVariant* trigger;
                 struct XdpGlobalShortcutAssigned *shortcut = &shortcuts[i];
                 shortcut->name = name;
                 g_print(g_variant_print(item, TRUE));
-                if (trigger = g_variant_lookup_value(item, "trigger_description", "s"))
-                {
-                    g_variant_get(trigger, "s", &shortcut->trigger_description);
-                }
+                g_variant_lookup(item, "trigger_description", "s", &shortcut->trigger_description);
                 i++;
             }
             ret = g_array_new_take(shortcuts,
