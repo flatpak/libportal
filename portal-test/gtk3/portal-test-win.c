@@ -720,11 +720,20 @@ capture_input_release (GtkButton *button,
 
 
 static void
+globalshortcuts_activated (XdpGlobalShortcutsSession *session,
+                          const char *shortcut_id,
+                          guint timestamp,
+                  gpointer user_data)
+{
+    GtkLabel *label = GTK_LABEL (user_data);
+    gtk_label_set_text(label, shortcut_id);
+}
+
+static void
 globalshortcuts_bind_done (GObject *source,
                           GAsyncResult *result,
                           gpointer data)
 {
-    XdpPortal *portal = XDP_PORTAL (source);
     PortalTestWin *win = data;
     g_autoptr(GError) error = NULL;
     g_autoptr (GString) s = NULL;
@@ -746,6 +755,8 @@ globalshortcuts_bind_done (GObject *source,
         g_string_append_printf (s, "%s: %s ", shortcut.name, shortcut.trigger_description);
     }
     gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), s->str);
+
+    g_signal_connect (session, "activated", G_CALLBACK (globalshortcuts_activated), win->globalshortcuts_activations);
 }
 
 static void
