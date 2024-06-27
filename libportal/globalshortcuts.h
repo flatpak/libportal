@@ -31,6 +31,16 @@ XDP_PUBLIC
 G_DECLARE_FINAL_TYPE (XdpGlobalShortcutsSession, xdp_global_shortcuts_session, XDP, GLOBAL_SHORTCUTS_SESSION, GObject)
 
 
+struct XdpGlobalShortcut {
+    // Shortcut ID, Owned by caller
+    char *name;
+    // Shortcut description, Owned by caller
+    char *description;
+    // Shortcut suggested trigger, nullable, Owned by caller
+    char *preferred_trigger;
+};
+
+
 XDP_PUBLIC
 void        xdp_portal_create_global_shortcuts_session (XdpPortal            *portal,
                                                      GCancellable         *cancellable,
@@ -49,14 +59,15 @@ XDP_PUBLIC
 void xdp_global_shortcuts_session_close (XdpGlobalShortcutsSession *session);
 
 XDP_PUBLIC
-void        xdp_global_shortcuts_session_set_pointer_barriers (XdpGlobalShortcutsSession         *session,
-                                                            GList                          *barriers,
+void        xdp_global_shortcuts_session_bind_shortcuts(XdpGlobalShortcutsSession         *session,
+                                                 // Contains XdpGlobalShortcut elements
+                                                            GArray                          *shortcuts, char *parent_window,
                                                             GCancellable                   *cancellable,
                                                             GAsyncReadyCallback             callback,
                                                             gpointer                        data);
 
 XDP_PUBLIC
-GList *     xdp_global_shortcuts_session_set_pointer_barriers_finish (XdpGlobalShortcutsSession  *session,
+GArray *     xdp_global_shortcuts_session_bind_shortcuts_finish (XdpGlobalShortcutsSession  *session,
                                                                    GAsyncResult            *result,
                                                                    GError                 **error);
 

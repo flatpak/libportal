@@ -392,7 +392,7 @@ xdp_global_shortcuts_session_close (XdpGlobalShortcutsSession *session)
 }
 
 static void
-get_zones_done (GDBusConnection *bus,
+bind_shortcuts_done (GDBusConnection *bus,
                 const char *sender_name,
                 const char *object_path,
                 const char *interface_name,
@@ -469,31 +469,6 @@ get_zones_done (GDBusConnection *bus,
 
   if (response != 0)
     call_free (call);
-}
-
-static void
-bind_shortcuts (Call *call)
-{
-  GVariantBuilder options;
-  const char *session_id;
-
-  /* May be called after CreateSession before we have an XdpGlobalShortcutsSession, or by the
-   * ZoneChanged signal when we do have a session */
-  session_id = call->session ? call->session->parent_session->id : call->session_path;
-
-  prep_call (call, get_zones_done, &options, NULL);
-  g_dbus_connection_call (call->portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.GlobalShortcuts",
-                          "BindShortcuts",
-                          g_variant_new ("(oa{sv})", session_id, &options),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          g_task_get_cancellable (call->task),
-                          call_returned,
-                          call);
 }
 
 static void
@@ -801,6 +776,109 @@ gobject_ref_wrapper (gpointer data, gpointer user_data)
 }
 
 /**
+ * xdp_global_shortcuts_session_bind_shortcuts:
+ * @session: a [class@GlobalShortcutsSession]
+ * @shortcuts: GArray<XdpGlobalShortcut>
+ *
+ * Bind shortcuts and list triggers.
+ */
+void xdp_global_shortcuts_session_bind_shortcuts(XdpGlobalShortcutsSession         *session,
+                                                // Contains XdpGlobalShortcut elements
+                                                GArray                          *shortcuts,
+                                                char                          *parent_window,
+                                                GCancellable                   *cancellable,
+                                                GAsyncReadyCallback             callback,
+                                                gpointer                        data)
+{
+    Call *call;
+    XdpPortal *portal;
+    guint i;
+    GVariantBuilder options;
+    GVariantBuilder shortcuts_builder;
+    g_autoptr(GVariantType) vtype;
+
+    g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
+    g_return_if_fail (shortcuts != NULL);
+
+    g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+
+    portal = session->parent_session->portal;
+
+    call = g_new0 (Call, 1);
+    call->portal = g_object_ref (portal);
+    call->task = g_task_new (portal, cancellable, callback, data);
+
+    prep_call (call, bind_shortcuts_done, &options, NULL);
+
+    vtype = g_variant_type_new ("a(sa{sv})");
+
+    g_variant_builder_init (&shortcuts_builder, vtype);
+
+    for (i = 0; i < shortcuts->len; i++) {
+        GVariantDict dict;
+        g_auto (GStrv) combos = NULL;
+        struct XdpGlobalShortcut shortcut = ((struct XdpGlobalShortcut*)shortcuts->data)[i];
+
+        g_variant_dict_init (&dict, NULL);
+        if (shortcut.preferred_trigger)
+            g_variant_dict_insert (&dict, "preferred_trigger", "s", shortcut.preferred_trigger);
+        g_variant_dict_insert (&dict, "description", "s", shortcut.description);
+
+        g_variant_builder_add (&shortcuts_builder, "(s@a{sv})", shortcut.name, g_variant_dict_end (&dict));
+    }
+
+    if (parent_window == NULL)
+        parent_window = "";
+
+    GVariant *v =                            g_variant_new ("(o@a(sa{sv})s@a{sv})",
+                                session->parent_session->id,
+                                g_variant_builder_end(&shortcuts_builder),
+                                parent_window,
+                                g_variant_builder_end(&options));
+
+    g_dbus_connection_call (call->portal->bus,
+                           PORTAL_BUS_NAME,
+                           PORTAL_OBJECT_PATH,
+                           "org.freedesktop.portal.GlobalShortcuts",
+                           "BindShortcuts",
+                           v,
+                           NULL,
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           g_task_get_cancellable (call->task),
+                           call_returned,
+                           call);
+}
+
+
+/**
+ * xdp_global_shortcuts_session_bind_shortcuts_finish:
+ * @session: a [class@GlobalShortcutsSession]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes the GlobalShortcuts BindShortcuts request.
+ *
+ * Returns: (transfer full): an array of [GlobalShortcutAssigned].
+ */
+GArray *
+xdp_global_shortcuts_session_bind_shortcuts_finish (XdpGlobalShortcutsSession *session,
+                                                  GAsyncResult *result,
+                                                  GError **error)
+{
+    GVariant *r;
+    g_return_val_if_fail (XDP_IS_GLOBAL_SHORTCUTS_SESSION (session), NULL);
+    g_return_val_if_fail (g_task_is_valid (result, session), NULL);
+
+    r = g_task_propagate_pointer (G_TASK (result), error);
+
+    if (session)
+        return session;
+    else
+        return NULL;
+}
+
+/**
  * xdp_global_shortcuts_session_list_shortcuts:
  * @session: a [class@GlobalShortcutsSession]
  *
@@ -856,3 +934,4 @@ xdp_global_shortcuts_session_list_shortcuts_finish (XdpGlobalShortcutsSession *s
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
+

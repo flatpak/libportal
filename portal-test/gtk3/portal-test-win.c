@@ -720,18 +720,17 @@ capture_input_release (GtkButton *button,
 
 
 static void
-globalshortcuts_session_created (GObject *source,
-                             GAsyncResult *result,
-                             gpointer data)
+globalshortcuts_bind_done (GObject *source,
+                          GAsyncResult *result,
+                          gpointer data)
 {
     XdpPortal *portal = XDP_PORTAL (source);
     PortalTestWin *win = data;
     g_autoptr(GError) error = NULL;
-    GList *zones;
     g_autoptr (GString) s = NULL;
     XdpGlobalShortcutsSession *session;
 
-    session = xdp_portal_create_global_shortcuts_session_finish (portal, result, &error);
+    session = xdp_global_shortcuts_session_bind_shortcuts_finish(session, result, &error);
     if (session == NULL)
     {
         g_warning ("Failed to create GlobalShortcuts session: %s", error->message);
@@ -739,9 +738,8 @@ globalshortcuts_session_created (GObject *source,
     }
     win->gs_session = session;
 
-//    zones = xdp_input_capture_session_get_zones (XDP_INPUT_CAPTURE_SESSION (win->session));
     s = g_string_new ("session");
-/*    for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
+    /*    for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
     {
         XdpInputCaptureZone *zone = elem->data;
         guint w, h;
@@ -760,9 +758,62 @@ globalshortcuts_session_created (GObject *source,
 }
 
 static void
+globalshortcuts_bind(XdpGlobalShortcutsSession *session)
+{
+    struct XdpGlobalShortcut s[2] = {{.description = "Do Foo", .name = "foo", .preferred_trigger = "CTRL+F"},
+                                     {.description = "Do Bar", .name = "bar", .preferred_trigger = NULL}};
+    GArray shortcuts = {.data=(char*)s, .len=2};
+    xdp_global_shortcuts_session_bind_shortcuts(session,
+                                                &shortcuts,
+                                                NULL,
+                                                NULL,
+                                                globalshortcuts_bind_done,
+                                                NULL);
+}
+
+static void
+globalshortcuts_session_created (GObject *source,
+                             GAsyncResult *result,
+                             gpointer data)
+{
+    XdpPortal *portal = XDP_PORTAL (source);
+    PortalTestWin *win = data;
+    g_autoptr(GError) error = NULL;
+    g_autoptr (GString) s = NULL;
+    XdpGlobalShortcutsSession *session;
+
+    session = xdp_portal_create_global_shortcuts_session_finish (portal, result, &error);
+    if (session == NULL)
+    {
+        g_warning ("Failed to create GlobalShortcuts session: %s", error->message);
+        return;
+    }
+    win->gs_session = session;
+
+    s = g_string_new ("session");
+/*    for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
+    {
+        XdpInputCaptureZone *zone = elem->data;
+        guint w, h;
+        gint x, y;
+
+        g_object_get (zone,
+                     "width", &w,
+                     "height", &h,
+                     "x", &x,
+                     "y", &y,
+                     NULL);
+
+        g_string_append_printf (s, "%ux%u@%d,%d ", w, h, x, y);
+    }*/
+    gtk_label_set_label (GTK_LABEL (win->inputcapture_label), s->str);
+    globalshortcuts_bind(win->gs_session);
+}
+
+static void
 globalshortcuts_session_start (PortalTestWin *win)
 {
-    g_clear_object (&win->session);
+    g_clear_object (&win->gs_session);
 
     xdp_portal_create_global_shortcuts_session (win->portal,
                                                NULL,
@@ -779,14 +830,20 @@ globalshortcuts_session_stop (PortalTestWin *win)
     gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "");
 }
 
+
+
 static void
 global_shortcuts_request (GtkButton *button,
                          PortalTestWin *win)
 {
     if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+      {
         globalshortcuts_session_start (win);
+      }
     else
+      {
         globalshortcuts_session_stop (win);
+      }
 }
 
 static void
