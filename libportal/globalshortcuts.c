@@ -57,12 +57,7 @@ struct _XdpGlobalShortcutsSession
 {
   GObject parent_instance;
   XdpSession *parent_session; /* strong ref */
-
-  GList *zones;
-
   guint signal_ids[SIGNAL_LAST_SIGNAL];
-  guint zone_serial;
-  guint zone_set;
 };
 
 G_DEFINE_TYPE (XdpGlobalShortcutsSession, xdp_global_shortcuts_session, G_TYPE_OBJECT)
@@ -103,11 +98,9 @@ xdp_global_shortcuts_session_finalize (GObject *object)
         }
 
       g_object_weak_unref (G_OBJECT (parent_session), parent_session_destroy, session);
-      //session->parent_session->input_capture_session = NULL;
+
       g_clear_pointer (&session->parent_session, g_object_unref);
     }
-
-  g_list_free_full (g_steal_pointer (&session->zones), g_object_unref);
 
   G_OBJECT_CLASS (xdp_global_shortcuts_session_parent_class)->finalize (object);
 }
@@ -178,8 +171,6 @@ static void
 xdp_global_shortcuts_session_init (XdpGlobalShortcutsSession *session)
 {
   session->parent_session = NULL;
-  session->zones = NULL;
-  session->zone_set = 0;
   for (guint i = 0; i < SIGNAL_LAST_SIGNAL; i++)
     session->signal_ids[i] = 0;
 }
@@ -195,9 +186,6 @@ typedef struct {
 
   /* GetZones only */
   XdpGlobalShortcutsSession *session;
-
-  /* SetPointerBarrier only */
-  GList *barriers;
 
 } Call;
 
@@ -286,7 +274,7 @@ shortcuts_changed_emit_signal (GObject *source_object,
   GVariantBuilder options;
 
   g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
-  g_variant_builder_add (&options, "{sv}", "zone_set", g_variant_new_uint32 (session->zone_set - 1));
+//  g_variant_builder_add (&options, "{sv}", "zone_set", g_variant_new_uint32 (session->zone_set - 1));
 
   g_signal_emit (session, signals[SIGNAL_SHORTCUTS_CHANGED], 0, g_variant_new ("a{sv}", &options));
 }
@@ -713,25 +701,10 @@ list_shortcuts_done (GDBusConnection *bus,
   Call *call = data;
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
-  GVariant *failed = NULL;
   GList *failed_list = NULL;
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
-  if (g_variant_lookup (ret, "failed_barriers", "@au", &failed))
-    {
-      const guint *failed_barriers = NULL;
-      gsize n_elements;
-      GList *it = call->barriers;
-
-      failed_barriers = g_variant_get_fixed_array (failed, &n_elements, sizeof (guint32));
-
-    }
-
-  /* all failed barriers have an extra ref in failed_list, so we can unref all barriers
-     in our original list */
-  free_barrier_list (call->barriers);
-  call->barriers = NULL;
   g_task_return_pointer (call->task, failed_list,  (GDestroyNotify)free_barrier_list);
 }
 
@@ -740,38 +713,22 @@ static void
 list_shortcuts (Call *call)
 {
   GVariantBuilder options;
-  GVariantBuilder barriers;
-  g_autoptr(GVariantType) vtype;
-
   prep_call (call, list_shortcuts_done, &options, NULL);
-
-  vtype = g_variant_type_new ("aa{sv}");
-
-  g_variant_builder_init (&barriers, vtype);
-
 
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
                           "org.freedesktop.portal.GlobalShortcuts",
                           "ListShortcuts",
-                          g_variant_new ("(oa{sv}aa{sv}u)",
+                          g_variant_new ("(oa{sv})",
                                          call->session->parent_session->id,
-                                         &options,
-                                         &barriers,
-                                         call->session->zone_set),
+                                         &options),
                           NULL,
                           G_DBUS_CALL_FLAGS_NONE,
                           -1,
                           g_task_get_cancellable (call->task),
                           call_returned,
                           call);
-}
-
-static void
-gobject_ref_wrapper (gpointer data, gpointer user_data)
-{
-  g_object_ref (G_OBJECT (data));
 }
 
 /**
@@ -923,7 +880,6 @@ xdp_global_shortcuts_session_bind_shortcuts_finish (XdpGlobalShortcutsSession *s
  */
 void
 xdp_global_shortcuts_session_list_shortcuts (XdpGlobalShortcutsSession         *session,
-                                                GList                          *barriers,
                                                 GCancellable                   *cancellable,
                                                 GAsyncReadyCallback             callback,
                                                 gpointer                        data)
@@ -932,19 +888,14 @@ xdp_global_shortcuts_session_list_shortcuts (XdpGlobalShortcutsSession         *
   XdpPortal *portal;
 
   g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-  g_return_if_fail (barriers != NULL);
 
   portal = session->parent_session->portal;
 
-  /* The list is ours, but we ref each object so we can create the list for the
-   * returned barriers during _finish*/
-  g_list_foreach (barriers, gobject_ref_wrapper, NULL);
 
   call = g_new0 (Call, 1);
   call->portal = g_object_ref (portal);
   call->session = g_object_ref (session);
   call->task = g_task_new (session, cancellable, callback, data);
-  call->barriers = barriers;
 
   list_shortcuts (call);
 }
