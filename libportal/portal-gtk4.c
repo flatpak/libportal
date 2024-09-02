@@ -86,7 +86,12 @@ _xdp_parent_unexport_gtk (XdpParent *parent)
   if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (GTK_WIDGET (parent->object))))
     {
       GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
+
+#if GTK_CHECK_VERSION(4, 12, 0)
+      gdk_wayland_toplevel_drop_exported_handle (GDK_TOPLEVEL (surface), parent->exported_handle);
+#else
       gdk_wayland_toplevel_unexport_handle (GDK_TOPLEVEL (surface));
+#endif
     }
 #endif
 }
