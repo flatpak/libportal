@@ -1,3 +1,13 @@
+Changes in 0.8.0, 02-09-2024
+==========================
+
+- Add API to allow for persistence on RemoteDesktop sessions
+- Implement support for the Input Capture portal
+- Add support for Qt 6
+- Support xdg-foreign with Qt 6
+- Fix screencasting on wlroots-based compositors
+
+
 Changes in 0.7.1, 09-09-2023
 ==========================
 
