@@ -37,6 +37,7 @@ struct _XdpParent {
   XdpParentUnexport parent_unexport;
   GObject *object;
   XdpParentExported callback;
+  char *exported_handle;
   gpointer data;
 };
 

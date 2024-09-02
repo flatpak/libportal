@@ -48,6 +48,10 @@ _xdp_parent_export_qt (XdpParent *parent,
   if (const auto services = dynamic_cast<QGenericUnixServices*>(QGuiApplicationPrivate::platformIntegration()->services()))
     {
       g_autofree char *handle = g_strdup(services->portalWindowIdentifier(w).toUtf8().constData());
+
+      g_assert (parent->exported_handle == NULL);
+
+      parent->exported_handle = g_strdup (handle);
       callback (parent, handle, data);
       return TRUE;
     }
@@ -57,6 +61,10 @@ _xdp_parent_export_qt (XdpParent *parent,
     {
       guint32 xid = (guint32) w->winId ();
       g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
+
+      g_assert (parent->exported_handle == NULL);
+
+      parent->exported_handle = g_strdup (handle);
       callback (parent, handle, data);
       return TRUE;
     }

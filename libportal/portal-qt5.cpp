@@ -38,6 +38,10 @@ _xdp_parent_export_qt (XdpParent *parent,
       if (w) {
         guint32 xid = (guint32) w->winId ();
         g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
+
+        g_assert (parent->exported_handle == NULL);
+
+        parent->exported_handle = g_strdup (handle);
         callback (parent, handle, data);
         return TRUE;
       }

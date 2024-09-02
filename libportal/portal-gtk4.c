@@ -37,6 +37,10 @@ _xdp_parent_exported_wayland (GdkToplevel *toplevel,
 {
   XdpParent *parent = data;
   g_autofree char *handle_str = g_strdup_printf ("wayland:%s", handle);
+
+  g_assert (parent->exported_handle == NULL);
+
+  parent->exported_handle = g_strdup (handle);
   parent->callback (parent, handle_str, parent->data);
 }
 
@@ -51,6 +55,10 @@ _xdp_parent_export_gtk (XdpParent         *parent,
       GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (parent->object));
       guint32 xid = (guint32) gdk_x11_surface_get_xid (surface);
       g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
+
+      g_assert (parent->exported_handle == NULL);
+
+      parent->exported_handle = g_strdup (handle);
       callback (parent, handle, data);
       return TRUE;
     }
