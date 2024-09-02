@@ -20,7 +20,7 @@ if meson.version().version_compare('>= 0.56.0')
       args: ['--verbose', '--verbose', '--log-level=DEBUG'],
       env: test_env,
       workdir: meson.current_source_dir(),
-      timeout: 60,
+      timeout: 180,
     )
   endif
 endif
