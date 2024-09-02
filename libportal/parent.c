@@ -26,14 +26,11 @@
  *
  * Parent window abstraction.
  *
- * The [struct@Parent] struct provides an abstract way to represent
- * a window, without introducing a dependency on a toolkit
- * library.
+ * The [struct@Parent] struct provides an abstract way to represent a window,
+ * without introducing a dependency on a toolkit library.
  *
- * An XdpParent implementation for GTK is included in the
- * `portal-gtk3.h` and `portal-gtk4.h` header files, in the form of inline functions.
- * To create a XdpParent for a GTK window, use
- * `xdp_parent_new_gtk()`.
+ * XdpParent implementations for GTK 3, GTK 4, Qt 5, and Qt 6 are available as
+ * separate libraries.
  */
 G_DEFINE_BOXED_TYPE (XdpParent, xdp_parent, xdp_parent_copy, xdp_parent_free)
 
