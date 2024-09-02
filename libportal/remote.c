@@ -424,7 +424,10 @@ get_remote_desktop_interface_version_returned (GObject *object,
   g_variant_get_child (ret, 0, "v", &version_variant);
   call->portal->remote_desktop_interface_version = g_variant_get_uint32 (version_variant);
 
-  create_session (call);
+  if (call->portal->screencast_interface_version == 0)
+    get_screencast_interface_version (call);
+  else
+    create_session (call);
 }
 
 static void
