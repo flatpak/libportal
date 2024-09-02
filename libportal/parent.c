@@ -56,6 +56,7 @@ xdp_parent_copy (XdpParent *source)
   parent->parent_unexport = source->parent_unexport;
   g_set_object (&parent->object, source->object);
   parent->data = source->data;
+  parent->exported_handle = g_strdup (source->exported_handle);
 
   return parent;
 }
@@ -69,6 +70,7 @@ xdp_parent_copy (XdpParent *source)
 void
 xdp_parent_free (XdpParent *parent)
 {
+  g_clear_pointer (&parent->exported_handle, g_free);
   g_clear_object (&parent->object);
   g_free (parent);
 }

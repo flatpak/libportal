@@ -37,6 +37,10 @@ _xdp_parent_exported_wayland (GdkWindow  *window,
 {
   XdpParent *parent = data;
   g_autofree char *handle_str = g_strdup_printf ("wayland:%s", handle);
+
+  g_assert (parent->exported_handle == NULL);
+
+  parent->exported_handle = g_strdup (handle);
   parent->callback (parent, handle_str, parent->data);
 }
 
@@ -51,6 +55,10 @@ _xdp_parent_export_gtk (XdpParent         *parent,
       GdkWindow *w = gtk_widget_get_window (GTK_WIDGET (parent->object));
       guint32 xid = (guint32) gdk_x11_window_get_xid (w);
       g_autofree char *handle = g_strdup_printf ("x11:%x", xid);
+
+      g_assert (parent->exported_handle == NULL);
+
+      parent->exported_handle = g_strdup (handle);
       callback (parent, handle, data);
       return TRUE;
     }
