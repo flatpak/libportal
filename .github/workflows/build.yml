@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y libglib2.0 gettext dbus meson gi-docgen libgirepository1.0-dev libgtk-3-dev libgtk-4-dev valac python3-dbusmock
+          apt-get install -y libglib2.0 gettext dbus meson gi-docgen libgirepository1.0-dev libgtk-3-dev libgtk-4-dev valac python3-dbusmock python3-pytest
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Check out libportal
         uses: actions/checkout@v3
@@ -32,6 +32,9 @@ jobs:
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled
       - name: Build libportal
         run: ninja -C_build
+      - name: Run libportal tests
+        working-directory: _build
+        run: meson test --verbose --print-errorlogs
 
   fedora:
     name: Fedora
@@ -51,6 +54,9 @@ jobs:
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled -Dbackend-qt5=enabled -Dbackend-qt6=enabled
       - name: Build libportal
         run: ninja -C_build
+      - name: Run libportal tests
+        working-directory: _build
+        run: meson test --verbose --print-errorlogs
 
   abi-check:
     name: ABI check
