@@ -563,7 +563,7 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
 }
 
 /**
- * xdp_portal_create_remote_desktop_session_full:
+ * xdp_portal_create_remote_desktop_session_full: (finish-func xdp_portal_create_remote_desktop_session_finish)
  * @portal: a [class@Portal]
  * @devices: which kinds of input devices to ofer in the new dialog
  * @outputs: which kinds of source to offer in the dialog
