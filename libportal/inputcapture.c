@@ -987,7 +987,8 @@ set_pointer_barriers (Call *call)
 }
 
 static void
-gobject_ref_wrapper (gpointer data, gpointer user_data)
+gobject_ref_wrapper (gpointer data,
+                     gpointer user_data)
 {
   g_object_ref (G_OBJECT (data));
 }
@@ -1009,11 +1010,11 @@ gobject_ref_wrapper (gpointer data, gpointer user_data)
  * that barrier. Failed barriers have the property set to a %FALSE value.
  */
 void
-xdp_input_capture_session_set_pointer_barriers (XdpInputCaptureSession         *session,
-                                                GList                          *barriers,
-                                                GCancellable                   *cancellable,
-                                                GAsyncReadyCallback             callback,
-                                                gpointer                        data)
+xdp_input_capture_session_set_pointer_barriers (XdpInputCaptureSession *session,
+                                                GList                  *barriers,
+                                                GCancellable           *cancellable,
+                                                GAsyncReadyCallback     callback,
+                                                gpointer                data)
 {
   Call *call;
   XdpPortal *portal;
@@ -1049,9 +1050,9 @@ xdp_input_capture_session_set_pointer_barriers (XdpInputCaptureSession         *
  */
 
 GList *
-xdp_input_capture_session_set_pointer_barriers_finish (XdpInputCaptureSession *session,
-                                                       GAsyncResult           *result,
-                                                       GError                **error)
+xdp_input_capture_session_set_pointer_barriers_finish (XdpInputCaptureSession  *session,
+                                                       GAsyncResult            *result,
+                                                       GError                 **error)
 {
   g_return_val_if_fail (_xdp_input_capture_session_is_valid (session), NULL);
   g_return_val_if_fail (g_task_is_valid (result, session), NULL);
@@ -1128,11 +1129,11 @@ xdp_input_capture_session_disable (XdpInputCaptureSession *session)
 }
 
 static void
-release_session (XdpInputCaptureSession   *session,
-                 guint                     activation_id,
-                 gboolean                  with_position,
-                 gdouble                   x,
-                 gdouble                   y)
+release_session (XdpInputCaptureSession *session,
+                 guint                   activation_id,
+                 gboolean                with_position,
+                 gdouble                 x,
+                 gdouble                 y)
 {
   XdpPortal *portal;
   GVariantBuilder options;
