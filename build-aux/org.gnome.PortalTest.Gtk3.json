@@ -1,7 +1,7 @@
 {
     "app-id": "org.gnome.PortalTest.Gtk3",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "45",
+    "runtime-version": "46",
     "sdk": "org.gnome.Sdk",
     "command": "portal-test-gtk3",
     "finish-args": [
