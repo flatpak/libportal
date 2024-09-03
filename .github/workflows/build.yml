@@ -55,7 +55,7 @@ jobs:
   abi-check:
     name: ABI check
     runs-on: ubuntu-latest
-    container: fedora:37
+    container: fedora:latest
     env:
       LAST_ABI_BREAK: "467a397fd7996557f837cdc26ac07c01c62810e5"
 
