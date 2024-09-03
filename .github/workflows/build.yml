@@ -53,7 +53,7 @@ jobs:
     container: fedora:${{ matrix.fedora-version }}
     strategy:
       matrix:
-        fedora-version: ['37', '38']
+        fedora-version: ['39', '40']
 
     steps:
       - name: Install dependencies
