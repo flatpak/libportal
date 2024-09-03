@@ -274,7 +274,7 @@ call_returned (GObject *object,
 {
   Call *call = data;
   GError *error = NULL;
-  g_autoptr(GVariant) ret;
+  g_autoptr(GVariant) ret = NULL;
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
   if (error)
@@ -959,7 +959,7 @@ set_pointer_barriers (Call *call)
 {
   GVariantBuilder options;
   GVariantBuilder barriers;
-  g_autoptr(GVariantType) vtype;
+  g_autoptr(GVariantType) vtype = NULL;
 
   prep_call (call, set_pointer_barriers_done, &options, NULL);
 
