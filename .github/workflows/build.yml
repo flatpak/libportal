@@ -35,6 +35,16 @@ jobs:
       - name: Run libportal tests
         working-directory: _build
         run: meson test --verbose --print-errorlogs
+      - name: Upload test logs
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: test logs (ubuntu ${{ matrix.ubuntu-version }})
+          path: |
+            tests/*.log
+            test-*.log
+            installed-test-logs/
+            _build/meson-logs/testlog.txt
 
   fedora:
     name: Fedora
@@ -57,6 +67,16 @@ jobs:
       - name: Run libportal tests
         working-directory: _build
         run: meson test --verbose --print-errorlogs
+      - name: Upload test logs
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: test logs (fedora ${{ matrix.fedora-version }})
+          path: |
+            tests/*.log
+            test-*.log
+            installed-test-logs/
+            _build/meson-logs/testlog.txt
 
   abi-check:
     name: ABI check
