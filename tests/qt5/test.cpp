@@ -88,4 +88,4 @@ void Test::testNotificationPortal()
 }
 
 
-QTEST_MAIN(Test)
+QTEST_GUILESS_MAIN(Test)
