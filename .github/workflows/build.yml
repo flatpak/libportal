@@ -12,26 +12,13 @@ on:
     - main
 
 jobs:
-  ubuntu-20-04:
-    name: Ubuntu 20.04
-    runs-on: ubuntu-20.04
-
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libglib2.0 gettext dbus meson libgirepository1.0-dev libgtk-3-dev valac python3-pytest python3-dbusmock
-      - name: Check out libportal
-        uses: actions/checkout@v3
-      - name: Configure libportal
-        run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Ddocs=false
-      - name: Build libportal
-        run: ninja -C_build
-
-  ubuntu-22-04:
-    name: Ubuntu 22.04
-    runs-on: ubuntu-22.04
-    container: ubuntu:22.04
+  ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    container: ubuntu:${{ matrix.ubuntu-version }}
+    strategy:
+      matrix:
+        ubuntu-version: ['22.04', '24.04']
 
     steps:
       - name: Install dependencies
