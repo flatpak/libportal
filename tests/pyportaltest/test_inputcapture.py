@@ -637,6 +637,7 @@ class TestInputCapture(PortalTest):
         def session_closed(session):
             nonlocal session_closed_signal_received
             session_closed_signal_received = True
+            self.mainloop.quit()
 
         xdp_session.connect("closed", session_closed)
 
