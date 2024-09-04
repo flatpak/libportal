@@ -1,3 +1,13 @@
+Changes in 0.8.1, 04-09-2024
+==========================
+
+- Fix a regression in the Remote Desktop where it wouldn't work with the
+  ScreenCast portal correctly.
+- Use non-deprecated functions in the GTK4 code
+- Run tests in CI so we catch regressions earlier
+- Make Qt tests use QTEST_GUILESS_MAIN
+- Fix an Input Capture test
+
 Changes in 0.8.0, 02-09-2024
 ==========================
 
