@@ -23,6 +23,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           apt-get update
           apt-get install -y \
             dbus \
@@ -36,7 +37,6 @@ jobs:
             python3-dbusmock \
             python3-pytest \
             valac
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Check out libportal
         uses: actions/checkout@v4
       - name: Configure libportal
