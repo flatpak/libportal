@@ -24,8 +24,8 @@ jobs:
       - name: Install dependencies
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          apt-get update
-          apt-get install -y \
+          apt-get update --quiet
+          apt-get install --quiet -y \
             dbus \
             gettext \
             gi-docgen \
@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          dnf install -y \
+          dnf install --quiet -y \
             gcc \
             git \
             gi-docgen \
