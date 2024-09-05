@@ -19,6 +19,10 @@ jobs:
     strategy:
       matrix:
         ubuntu-version: ['22.04', '24.04']
+        compiler: ['gcc', 'clang']
+
+    env:
+      CC: ${{ matrix.compiler }}
 
     steps:
       - name: Install dependencies
@@ -26,6 +30,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           apt-get update --quiet
           apt-get install --quiet -y \
+            ${{ matrix.compiler }} \
             dbus \
             gettext \
             gi-docgen \
@@ -50,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: test logs (ubuntu ${{ matrix.ubuntu-version }})
+          name: test logs (ubuntu ${{ matrix.ubuntu-version }} ${{ matrix.compiler }})
           path: |
             tests/*.log
             test-*.log
@@ -64,12 +69,16 @@ jobs:
     strategy:
       matrix:
         fedora-version: ['39', '40']
+        compiler: ['gcc', 'clang']
+
+    env:
+      CC: ${{ matrix.compiler }}
 
     steps:
       - name: Install dependencies
         run: |
           dnf install --quiet -y \
-            gcc \
+            ${{ matrix.compiler }} \
             git \
             gi-docgen \
             gobject-introspection-devel \
@@ -96,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: test logs (fedora ${{ matrix.fedora-version }})
+          name: test logs (fedora ${{ matrix.fedora-version }} ${{ matrix.compiler }})
           path: |
             tests/*.log
             test-*.log
