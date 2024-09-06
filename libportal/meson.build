@@ -277,7 +277,7 @@ endif
 # Qt 6 #
 ########
 
-if meson.version().version_compare('>= 0.59.0')
+if meson.version().version_compare('>= 0.63.0')
    have_cpp = add_languages('cpp', required: get_option('backend-qt6'))
    qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'], private_headers: true, required: get_option('backend-qt6'))
 
