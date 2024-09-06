@@ -33,6 +33,7 @@ jobs:
             ${{ matrix.compiler }} \
             dbus \
             gettext \
+            git \
             gi-docgen \
             libgirepository1.0-dev \
             libglib2.0 \
@@ -48,6 +49,11 @@ jobs:
             valac
       - name: Check out libportal
         uses: actions/checkout@v4
+      - name: Fix Git ownership
+        run: |
+          echo $GITHUB_WORKSPACE
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git status
       - name: Configure libportal
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled -Dbackend-qt5=enabled -Dbackend-qt6=enabled
       - name: Build libportal
@@ -55,6 +61,9 @@ jobs:
       - name: Run libportal tests
         working-directory: _build
         run: meson test --verbose --print-errorlogs
+      - name: Generate dist tarball
+        working-directory: _build
+        run: meson dist
       - name: Upload test logs
         uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -65,6 +74,7 @@ jobs:
             test-*.log
             installed-test-logs/
             _build/meson-logs/testlog.txt
+            _build/meson-dist/
 
   fedora:
     name: Fedora
@@ -98,6 +108,11 @@ jobs:
             vala
       - name: Check out libportal
         uses: actions/checkout@v4
+      - name: Fix Git ownership
+        run: |
+          echo $GITHUB_WORKSPACE
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git status
       - name: Configure libportal
         run: meson setup --prefix=/usr _build -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled -Dbackend-qt5=enabled -Dbackend-qt6=enabled
       - name: Build libportal
@@ -105,6 +120,9 @@ jobs:
       - name: Run libportal tests
         working-directory: _build
         run: meson test --verbose --print-errorlogs
+      - name: Generate dist tarball
+        working-directory: _build
+        run: meson dist
       - name: Upload test logs
         uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -115,6 +133,7 @@ jobs:
             test-*.log
             installed-test-logs/
             _build/meson-logs/testlog.txt
+            _build/meson-dist/
 
   abi-check:
     name: ABI check
