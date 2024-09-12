@@ -48,6 +48,7 @@ struct _XdpPortal {
   guint location_updated_signal;
 
   /* notification */
+  guint notification_interface_version;
   guint action_invoked_signal;
 
   /* screencast */
