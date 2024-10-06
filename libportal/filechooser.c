@@ -329,14 +329,11 @@ xdp_portal_open_file_finish (XdpPortal *portal,
                              GAsyncResult *result,
                              GError **error)
 {
-  GVariant *ret;
-
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_open_file, NULL);
 
-  ret = g_task_propagate_pointer (G_TASK (result), error);
-  return ret ? g_variant_ref (ret) : NULL;
+  return g_task_propagate_pointer (G_TASK (result), error);
 }
 
 /**
@@ -427,14 +424,11 @@ xdp_portal_save_file_finish (XdpPortal *portal,
                              GAsyncResult *result,
                              GError **error)
 {
-  GVariant *ret;
-
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_save_file, NULL);
 
-  ret = g_task_propagate_pointer (G_TASK (result), error);
-  return ret ? g_variant_ref (ret) : NULL;
+  return g_task_propagate_pointer (G_TASK (result), error);
 }
 
 /**
@@ -526,12 +520,9 @@ xdp_portal_save_files_finish (XdpPortal *portal,
                               GAsyncResult *result,
                               GError **error)
 {
-  GVariant *ret;
-
   g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
   g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
   g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_save_files, NULL);
 
-  ret = g_task_propagate_pointer (G_TASK (result), error);
-  return ret ? g_variant_ref (ret) : NULL;
+  return g_task_propagate_pointer (G_TASK (result), error);
 }
