@@ -56,6 +56,7 @@ class TestRemoteDesktop(PortalTest):
         start_session=True,
         persist_mode=None,
         restore_token=None,
+        cb_closed_signal=None,
     ) -> SessionSetup:
         params = params or {}
         # To make the tests easier, load ScreenCast automatically if we have
@@ -119,6 +120,9 @@ class TestRemoteDesktop(PortalTest):
         session_handle = options["session_handle_token"]
 
         assert session.get_session_type() == Xdp.SessionType.REMOTE_DESKTOP
+
+        if cb_closed_signal:
+            session.connect("closed", cb_closed_signal)
 
         if outputs:
             # open the PW remote by default since we need it anyway for Start()
@@ -581,9 +585,6 @@ class TestRemoteDesktop(PortalTest):
         Ensure that we get the GObject signal when our session is closed
         externally.
         """
-        params = {"close-after-start": 500}
-        setup = self.create_session(params=params)
-        session = setup.session
 
         session_closed_signal_received = False
 
@@ -592,8 +593,10 @@ class TestRemoteDesktop(PortalTest):
             session_closed_signal_received = True
             self.mainloop.quit()
 
-        session.connect("closed", session_closed)
-
+        params = {"close-after-start": 500}
+        _ = self.create_session(
+            params=params, cb_closed_signal=session_closed
+        )  # keep SessionResult alive
         self.mainloop.run()
 
         assert session_closed_signal_received is True
