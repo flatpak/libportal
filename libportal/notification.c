@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018, Matthias Clasen
+ * Copyright (C) 2024 GNOME Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -15,9 +16,21 @@
  * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: LGPL-3.0-only
+ *
+ * Authors:
+ *    Matthias Clasen <mclasen@redhat.com>
+ *    Julian Sparber <julian@gnome.org>
  */
 
 #include "config.h"
+
+#define _GNU_SOURCE
+#include <sys/mman.h>
+#include <fcntl.h>
+
+#include <glib/gstdio.h>
+#include <gio/gunixfdlist.h>
+#include <gio/gunixoutputstream.h>
 
 #include "notification.h"
 #include "portal-private.h"
@@ -60,22 +73,312 @@ ensure_action_invoked_connection (XdpPortal *portal)
 }
 
 typedef struct {
-  XdpPortal *portal;
-  GAsyncReadyCallback callback;
-  gpointer data;
-} CallDoneData;
+  GUnixFDList *fd_list;
+  GVariantBuilder *builder;
+  gsize hold_count;
+} ParserData;
+
+static ParserData*
+parser_data_new (const char *id)
+{
+  ParserData *data;
+
+  data = g_new0 (ParserData, 1);
+  data->fd_list = g_unix_fd_list_new ();
+  data->builder = g_variant_builder_new (G_VARIANT_TYPE ("(sa{sv})"));
+
+  g_variant_builder_add (data->builder, "s", id);
+  g_variant_builder_open (data->builder, G_VARIANT_TYPE ("a{sv}"));
+
+  return data;
+}
 
 static void
-call_done (GObject *source,
-           GAsyncResult *result,
-           gpointer data)
+parser_data_hold (ParserData *data)
 {
-  CallDoneData *call_done_data = data;
+  data->hold_count++;
+}
 
-  call_done_data->callback (G_OBJECT (call_done_data->portal), result, call_done_data->data);
+static gboolean
+parser_data_release (ParserData *data)
+{
+  data->hold_count--;
 
-  g_object_unref (call_done_data->portal);
-  g_free (call_done_data);
+  if (data->hold_count == 0)
+    g_variant_builder_close (data->builder);
+
+  return data->hold_count == 0;
+}
+
+static void
+parser_data_free (gpointer user_data)
+{
+  ParserData *data = user_data;
+
+  g_clear_object (&data->fd_list);
+  g_clear_pointer (&data->builder, g_variant_builder_unref);
+
+  g_free (data);
+}
+
+static void
+call_done_cb (GObject      *source,
+              GAsyncResult *result,
+              gpointer      data)
+{
+  g_autoptr(GTask) task = G_TASK (data);
+  XdpPortal *portal = g_task_get_source_object (task);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) res = NULL;
+
+  res = g_dbus_connection_call_with_unix_fd_list_finish (portal->bus, NULL, result, &error);
+
+  if (res)
+    g_task_return_boolean (task, TRUE);
+  else
+    g_task_return_error (task, g_steal_pointer (&error));
+}
+
+static void
+parse_buttons_v1 (GVariantBuilder *builder,
+                  GVariant        *value)
+{
+  GVariant *button;
+  GVariantIter iter_buttons;
+
+  g_variant_builder_open (builder, G_VARIANT_TYPE ("{sv}"));
+  g_variant_builder_add (builder, "s", "buttons");
+  g_variant_builder_open (builder, G_VARIANT_TYPE_VARIANT);
+  g_variant_builder_open (builder, G_VARIANT_TYPE ("aa{sv}"));
+  g_variant_iter_init (&iter_buttons, value);
+  while (g_variant_iter_loop (&iter_buttons, "@a{sv}", &button))
+    {
+      GVariant *button_value;
+      const gchar *button_key;
+      GVariantIter iter_button;
+      g_variant_builder_open (builder, G_VARIANT_TYPE ("a{sv}"));
+
+      g_variant_iter_init (&iter_button, button);
+      while (g_variant_iter_loop (&iter_button, "{&sv}", &button_key, &button_value))
+        {
+          if (strcmp (button_key, "purpose") != 0)
+            g_variant_builder_add (builder, "{sv}", button_key, button_value);
+        }
+
+      g_variant_builder_close (builder);
+    }
+
+  g_variant_builder_close (builder);
+  g_variant_builder_close (builder);
+  g_variant_builder_close (builder);
+}
+
+static void
+parse_notification (GVariant            *notification,
+                    uint                 version,
+                    GCancellable        *cancellable,
+                    GAsyncReadyCallback  callback,
+                    gpointer             user_data)
+{
+  GVariantIter iter;
+  const char *id;
+  const char *key;
+  GVariant *value = NULL;
+  GVariant *properties = NULL;
+  ParserData *data;
+  g_autoptr(GTask) task;
+  const char *supported_properties_v1[] = {
+    "title",
+    "body",
+    "buttons",
+    "icon",
+    "priority",
+    "default-action",
+    "default-action-target",
+    NULL
+  };
+
+  task = g_task_new (NULL, cancellable, callback, user_data);
+  g_task_set_source_tag (task, parse_notification);
+
+  g_variant_get (notification, "(&s@a{sv})", &id, &properties);
+
+  data = parser_data_new (id);
+  g_task_set_task_data (task,
+                        data,
+                        parser_data_free);
+
+  g_variant_iter_init (&iter, properties);
+
+  parser_data_hold (data);
+  while (g_variant_iter_loop (&iter, "{&sv}", &key, &value))
+    {
+      /* In version 1 of the interface requests fail if there are unsupported properties */
+      if (version < 2)
+        {
+          if (!g_strv_contains (supported_properties_v1, key))
+            continue;
+
+          if (strcmp (key, "buttons") == 0)
+            {
+              parse_buttons_v1 (data->builder, value);
+              continue;
+            }
+        }
+
+      g_variant_builder_add (data->builder, "{sv}", key, value);
+    }
+
+  if (parser_data_release (data))
+    {
+      g_task_return_boolean (task, TRUE);
+    }
+}
+
+static GVariant *
+parse_notification_finish (GAsyncResult  *result,
+                           GUnixFDList  **fd_list,
+                           GError       **error)
+{
+  ParserData *data;
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == parse_notification, NULL);
+
+  if (!g_task_propagate_boolean (G_TASK (result), error))
+    return NULL;
+
+  data = g_task_get_task_data (G_TASK (result));
+
+  if (fd_list)
+    *fd_list = g_steal_pointer (&data->fd_list);
+
+  return g_variant_ref_sink (g_variant_builder_end (g_steal_pointer (&data->builder)));
+}
+
+static void
+parse_notification_cb (GObject      *source_object,
+                       GAsyncResult *result,
+                       gpointer      user_data)
+{
+  g_autoptr(GTask) task = G_TASK (user_data);
+  XdpPortal *portal = g_task_get_source_object (task);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GUnixFDList) fd_list = NULL;
+  g_autoptr(GVariant) parameters = NULL;
+
+  parameters = parse_notification_finish (result, &fd_list, &error);
+
+  if (!parameters)
+    {
+        g_task_return_error (task, g_steal_pointer (&error));
+        return;
+    }
+
+  g_dbus_connection_call_with_unix_fd_list (portal->bus,
+                                            PORTAL_BUS_NAME,
+                                            PORTAL_OBJECT_PATH,
+                                            "org.freedesktop.portal.Notification",
+                                            "AddNotification",
+                                            parameters,
+                                            NULL,
+                                            G_DBUS_CALL_FLAGS_NONE,
+                                            -1,
+                                            fd_list,
+                                            g_task_get_cancellable (task),
+                                            call_done_cb,
+                                            g_object_ref (task));
+}
+
+
+
+static void
+get_properties_cb (GObject      *source_object,
+                   GAsyncResult *result,
+                   gpointer      user_data)
+{
+  g_autoptr(GTask) task = G_TASK (user_data);
+  XdpPortal *portal = g_task_get_source_object (task);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) vardict = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (source_object), result, &error);
+  if (!ret)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_variant_get (ret, "(@a{sv})", &vardict);
+
+  if (!g_variant_lookup (vardict, "version", "u", &portal->notification_interface_version))
+    portal->notification_interface_version = 1;
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+get_supported_features (XdpPortal *portal,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data)
+{
+  g_autoptr(GTask) task = NULL;
+
+  task = g_task_new (portal, cancellable, callback, user_data);
+  g_task_set_source_tag (task, get_supported_features);
+
+  if (portal->notification_interface_version != 0)
+    {
+      g_task_return_boolean (task, TRUE);
+      return;
+    }
+
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.DBus.Properties",
+                          "GetAll",
+                          g_variant_new ("(s)", "org.freedesktop.portal.Notification"),
+                          G_VARIANT_TYPE ("(a{sv})"),
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          get_properties_cb,
+                          g_object_ref (task));
+}
+
+static gboolean
+get_supported_features_finish (XdpPortal     *portal,
+                               GAsyncResult  *result,
+                               GError       **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == get_supported_features, FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+static void
+get_supported_features_cb (GObject      *source_object,
+                           GAsyncResult *result,
+                           gpointer      user_data)
+{
+  XdpPortal *portal = XDP_PORTAL (source_object);
+  g_autoptr(GTask) task = G_TASK (user_data);
+  g_autoptr(GError) error = NULL;
+
+  if (!get_supported_features_finish (portal, result, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  parse_notification (g_task_get_task_data (task),
+                      portal->notification_interface_version,
+                      g_task_get_cancellable (task),
+                      parse_notification_cb,
+                      g_object_ref (task));
 }
 
 /**
@@ -129,35 +432,23 @@ xdp_portal_add_notification (XdpPortal *portal,
                              GAsyncReadyCallback callback,
                              gpointer data)
 {
-  GAsyncReadyCallback call_done_cb = NULL;
-  CallDoneData *call_done_data = NULL;
+  g_autoptr(GTask) task = NULL;
+  g_autoptr(GVariant) variant = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
   g_return_if_fail (flags == XDP_NOTIFICATION_FLAG_NONE);
 
   ensure_action_invoked_connection (portal);
 
-  if (callback)
-    {
-      call_done_cb = call_done; 
-      call_done_data = g_new (CallDoneData, 1);
-      call_done_data->portal = g_object_ref (portal);
-      call_done_data->callback = callback,
-      call_done_data->data = data;
-    }
+  variant = g_variant_ref_sink (g_variant_new ("(s@a{sv})", id, notification));
+  task = g_task_new (portal, cancellable, callback, data);
+  g_task_set_source_tag (task, xdp_portal_add_notification);
+  g_task_set_task_data (task, g_steal_pointer (&variant), (GDestroyNotify) g_variant_unref);
 
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.Notification",
-                          "AddNotification",
-                          g_variant_new ("(s@a{sv})", id, notification),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
+  get_supported_features (portal,
                           cancellable,
-                          call_done_cb,
-                          call_done_data);
+                          get_supported_features_cb,
+                          g_steal_pointer (&task));
 }
 
 /**
@@ -177,11 +468,11 @@ xdp_portal_add_notification_finish (XdpPortal     *portal,
                                     GAsyncResult  *result,
                                     GError       **error)
 {
-  g_autoptr(GVariant) res = NULL;
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) == xdp_portal_add_notification, FALSE);
 
-  res = g_dbus_connection_call_finish (portal->bus, result, error);
-
-  return !!res;
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**
