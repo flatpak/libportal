@@ -1,7 +1,7 @@
 {
     "app-id": "org.gnome.PortalTest.Gtk4",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "46",
+    "runtime-version": "47",
     "sdk": "org.gnome.Sdk",
     "command": "org.gnome.PortalTest.Gtk4",
     "finish-args": [
