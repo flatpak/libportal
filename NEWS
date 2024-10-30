@@ -1,3 +1,8 @@
+Changes in 0.9.0, xx-xx-xxxx
+==========================
+
+- Fix some minor memory leaks
+
 Changes in 0.8.1, 04-09-2024
 ==========================
 
