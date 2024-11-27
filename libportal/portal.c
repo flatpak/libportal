@@ -117,6 +117,8 @@ xdp_portal_finalize (GObject *object)
   if (portal->action_invoked_signal)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->action_invoked_signal);
 
+  g_clear_pointer (&portal->supported_notification_options, g_variant_unref);
+
   g_clear_object (&portal->bus);
   g_free (portal->sender);
 
