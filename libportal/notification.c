@@ -848,7 +848,7 @@ xdp_portal_remove_notification (XdpPortal  *portal,
  *
  * Returns: (transfer none): a vardict of supported options for properties that have options.
  *
- * Since: 0.7.2
+ * Since: 0.9.0
  */
 GVariant *
 xdp_portal_get_supported_notification_options (XdpPortal  *portal,
