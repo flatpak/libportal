@@ -284,7 +284,8 @@ parse_media (GVariant            *media,
 
   if (!g_variant_is_of_type (media, G_VARIANT_TYPE("(sv)")))
     {
-      g_task_return_boolean (task, TRUE);
+      g_task_set_task_data (task, g_variant_ref (media), (GDestroyNotify) g_variant_unref);
+      g_task_return_int (task, -1);
       return;
     }
 
