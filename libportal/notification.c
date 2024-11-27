@@ -631,7 +631,7 @@ get_properties_cb (GObject      *source_object,
 
   if (!g_variant_lookup (vardict, "version", "u", &portal->notification_interface_version))
     portal->notification_interface_version = 1;
-  if (!g_variant_lookup (vardict, "SupportedOptions", "v", &portal->supported_notification_options))
+  if (!g_variant_lookup (vardict, "SupportedOptions", "@a{sv}", &portal->supported_notification_options))
     {
       GVariantBuilder builder;
 
@@ -878,10 +878,10 @@ xdp_portal_get_supported_notification_options (XdpPortal  *portal,
   if (!ret)
     return NULL;
 
-  g_variant_get (ret, "(&a{sv})", &vardict);
+  g_variant_get (ret, "(@a{sv})", &vardict);
   if (!g_variant_lookup (vardict, "version", "u", &portal->notification_interface_version))
     portal->notification_interface_version = 1;
-  if (!g_variant_lookup (vardict, "SupportedOptions", "v", &portal->supported_notification_options))
+  if (!g_variant_lookup (vardict, "SupportedOptions", "@a{sv}", &portal->supported_notification_options))
     {
       GVariantBuilder builder;
 
