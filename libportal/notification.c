@@ -139,6 +139,7 @@ typedef struct {
   GUnixFDList *fd_list;
   GVariantBuilder *builder;
   gsize hold_count;
+  GVariant *data;
 } ParserData;
 
 static ParserData*
@@ -168,7 +169,10 @@ parser_data_release (ParserData *data)
   data->hold_count--;
 
   if (data->hold_count == 0)
-    g_variant_builder_close (data->builder);
+    {
+      g_variant_builder_close (data->builder);
+      data->data = g_variant_ref_sink (g_variant_builder_end (data->builder));
+    }
 
   return data->hold_count == 0;
 }
@@ -180,6 +184,7 @@ parser_data_free (gpointer user_data)
 
   g_clear_object (&data->fd_list);
   g_clear_pointer (&data->builder, g_variant_builder_unref);
+  g_clear_pointer (&data->data, g_variant_unref);
 
   g_free (data);
 }
@@ -568,7 +573,7 @@ parse_notification_finish (GAsyncResult  *result,
   if (fd_list)
     *fd_list = g_steal_pointer (&data->fd_list);
 
-  return g_variant_ref_sink (g_variant_builder_end (g_steal_pointer (&data->builder)));
+  return g_steal_pointer (&data->data);
 }
 
 static void
