@@ -1,6 +1,17 @@
-Changes in 0.9.0, xx-xx-xxxx
+Changes in 0.9.0, 21-12-2024
 ==========================
 
+Dependencies:
+
+- GLib 2.72 or higher is now required
+
+Features:
+
+- Introduce support for the Notification v2 portal version
+
+Bug fixes:
+
+- Fix a file descriptor leak in the Mail portal code
 - Fix some minor memory leaks
 
 Changes in 0.8.1, 04-09-2024
