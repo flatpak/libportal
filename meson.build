@@ -1,7 +1,7 @@
 project('libportal','c',
         version: '0.9.1',
         default_options: ['warning_level=2'],
-        meson_version: '>= 0.49.0')
+        meson_version: '>= 0.55.0')
 
 cc = meson.get_compiler('c')
 cflags = [
