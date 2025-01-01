@@ -486,7 +486,7 @@ parse_notification (GVariant            *notification,
   GVariant *value = NULL;
   g_autoptr(GVariant) properties = NULL;
   ParserData *data;
-  g_autoptr(GTask) task;
+  g_autoptr(GTask) task = NULL;
   const char *supported_properties_v1[] = {
     "title",
     "body",
