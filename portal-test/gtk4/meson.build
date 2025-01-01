@@ -25,7 +25,7 @@ js_resouces = gnome.compile_resources(
 )
 
 bin_conf = configuration_data()
-bin_conf.set('GJS', find_program('gjs').path())
+bin_conf.set('GJS', find_program('gjs').full_path())
 bin_conf.set('PACKAGE_NAME', package_name)
 bin_conf.set('PACKAGE_VERSION', '1.0.0')
 bin_conf.set('prefix', get_option('prefix'))
