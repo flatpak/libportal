@@ -1,4 +1,4 @@
-add_languages('cpp', required : true)
+add_languages('cpp', required : true, native : false)
 
 qt6_dep = dependency('qt6', modules: ['Core', 'Test'])
 
