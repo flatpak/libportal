@@ -242,7 +242,7 @@ endif
 # Qt 5 #
 ########
 
-have_cpp = add_languages('cpp', required: get_option('backend-qt5'))
+have_cpp = add_languages('cpp', required: get_option('backend-qt5'), native: false)
 qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'X11Extras', 'Widgets'], required: get_option('backend-qt5'))
 
 if have_cpp and qt5_dep.found()
@@ -279,7 +279,7 @@ endif
 ########
 
 if meson.version().version_compare('>= 0.63.0')
-   have_cpp = add_languages('cpp', required: get_option('backend-qt6'))
+   have_cpp = add_languages('cpp', required: get_option('backend-qt6'), native: false)
    qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'], private_headers: true, required: get_option('backend-qt6'))
 
    if have_cpp and qt6_dep.found()

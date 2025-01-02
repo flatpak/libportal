@@ -1,5 +1,5 @@
 
-add_languages('cpp', required : true)
+add_languages('cpp', required : true, native : false)
 
 src = [
   'main.cpp',
