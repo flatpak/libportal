@@ -457,7 +457,7 @@ get_remote_desktop_interface_version (CreateCall *call)
  * @restore_token: (nullable): the token of a previous screencast session to restore
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Creates a session for a screencast.
  *
@@ -527,7 +527,7 @@ xdp_portal_create_screencast_session_finish (XdpPortal *portal,
  * @cursor_mode: the cursor mode of the session
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Creates a session for remote desktop.
  *
@@ -567,7 +567,7 @@ xdp_portal_create_remote_desktop_session (XdpPortal *portal,
  * @restore_token: (nullable): the token of a previous screencast session to restore
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Creates a session for remote desktop.
  *
@@ -805,7 +805,7 @@ start_session (StartCall *call)
  * @parent: (nullable): parent window information
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Starts the session.
  *

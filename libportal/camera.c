@@ -215,7 +215,7 @@ access_camera (AccessCameraCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Request access to a camera.
  *

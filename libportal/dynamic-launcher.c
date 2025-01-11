@@ -233,7 +233,7 @@ do_prepare_install (PrepareInstallLauncherCall *call)
  * @editable_icon: if %TRUE, the user will be able to edit the icon of the launcher, if the implementation supports this
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Presents a dialog to the user so they can confirm they want to install a
  * launcher to their desktop.

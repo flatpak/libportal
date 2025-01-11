@@ -221,7 +221,7 @@ take_screenshot (ScreenshotCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Takes a screenshot.
  *
@@ -285,7 +285,7 @@ xdp_portal_take_screenshot_finish (XdpPortal *portal,
  * @parent: (nullable): parent window information
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Lets the user pick a color from the screen.
  * 

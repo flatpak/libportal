@@ -277,7 +277,7 @@ do_print (PrintCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  * 
  * Presents a print dialog to the user and returns print settings and page setup.
  *
@@ -355,7 +355,7 @@ xdp_portal_prepare_print_finish (XdpPortal *portal,
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  * 
  * Prints a file.
  *

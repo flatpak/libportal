@@ -274,7 +274,7 @@ do_open (OpenCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Opens @uri with an external handler.
  */
@@ -341,7 +341,7 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Opens the directory containing the file specified by the @uri.
  *
