@@ -125,7 +125,7 @@ trash_file (TrashCall *call)
  * @path: the path for a local file
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Sends the file at @path to the trash can.
  */

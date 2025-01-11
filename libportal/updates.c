@@ -205,7 +205,7 @@ create_monitor (CreateMonitorCall *call)
  * @flags: options for this cal..
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Makes `XdpPortal` start monitoring for available software updates.
  *
@@ -388,7 +388,7 @@ install_update (InstallUpdateCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Installs an available software update.
  *

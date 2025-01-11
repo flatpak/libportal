@@ -200,7 +200,7 @@ do_spawn (SpawnCall *call)
  * @sandbox_expose_ro: (array zero-terminated) (nullable): paths to expose ro in the new sandbox, or `NULL`
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Creates a new copy of the applications sandbox, and runs
  * a process in, with the given arguments.

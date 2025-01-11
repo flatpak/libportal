@@ -242,7 +242,7 @@ open_file (FileCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Asks the user to open one or more files.
  *
@@ -350,7 +350,7 @@ xdp_portal_open_file_finish (XdpPortal *portal,
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Asks the user for a location to save a file.
  *
@@ -443,7 +443,7 @@ xdp_portal_save_file_finish (XdpPortal *portal,
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Asks for a folder as a location to save one or more files.
  *

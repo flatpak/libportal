@@ -215,7 +215,7 @@ do_inhibit (InhibitCall *call)
  * @flags: information about what to inhibit
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Inhibits various session status changes.
  *
@@ -566,7 +566,7 @@ create_monitor (CreateMonitorCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Makes [class@Portal] start monitoring the login session state.
  *

@@ -724,7 +724,7 @@ create_session (Call *call)
  * @capabilities: which kinds of capabilities to request
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Creates a session for input capture
  *

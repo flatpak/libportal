@@ -326,7 +326,7 @@ request_background (BackgroundCall *call)
  * @flags: options for this call
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @user_data: (closure): data to pass to @callback
+ * @user_data: data to pass to @callback
  *
  * Requests background permissions.
  *
@@ -396,7 +396,7 @@ xdp_portal_request_background_finish (XdpPortal *portal,
  * @status_message: (nullable): status message when running in background
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
- * @data: (closure): data to pass to @callback
+ * @data: data to pass to @callback
  *
  * Sets the status information of the application, for when it's running
  * in background.
