@@ -14,7 +14,7 @@ class PortalTestQt : public QMainWindow
 {
     Q_OBJECT
 public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    PortalTestQt(XdpPortal *portal, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~PortalTestQt();
 
     void updateLastOpenedFile(const QString &file);

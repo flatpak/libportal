@@ -1,4 +1,4 @@
-const { Gio, GLib, GObject, Gtk } = imports.gi;
+const { Gio, GLib, GObject, Gtk, Xdp } = imports.gi;
 
 const { PortalTestWindow } = imports.window;
 const ByteArray = imports.byteArray;
@@ -31,10 +31,19 @@ var Application = GObject.registerClass({
     }
 
     vfunc_startup() {
+        this._portal = new Xdp.Portal();
+        this._portal.register(this.get_application_id(), null, (portal, result) => {
+          this._portal.register_finish(result);
+        });
+
         super.vfunc_startup();
 
         if (!this._window)
             this._window = new PortalTestWindow(this);
+    }
+
+    getPortal() {
+        return this._portal;
     }
 
     restart() {

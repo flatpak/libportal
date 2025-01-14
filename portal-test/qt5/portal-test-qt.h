@@ -14,7 +14,7 @@ class PortalTestQt : public QMainWindow
 {
     Q_OBJECT
 public:
-    PortalTestQt(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    PortalTestQt(QApplication *app, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~PortalTestQt();
 
     void updateLastOpenedFile(const QString &file);
@@ -22,6 +22,7 @@ private:
     static void openedFile(GObject *object, GAsyncResult *result, gpointer data);
 
     Ui_PortalTestQt *m_mainWindow;
+    QApplication *m_app;
     XdpPortal *m_portal;
 };
 

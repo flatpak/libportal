@@ -299,8 +299,28 @@ settings_changed (XdpSettings* settings, const gchar *namespace, const gchar *ke
 }
 
 static void
-portal_test_win_init (PortalTestWin *win)
+register_cb (GObject      *source_object,
+             GAsyncResult *result,
+             gpointer      user_data)
 {
+  XdpPortal *portal = XDP_PORTAL (source_object);
+  g_autoptr(GError) error = NULL;
+
+  if (!xdp_portal_register_finish (portal, result, &error))
+    {
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        g_warning ("Failed to register application ID: %s", error->message);
+      return;
+    }
+
+  g_debug ("Registered application ID");
+}
+
+static void
+portal_test_win_realize (GtkWidget *widget)
+{
+  PortalTestWin *win = (PortalTestWin *) widget;
+  GtkApplication *app = gtk_window_get_application (GTK_WINDOW (win));
   const char *status;
   g_auto(GStrv) proxies = NULL;
   g_autofree char *proxy = NULL;
@@ -312,6 +332,11 @@ portal_test_win_init (PortalTestWin *win)
   g_autoptr(GFile) src = NULL;
 
   win->portal = xdp_portal_new ();
+  xdp_portal_register (win->portal,
+                       g_application_get_application_id (G_APPLICATION (app)),
+                       NULL,
+                       register_cb,
+                       NULL);
 
   gtk_widget_init_template (GTK_WIDGET (win));
 
@@ -357,6 +382,13 @@ portal_test_win_init (PortalTestWin *win)
 
   win->settings = xdp_portal_get_settings (win->portal);
   g_signal_connect (win->settings, "changed", G_CALLBACK (settings_changed), win);
+
+  GTK_WIDGET_CLASS (portal_test_win_parent_class)->realize (widget);
+}
+
+static void
+portal_test_win_init (PortalTestWin *win)
+{
 }
 
 static void
@@ -1393,6 +1425,8 @@ static void
 portal_test_win_class_init (PortalTestWinClass *class)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (class);
+
+  widget_class->realize = portal_test_win_realize;
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/org/gtk/portal-test/portal-test-win.ui");
