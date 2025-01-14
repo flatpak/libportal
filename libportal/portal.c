@@ -386,6 +386,117 @@ xdp_portal_new (void)
   return portal;
 }
 
+static void
+register_cb (GObject      *source_object,
+	     GAsyncResult *result,
+	     gpointer      user_data)
+{
+  g_autoptr(GTask) task = user_data;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GError) error = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (source_object),
+				       result,
+				       &error);
+  if (error)
+    g_task_return_error (task, g_steal_pointer (&error));
+  else
+    g_task_return_boolean (task, TRUE);
+}
+
+/**
+ * xdp_portal_register:
+ * @portal: a [class@Portal]
+ * @app_id: an application ID matching the basename of a desktop file
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: (closure): data to pass to @callback
+ *
+ * Registers the application ID with the org.freedesktop.host.Registry portal.
+ * Doing this when sandboxed is a no-op, but when running on the host, it will
+ * help associating portal requests with an application.
+ *
+ * When the request is done, @callback will be called. You can then
+ * call [method@Portal.register_finish] to get the results.
+ */
+void
+xdp_portal_register (XdpPortal           *portal,
+		     const char          *app_id,
+		     GCancellable        *cancellable,
+		     GAsyncReadyCallback  callback,
+		     gpointer             user_data)
+{
+  g_autoptr(GTask) task = NULL;
+  GVariantBuilder options;
+  g_autoptr(GError) error = NULL;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+  g_return_if_fail (app_id);
+  g_return_if_fail (g_strcmp0 (app_id, "") != 0);
+
+  task = g_task_new (portal, cancellable, callback, user_data);
+  g_task_set_source_tag (task, xdp_portal_register);
+
+  if (xdp_portal_running_under_flatpak ())
+    {
+      g_task_return_boolean (task, TRUE);
+      return;
+    }
+
+  if (xdp_portal_running_under_snap (&error))
+    {
+      g_task_return_boolean (task, TRUE);
+      return;
+    }
+
+  if (error)
+    {
+      g_task_return_error (task, error);
+      return;
+    }
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+
+  g_dbus_connection_call (portal->bus,
+			  PORTAL_BUS_NAME,
+			  PORTAL_OBJECT_PATH,
+			  "org.freedesktop.host.portal.Registry",
+			  "Register",
+			  g_variant_new ("(sa{sv})", app_id, &options),
+			  NULL,
+			  G_DBUS_CALL_FLAGS_NONE,
+			  -1,
+			  NULL,
+			  register_cb,
+			  g_object_ref (task));
+}
+
+/**
+ * xdp_portal_register_finish:
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes the registry registration request.
+ *
+ * Returns %TRUE if the registration succeeded, or app was sandboxed, in which
+ * case, the operation was a no-op.
+ *
+ * Returns: %TRUE on success
+ */
+gboolean
+xdp_portal_register_finish (XdpPortal     *portal,
+			    GAsyncResult  *result,
+			    GError       **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, portal), FALSE);
+  g_return_val_if_fail (g_task_get_source_tag (G_TASK (result)) ==
+                        xdp_portal_register, FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
 /* This function is copied from xdg-desktop-portal */
 static int
 _xdp_parse_cgroup_file (FILE *f, gboolean *is_snap)
