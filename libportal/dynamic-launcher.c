@@ -52,6 +52,8 @@ typedef struct {
 static void
 prepare_install_launcher_call_free (PrepareInstallLauncherCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->parent)
     {
       call->parent->parent_unexport (call->parent);

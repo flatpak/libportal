@@ -36,6 +36,8 @@ typedef struct {
 static void
 account_call_free (AccountCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   g_debug ("freeing AccountCall");
   if (call->parent)
     {

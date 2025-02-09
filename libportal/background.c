@@ -33,6 +33,8 @@ typedef struct {
 static void
 set_status_call_free (SetStatusCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   g_clear_pointer (&call->status_message, g_free);
   g_clear_object (&call->portal);
   g_clear_object (&call->task);
@@ -148,6 +150,8 @@ typedef struct {
 static void
 background_call_free (BackgroundCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->parent)
     {
       call->parent->parent_unexport (call->parent);

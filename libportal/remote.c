@@ -44,6 +44,8 @@ typedef struct {
 static void
 create_call_free (CreateCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 

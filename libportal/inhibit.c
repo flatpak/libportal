@@ -38,6 +38,8 @@ typedef struct {
 static void
 inhibit_call_free (InhibitCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->parent)
     {
       call->parent->parent_unexport (call->parent);

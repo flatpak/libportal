@@ -50,6 +50,8 @@ typedef struct {
 static void
 spawn_call_free (SpawnCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   g_object_unref (call->portal);
   g_object_unref (call->task);
 

@@ -37,6 +37,8 @@ typedef struct {
 static void
 screenshot_call_free (ScreenshotCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->parent)
     {
       call->parent->parent_unexport (call->parent);

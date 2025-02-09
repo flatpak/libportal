@@ -75,6 +75,8 @@ typedef struct {
 static void
 access_camera_call_free (AccessCameraCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 

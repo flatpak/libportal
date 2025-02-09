@@ -35,6 +35,8 @@ typedef struct {
 static void
 create_monitor_call_free (CreateMonitorCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   g_free (call->request_path);
   g_free (call->id);
 

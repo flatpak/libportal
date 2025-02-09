@@ -241,6 +241,8 @@ static void get_zones (Call *call);
 static void
 call_free (Call *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   /* CreateSesssion */
   if (call->parent)
     {

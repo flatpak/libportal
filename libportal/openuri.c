@@ -49,6 +49,8 @@ typedef struct {
 static void
 open_call_free (OpenCall *call)
 {
+  g_return_if_fail (G_IS_TASK (call->task));
+
   if (call->parent)
     {
       call->parent->parent_unexport (call->parent);
