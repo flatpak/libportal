@@ -253,8 +253,7 @@ call_free (Call *call)
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
 
-  if (call->cancelled_id)
-    g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
+  g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
 
   g_free (call->request_path);
 
@@ -298,11 +297,7 @@ call_returned (GObject *object,
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
   if (error)
     {
-      if (call->cancelled_id)
-        {
-          g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
-          call->cancelled_id = 0;
-        }
+      g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
       g_task_return_error (call->task, error);
       call_free (call);
     }
@@ -511,11 +506,8 @@ get_zones_done (GDBusConnection *bus,
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
-  if (response != 0 && call->cancelled_id)
-    {
-      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
-      call->cancelled_id = 0;
-    }
+  if (response != 0)
+    g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
 
   if (response == 0)
     {
@@ -640,11 +632,8 @@ session_created (GDBusConnection *bus,
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
-  if (response != 0 && call->cancelled_id)
-    {
-      g_signal_handler_disconnect (g_task_get_cancellable (call->task), call->cancelled_id);
-      call->cancelled_id = 0;
-    }
+  if (response != 0)
+    g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
 
   if (response == 0)
     {
