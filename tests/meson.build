@@ -14,6 +14,7 @@ if meson.version().version_compare('>= 0.56.0')
     test_env = environment()
     test_env.set('LD_LIBRARY_PATH', meson.project_build_root() / 'libportal')
     test_env.set('GI_TYPELIB_PATH', meson.project_build_root() / 'libportal')
+    test_env.set('G_DEBUG', 'fatal-criticals')
 
     test('pytest',
       pytest,
