@@ -69,7 +69,7 @@ typedef struct {
   GCancellable *cancellable;
   GTask *task;
   char *request_path;
-  guint cancelled_id;
+  gulong cancelled_id;
 } AccessCameraCall;
 
 static void

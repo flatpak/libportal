@@ -220,7 +220,7 @@ typedef struct {
   GTask *task;
   guint signal_id; /* Request::Response signal */
   char *request_path; /* object path for request */
-  guint cancelled_id; /* signal id for cancelled gobject signal */
+  gulong cancelled_id; /* signal id for cancelled gobject signal */
 
   /* CreateSession only */
   XdpParent *parent;

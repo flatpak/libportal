@@ -28,7 +28,7 @@ typedef struct {
   char *parent_handle;
   XdpInhibitFlags inhibit;
   guint signal_id;
-  guint cancelled_id;
+  gulong cancelled_id;
   char *request_path;
   char *reason;
   GTask *task;
@@ -336,7 +336,7 @@ typedef struct {
   GTask *task;
   char *request_path;
   guint signal_id;
-  guint cancelled_id;
+  gulong cancelled_id;
   char *id;
 } CreateMonitorCall;
 

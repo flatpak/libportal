@@ -30,7 +30,7 @@ typedef struct {
   GTask *task;
   guint signal_id;
   char *request_path;
-  guint cancelled_id;
+  gulong cancelled_id;
 } AccountCall;
 
 static void

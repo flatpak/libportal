@@ -43,7 +43,7 @@ typedef struct {
   guint signal_id;
   GTask *task;
   char *request_path;
-  guint cancelled_id;
+  gulong cancelled_id;
 } OpenCall;
 
 static void
