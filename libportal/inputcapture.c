@@ -379,7 +379,7 @@ set_zones (XdpInputCaptureSession *session, GVariant *zones, guint zone_set)
 
 
 static void
-prep_call (Call *call, GDBusSignalCallback callback, GVariantBuilder *options, void *userdata)
+prep_call (Call *call, GDBusSignalCallback callback, GVariantBuilder *options)
 {
   g_autofree char *token = NULL;
 
@@ -387,6 +387,8 @@ prep_call (Call *call, GDBusSignalCallback callback, GVariantBuilder *options, v
 
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
+  /* No free-function: the call owns the signal connection and will
+   * unsubscribe when destroyed */
   call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
                                                         PORTAL_BUS_NAME,
                                                         REQUEST_INTERFACE,
@@ -396,7 +398,7 @@ prep_call (Call *call, GDBusSignalCallback callback, GVariantBuilder *options, v
                                                         G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
                                                         callback,
                                                         call,
-                                                        userdata);
+                                                        NULL);
 
   g_variant_builder_init (options, G_VARIANT_TYPE_VARDICT);
   g_variant_builder_add (options, "{sv}", "handle_token", g_variant_new_string (token));
@@ -647,7 +649,7 @@ get_zones (Call *call)
    * ZoneChanged signal when we do have a session */
   session_id = call->session ? call->session->parent_session->id : call->session_path;
 
-  prep_call (call, get_zones_done, &options, NULL);
+  prep_call (call, get_zones_done, &options);
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
                           PORTAL_OBJECT_PATH,
@@ -750,7 +752,7 @@ create_session (Call *call)
 
   session_token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
 
-  prep_call (call, session_created, &options, NULL);
+  prep_call (call, session_created, &options);
   g_variant_builder_add (&options, "{sv}", "session_handle_token", g_variant_new_string (session_token));
   g_variant_builder_add (&options, "{sv}", "capabilities", g_variant_new_uint32 (call->capabilities));
 
@@ -1012,7 +1014,7 @@ set_pointer_barriers (Call *call)
   GVariantBuilder barriers;
   g_autoptr(GVariantType) vtype = NULL;
 
-  prep_call (call, set_pointer_barriers_done, &options, NULL);
+  prep_call (call, set_pointer_barriers_done, &options);
 
   vtype = g_variant_type_new ("aa{sv}");
 
