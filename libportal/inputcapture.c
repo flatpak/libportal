@@ -267,6 +267,25 @@ call_free (Call *call)
   g_free (call);
 }
 
+static Call *
+call_new (XdpPortal *portal,
+          XdpInputCaptureSession *session,
+          void *source_object,
+          GCancellable *cancellable,
+          GAsyncReadyCallback callback,
+          void *callback_data)
+{
+  Call *call = g_new0 (Call, 1);
+
+  call->portal = g_object_ref (portal);
+
+  if (session != NULL)
+    call->session = g_object_ref (session);
+
+  call->task = g_task_new (G_OBJECT (source_object), cancellable, callback, callback_data);
+  return call;
+}
+
 static void
 call_returned (GObject *object,
                GAsyncResult *result,
@@ -386,10 +405,7 @@ zones_changed (GDBusConnection *bus,
 
   /* Zones have changed, but let's fetch the new zones before we notify the
    * caller so they're already available by the time they get notified */
-  call = g_new0 (Call, 1);
-  call->portal = g_object_ref (portal);
-  call->task = g_task_new (portal, NULL, zones_changed_emit_signal, session);
-  call->session = g_object_ref (session);
+  call = call_new (portal, session, portal, NULL, zones_changed_emit_signal, session);
 
   get_zones (call);
 }
@@ -743,9 +759,7 @@ xdp_portal_create_input_capture_session (XdpPortal *portal,
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
-  call = g_new0 (Call, 1);
-  call->portal = g_object_ref (portal);
-  call->task = g_task_new (portal, cancellable, callback, data);
+  call = call_new (portal, NULL, portal, cancellable, callback, data);
 
   if (parent)
     call->parent = xdp_parent_copy (parent);
@@ -1028,10 +1042,7 @@ xdp_input_capture_session_set_pointer_barriers (XdpInputCaptureSession *session,
    * returned barriers during _finish*/
   g_list_foreach (barriers, gobject_ref_wrapper, NULL);
 
-  call = g_new0 (Call, 1);
-  call->portal = g_object_ref (portal);
-  call->session = g_object_ref (session);
-  call->task = g_task_new (session, cancellable, callback, data);
+  call = call_new (portal, session, session, cancellable, callback, data);
   call->barriers = barriers;
 
   set_pointer_barriers (call);
