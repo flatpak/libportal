@@ -633,6 +633,8 @@ get_zones_done (GDBusConnection *bus,
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "InputCapture GetZones() canceled");
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture GetZones() failed");
+  else if (response != 0)
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture GetZones() unknown response code %d", response);
 
   /* If the Call failed, we can ignore any subsequent method replies */
   if (response != 0)
@@ -699,6 +701,8 @@ session_created (GDBusConnection *bus,
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "CreateSession canceled");
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateSession failed");
+  else if (response != 0)
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture CreateSession() unknown response code %d", response);
 
   /* If the Call failed, we can ignore any subsequent method replies */
   if (response != 0)
