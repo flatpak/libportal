@@ -17,6 +17,8 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
+#pragma once
+
 #include <errno.h>
 
 #include <glib/gstdio.h>

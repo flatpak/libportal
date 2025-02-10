@@ -17,6 +17,8 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
+#pragma once
+
 #include "inputcapture-pointerbarrier.h"
 #include "inputcapture-zone.h"
 
