@@ -1,6 +1,4 @@
-
-#ifndef PORTAL_TEST_QT_H
-#define PORTAL_TEST_QT_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -24,5 +22,3 @@ private:
     Ui_PortalTestQt *m_mainWindow;
     XdpPortal *m_portal;
 };
-
-#endif // PORTAL_TEST_QT_H
