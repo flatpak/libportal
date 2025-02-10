@@ -383,6 +383,8 @@ prep_call (Call *call, GDBusSignalCallback callback, GVariantBuilder *options, v
 {
   g_autofree char *token = NULL;
 
+  g_return_if_fail (call->signal_id == 0);
+
   token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
   call->request_path = g_strconcat (REQUEST_PATH_PREFIX, call->portal->sender, "/", token, NULL);
   call->signal_id = g_dbus_connection_signal_subscribe (call->portal->bus,
