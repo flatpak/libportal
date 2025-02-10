@@ -619,8 +619,6 @@ get_zones_done (GDBusConnection *bus,
         {
           set_zones (session, zones, zone_set);
           g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
-          /* Now the Call succeeded, we can ignore any subsequent method replies */
-          call_dispose (call);
         }
       else
         {
@@ -636,8 +634,8 @@ get_zones_done (GDBusConnection *bus,
   else if (response != 0)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture GetZones() unknown response code %d", response);
 
-  /* If the Call failed, we can ignore any subsequent method replies */
-  if (response != 0)
+  /* If the Call succeeded or failed, we can ignore any subsequent method replies */
+  if (g_task_get_completed (call->task))
     call_dispose (call);
 }
 
@@ -705,7 +703,7 @@ session_created (GDBusConnection *bus,
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture CreateSession() unknown response code %d", response);
 
   /* If the Call failed, we can ignore any subsequent method replies */
-  if (response != 0)
+  if (g_task_get_completed (call->task))
     call_dispose (call);
 }
 
