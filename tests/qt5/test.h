@@ -17,8 +17,7 @@
  * SPDX-License-Identifier: LGPL-3.0-only
  */
 
-#ifndef TEST_H
-#define TEST_H
+#pragma once
 
 #include <QObject>
 
@@ -29,5 +28,3 @@ private Q_SLOTS:
     void testFileChooserPortal();
     void testNotificationPortal();
 };
-
-#endif // TEST_H
