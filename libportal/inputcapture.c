@@ -523,7 +523,11 @@ get_zones_done (GDBusConnection *bus,
       g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
       call->signal_id = 0;
 
-      if (session == NULL)
+      if (session != NULL)
+        {
+          g_object_ref (session);
+        }
+      else
         {
           session = _xdp_input_capture_session_new (call->portal, call->session_path);
           session->signal_ids[SIGNAL_ZONES_CHANGED] =
@@ -579,7 +583,7 @@ get_zones_done (GDBusConnection *bus,
           g_variant_lookup (ret, "zones", "@a(uuii)", &zones))
         {
           set_zones (session, zones, zone_set);
-          g_task_return_pointer (call->task, session, g_object_unref);
+          g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
         }
       else
         {
