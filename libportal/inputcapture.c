@@ -239,30 +239,35 @@ static void create_session (Call *call);
 static void get_zones (Call *call);
 
 static void
-call_free (Call *call)
+call_dispose (Call *call)
 {
   /* CreateSesssion */
   if (call->parent)
-    {
-      call->parent->parent_unexport (call->parent);
-      xdp_parent_free (call->parent);
-    }
-  g_free (call->parent_handle);
+    call->parent->parent_unexport (call->parent);
+
+  g_clear_pointer (&call->parent, xdp_parent_free);
+  g_clear_pointer (&call->parent_handle, g_free);
 
   /* Generic */
   if (call->signal_id)
-    g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+    g_dbus_connection_signal_unsubscribe (call->portal->bus, g_steal_handle_id (&call->signal_id));
 
-  g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
+  if (call->task)
+    g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
 
-  g_free (call->request_path);
+  g_clear_pointer (&call->request_path, g_free);
 
   g_clear_object (&call->portal);
   g_clear_object (&call->task);
   g_clear_object (&call->session);
 
-  g_free (call->session_path);
+  g_clear_pointer (&call->session_path, g_free);
+}
 
+static void
+call_free (Call *call)
+{
+  call_dispose (call);
   g_free (call);
 }
 
