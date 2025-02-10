@@ -544,6 +544,10 @@ get_zones_done (GDBusConnection *bus,
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
 
+  /* If the Call has already been disposed, we should have unsubscribed
+   * from the Response signal at that time, so we shouldn't get here */
+  g_return_if_fail (G_IS_TASK (call->task));
+
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
   if (response != 0)
@@ -676,6 +680,10 @@ session_created (GDBusConnection *bus,
   Call *call = data;
   guint32 response;
   g_autoptr(GVariant) ret = NULL;
+
+  /* If the Call has already been disposed, we should have unsubscribed
+   * from the Response signal at that time, so we shouldn't get here */
+  g_return_if_fail (G_IS_TASK (call->task));
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
@@ -955,6 +963,10 @@ set_pointer_barriers_done (GDBusConnection *bus,
   g_autoptr(GVariant) ret = NULL;
   GVariant *failed = NULL;
   GList *failed_list = NULL;
+
+  /* If the Call has already been disposed, we should have unsubscribed
+   * from the Response signal at that time, so we shouldn't get here */
+  g_return_if_fail (G_IS_TASK (call->task));
 
   g_variant_get (parameters, "(u@a{sv})", &response, &ret);
 
