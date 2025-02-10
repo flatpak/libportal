@@ -264,12 +264,28 @@ call_dispose (Call *call)
   g_clear_pointer (&call->session_path, g_free);
 }
 
-static void
-call_free (Call *call)
+static inline Call *
+call_ref (Call *call)
 {
-  call_dispose (call);
-  g_free (call);
+  return g_rc_box_acquire (call);
 }
+
+static inline void
+call_last_unref (void *call)
+{
+  /* Only separated from call_dispose() because g_rc_box_release_full()
+   * wants a GDestroyNotify, and because this is a convenient place to put
+   * life-cycle debugging */
+  call_dispose (call);
+}
+
+static inline void
+call_unref (void *call)
+{
+  g_rc_box_release_full (call, call_last_unref);
+}
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (Call, call_unref)
 
 static Call *
 call_new (XdpPortal *portal,
@@ -279,7 +295,7 @@ call_new (XdpPortal *portal,
           GAsyncReadyCallback callback,
           void *callback_data)
 {
-  Call *call = g_new0 (Call, 1);
+  g_autoptr(Call) call = g_rc_box_new0 (Call);
 
   call->portal = g_object_ref (portal);
 
@@ -287,7 +303,13 @@ call_new (XdpPortal *portal,
     call->session = g_object_ref (session);
 
   call->task = g_task_new (G_OBJECT (source_object), cancellable, callback, callback_data);
-  return call;
+
+  /* The GTask holds a reference to the Call for as long as it's subscribed
+   * to signals, etc. This is a circular reference which is released by
+   * call_dispose(). */
+  g_task_set_task_data (call->task, call_ref (call), call_unref);
+
+  return g_steal_pointer (&call);
 }
 
 static void
@@ -295,16 +317,25 @@ call_returned (GObject *object,
                GAsyncResult *result,
                gpointer data)
 {
-  Call *call = data;
+  /* This releases the ref that was taken when we called a D-Bus method */
+  g_autoptr(Call) call = data;
   GError *error = NULL;
   g_autoptr(GVariant) ret = NULL;
+
+  /* If the Call's result has already been resolved, then the only reason
+   * we have not yet freed the Call is that the D-Bus method call was still
+   * holding a reference to it. Let the g_autoptr free it, but we don't need
+   * to do anything else here. */
+  if (call->task == NULL)
+    return;
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
   if (error)
     {
       g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
+      /* Now the Call failed, we can ignore any subsequent method replies */
       g_task_return_error (call->task, error);
-      call_free (call);
+      call_dispose (call);
     }
 }
 
@@ -396,7 +427,7 @@ zones_changed (GDBusConnection *bus,
   XdpPortal *portal = session->parent_session->portal;
   g_autoptr(GVariant) options = NULL;
   const char *handle = NULL;
-  Call *call;
+  g_autoptr(Call) call = NULL;
 
   g_variant_get(parameters, "(o@a{sv})", &handle, &options);
 
@@ -584,6 +615,8 @@ get_zones_done (GDBusConnection *bus,
         {
           set_zones (session, zones, zone_set);
           g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
+          /* Now the Call succeeded, we can ignore any subsequent method replies */
+          call_dispose (call);
         }
       else
         {
@@ -597,8 +630,9 @@ get_zones_done (GDBusConnection *bus,
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture GetZones() failed");
 
+  /* If the Call failed, we can ignore any subsequent method replies */
   if (response != 0)
-    call_free (call);
+    call_dispose (call);
 }
 
 static void
@@ -623,7 +657,7 @@ get_zones (Call *call)
                           -1,
                           g_task_get_cancellable (call->task),
                           call_returned,
-                          call);
+                          call_ref (call));
 }
 
 static void
@@ -662,8 +696,9 @@ session_created (GDBusConnection *bus,
   else if (response == 2)
     g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "CreateSession failed");
 
+  /* If the Call failed, we can ignore any subsequent method replies */
   if (response != 0)
-    call_free (call);
+    call_dispose (call);
 }
 
 static void
@@ -728,7 +763,7 @@ create_session (Call *call)
                           -1,
                           cancellable,
                           call_returned,
-                          call);
+                          call_ref (call));
 }
 
 /**
@@ -753,7 +788,7 @@ xdp_portal_create_input_capture_session (XdpPortal *portal,
                                          GAsyncReadyCallback callback,
                                          gpointer data)
 {
-  Call *call;
+  g_autoptr(Call) call = NULL;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
 
@@ -947,6 +982,8 @@ set_pointer_barriers_done (GDBusConnection *bus,
   free_barrier_list (call->barriers);
   call->barriers = NULL;
   g_task_return_pointer (call->task, failed_list,  (GDestroyNotify)free_barrier_list);
+  /* Now the Call succeeded, we can ignore any subsequent method replies */
+  call_dispose (call);
 }
 
 static void
@@ -995,7 +1032,7 @@ set_pointer_barriers (Call *call)
                           -1,
                           g_task_get_cancellable (call->task),
                           call_returned,
-                          call);
+                          call_ref (call));
 }
 
 static void
@@ -1028,7 +1065,7 @@ xdp_input_capture_session_set_pointer_barriers (XdpInputCaptureSession *session,
                                                 GAsyncReadyCallback     callback,
                                                 gpointer                data)
 {
-  Call *call;
+  g_autoptr(Call) call = NULL;
   XdpPortal *portal;
 
   g_return_if_fail (_xdp_input_capture_session_is_valid (session));
