@@ -65,3 +65,17 @@ _g_clear_fd_ignore_error (int *fd_ptr)
 #define g_autofd __attribute__((cleanup(_g_clear_fd_ignore_error)))
 
 #endif
+
+#if !GLIB_CHECK_VERSION(2, 84, 0)
+static inline unsigned int
+backport_steal_handle_id (unsigned int *handle_pointer)
+{
+  unsigned int handle;
+
+  handle = *handle_pointer;
+  *handle_pointer = 0;
+
+  return handle;
+}
+#define g_steal_handle_id(hp) backport_steal_handle_id (hp)
+#endif
