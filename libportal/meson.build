@@ -2,7 +2,7 @@ generated_files = []
 version = '1.0.0'
 gir_version = '1.0'
 
-headers = [
+public_headers = [
   'portal.h',
   'portal-helpers.h',
   'account.h',
@@ -11,7 +11,6 @@ headers = [
   'dynamic-launcher.h',
   'email.h',
   'filechooser.h',
-  'glib-backports.h',
   'inhibit.h',
   'inputcapture.h',
   'inputcapture-zone.h',
@@ -33,7 +32,7 @@ headers = [
 ]
 
 portal_enums = gnome.mkenums('portal-enums',
-  sources: headers,
+  sources: public_headers,
   c_template: 'portal-enums.c.template',
   h_template: 'portal-enums.h.template',
   install_dir: join_paths (get_option('includedir'), 'libportal'),
@@ -72,7 +71,7 @@ src = [
 gio_dep = dependency('gio-2.0', version: '>= 2.72')
 gio_unix_dep = dependency('gio-unix-2.0')
 
-install_headers(headers, subdir: 'libportal')
+install_headers(public_headers, subdir: 'libportal')
 
 libportal = library('portal',
   src,
@@ -98,7 +97,7 @@ libportal_dep = declare_dependency(
 
 if introspection
   libportal_gir = gnome.generate_gir(libportal,
-    sources: generated_files + headers + src,
+    sources: generated_files + public_headers + src,
     nsversion: gir_version,
     namespace: 'Xdp',
     symbol_prefix: 'xdp',
