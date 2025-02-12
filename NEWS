@@ -1,7 +1,20 @@
 Changes in 0.9.1, xx-xx-xxxx
 ==========================
 
-...
+Dependencies:
+
+- Meson 0.55.0 is required
+
+Bug fixes:
+
+- Fix memory management in the Input Capture portal code (#169, #190)
+- Correct the type used for GObject signal connections (#184)
+- Remove wrong `(closure)` annotations, fixing GObject-Introspection warnings
+  (#182)
+- Don't require a C++ compiler for the build architecture (#181)
+- Fix Meson warnings (#181)
+- Consistently use `#pragma once` (#192)
+- Initialize all g_autoptr variables (#180)
 
 Changes in 0.9.0, 21-12-2024
 ==========================
