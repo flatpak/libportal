@@ -239,8 +239,10 @@ static void create_session (Call *call);
 static void get_zones (Call *call);
 
 static void
-call_dispose (Call *call)
+call_dispose (void *p)
 {
+  Call *call = p;
+
   /* CreateSesssion */
   if (call->parent)
     call->parent->parent_unexport (call->parent);
@@ -271,18 +273,9 @@ call_ref (Call *call)
 }
 
 static inline void
-call_last_unref (void *call)
-{
-  /* Only separated from call_dispose() because g_rc_box_release_full()
-   * wants a GDestroyNotify, and because this is a convenient place to put
-   * life-cycle debugging */
-  call_dispose (call);
-}
-
-static inline void
 call_unref (void *call)
 {
-  g_rc_box_release_full (call, call_last_unref);
+  g_rc_box_release_full (call, call_dispose);
 }
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (Call, call_unref)
