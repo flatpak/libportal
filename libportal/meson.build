@@ -96,6 +96,12 @@ libportal_dep = declare_dependency(
 )
 
 if introspection
+  fs = import('fs')
+  libportal_gir_args = []
+  foreach h: public_headers
+    libportal_gir_args += '--c-include=libportal/' + fs.name(h)
+  endforeach
+
   libportal_gir = gnome.generate_gir(libportal,
     sources: generated_files + public_headers + src,
     nsversion: gir_version,
@@ -107,6 +113,7 @@ if introspection
     includes: ['Gio-2.0'],
     install: true,
     export_packages: ['libportal'],
+    extra_args: libportal_gir_args,
    )
   if vapi
     libportal_vapi = gnome.generate_vapi(
