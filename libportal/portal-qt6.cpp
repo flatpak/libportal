@@ -31,7 +31,11 @@
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #include <qpa/qplatformintegration.h>
 #include <private/qguiapplication_p.h>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#include <private/qdesktopunixservices_p.h>
+#else
 #include <private/qgenericunixservices_p.h>
+#endif
 #endif
 
 static gboolean
@@ -45,7 +49,11 @@ _xdp_parent_export_qt (XdpParent *parent,
   }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+  if (const auto services = dynamic_cast<QDesktopUnixServices*>(QGuiApplicationPrivate::platformIntegration()->services()))
+#else
   if (const auto services = dynamic_cast<QGenericUnixServices*>(QGuiApplicationPrivate::platformIntegration()->services()))
+#endif
     {
       g_autofree char *handle = g_strdup(services->portalWindowIdentifier(w).toUtf8().constData());
 
