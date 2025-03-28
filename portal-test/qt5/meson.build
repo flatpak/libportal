@@ -14,6 +14,8 @@ prep = qt5.preprocess(
   dependencies: libportal_qt5_dep,
 )
 
+install_data('org.freedesktop.PortalTest.Qt5.desktop', install_dir: 'share/applications')
+
 executable('portal-test-qt5',
   [src, prep],
   include_directories: [top_inc, libportal_inc],
