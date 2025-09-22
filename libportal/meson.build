@@ -68,7 +68,7 @@ src = [
   generated_files,
 ]
 
-gio_dep = dependency('gio-2.0', version: '>= 2.72')
+gio_dep = dependency('gio-2.0', version: '>= 2.80')
 gio_unix_dep = dependency('gio-unix-2.0')
 
 install_headers(public_headers, subdir: 'libportal')
