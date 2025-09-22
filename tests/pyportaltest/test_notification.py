@@ -8,7 +8,7 @@ import gi
 import logging
 
 gi.require_version("Xdp", "1.0")
-from gi.repository import GLib, Gio, Xdp
+from gi.repository import GLib, Gio, GioUnix, Xdp
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class TestNotification(PortalTest):
         assert dict(notification) == notification_to_set_dict
         (icon_type, handle) = icon
         assert icon_type == 'file-descriptor'
-        input_stream = Gio.UnixInputStream.new(handle.take(), True)
+        input_stream = GioUnix.InputStream.new(handle.take(), True)
 
         res_bytes = input_stream.read_bytes(bytes.get_size(), None)
         assert res_bytes.equal (bytes)
@@ -117,7 +117,7 @@ class TestNotification(PortalTest):
         assert dict(notification) == notification_to_set_dict
         (icon_type, handle) = icon
         assert icon_type == 'file-descriptor'
-        input_stream = Gio.UnixInputStream.new(handle.take(), True)
+        input_stream = GioUnix.InputStream.new(handle.take(), True)
 
         res_bytes = input_stream.read_bytes(bytes.get_size(), None)
         assert res_bytes.equal (bytes)
@@ -164,7 +164,7 @@ class TestNotification(PortalTest):
         assert dict(notification) == notification_to_set_dict
         (sound_type, handle) = sound
         assert sound_type == 'file-descriptor'
-        input_stream = Gio.UnixInputStream.new(handle.take(), True)
+        input_stream = GioUnix.InputStream.new(handle.take(), True)
 
         res_bytes = input_stream.read_bytes(bytes.get_size(), None)
         assert res_bytes.equal (bytes)
@@ -192,7 +192,7 @@ class TestNotification(PortalTest):
         assert dict(notification) == notification_to_set_dict
         (sound_type, handle) = sound_out
         assert sound_type == 'file-descriptor'
-        input_stream = Gio.UnixInputStream.new(handle.take(), True)
+        input_stream = GioUnix.InputStream.new(handle.take(), True)
 
         res_bytes = input_stream.read_bytes(bytes.get_size(), None)
         assert res_bytes.equal (bytes)
