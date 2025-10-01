@@ -79,7 +79,7 @@ xdp_settings_class_init (XdpSettingsClass *klass)
   /**
    * XdpSettings::changed:
    * @settings: the [class@Settings] object
-   * @namespace: the value namespace
+   * @namespace_: the value namespace
    * @key: the value key
    * @value: the value
    *
@@ -136,22 +136,22 @@ settings_changed (GDBusConnection *bus,
 /**
  * xdp_settings_read_uint:
  * @settings: the [class@Settings] object.
- * @namespace: the namespace of the value.
+ * @namespace_: the namespace of the value.
  * @key: the key of the value.
  * @cancellable: a GCancellable or NULL.
  * @error: return location for error or NULL.
  *
- * Read a setting value as unsigned int within @namespace, with @key.
+ * Read a setting value as unsigned int within @namespace_, with @key.
  *
  * Returns: the uint value, or 0 if not found or not
  * the right type. If @error is not NULL, then the error is returned.
  */
 guint32
-xdp_settings_read_uint (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error)
+xdp_settings_read_uint (XdpSettings *settings, const char *namespace_, const char *key, GCancellable *cancellable, GError **error)
 {
   g_autoptr(GVariant) value = NULL;
 
-  value = xdp_settings_read_value (settings, namespace, key, cancellable, error);
+  value = xdp_settings_read_value (settings, namespace_, key, cancellable, error);
   if (value)
     {
       if (g_variant_is_of_type (value, G_VARIANT_TYPE_UINT32))
@@ -165,22 +165,22 @@ xdp_settings_read_uint (XdpSettings *settings, const char *namespace, const char
 /**
  * xdp_settings_read_string:
  * @settings: the [class@Settings] object.
- * @namespace: the namespace of the value.
+ * @namespace_: the namespace of the value.
  * @key: the key of the value.
  * @cancellable: a GCancellable or NULL.
  * @error: return location for error or NULL.
  *
- * Read a setting value as unsigned int within @namespace, with @key.
+ * Read a setting value as unsigned int within @namespace_, with @key.
  *
  * Returns: (transfer full): the stringint value, or NULL if not found or not
  * the right type. If @error is not NULL, then the error is returned.
  */
 char *
-xdp_settings_read_string (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error)
+xdp_settings_read_string (XdpSettings *settings, const char *namespace_, const char *key, GCancellable *cancellable, GError **error)
 {
   g_autoptr(GVariant) value = NULL;
 
-  value = xdp_settings_read_value (settings, namespace, key, cancellable, error);
+  value = xdp_settings_read_value (settings, namespace_, key, cancellable, error);
   if (value)
     {
       if (g_variant_is_of_type (value, G_VARIANT_TYPE_STRING))
@@ -194,14 +194,14 @@ xdp_settings_read_string (XdpSettings *settings, const char *namespace, const ch
 /**
  * xdp_settings_read:
  * @settings: the [class@Settings] object.
- * @namespace: the namespace of the value.
+ * @namespace_: the namespace of the value.
  * @key: the key of the value.
  * @cancellable: a GCancellable or NULL.
  * @error: return location for error or NULL.
  * @format: a #GVariant format string
  * @...: arguments as per @format
  *
- * Read a setting value within @namespace, with @key.
+ * Read a setting value within @namespace_, with @key.
  *
  * A convenience function that combines xdp_settings_read_value() with
  * g_variant_get().
@@ -210,12 +210,12 @@ xdp_settings_read_string (XdpSettings *settings, const char *namespace, const ch
  * returned.
  */
 void
-xdp_settings_read (XdpSettings *settings, const char *namespace, const gchar *key, GCancellable *cancellable, GError **error, const gchar *format, ...)
+xdp_settings_read (XdpSettings *settings, const char *namespace_, const gchar *key, GCancellable *cancellable, GError **error, const gchar *format, ...)
 {
   g_autoptr(GVariant) value = NULL;
   va_list ap;
 
-  value = xdp_settings_read_value (settings, namespace, key, cancellable, error);
+  value = xdp_settings_read_value (settings, namespace_, key, cancellable, error);
   if (value)
     {
       va_start (ap, format);
@@ -227,18 +227,18 @@ xdp_settings_read (XdpSettings *settings, const char *namespace, const gchar *ke
 /**
  * xdp_settings_read_value:
  * @settings: the [class@Settings] object.
- * @namespace: the namespace of the value.
+ * @namespace_: the namespace of the value.
  * @key: the key of the value.
  * @cancellable: a GCancellable or NULL.
  * @error: return location for error or NULL.
  *
- * Read a setting value within @namespace, with @key.
+ * Read a setting value within @namespace_, with @key.
  *
  * Returns: (transfer full): the value, or %NULL if not
  * found. If @error is not NULL, then the error is returned.
  */
 GVariant *
-xdp_settings_read_value (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error)
+xdp_settings_read_value (XdpSettings *settings, const char *namespace_, const char *key, GCancellable *cancellable, GError **error)
 {
   g_autoptr(GVariant) ret = NULL;
   g_autoptr(GVariant) inner = NULL;
@@ -248,7 +248,7 @@ xdp_settings_read_value (XdpSettings *settings, const char *namespace, const cha
                                      PORTAL_OBJECT_PATH,
                                      SETTINGS_INTERFACE,
                                      "ReadOne",
-                                     g_variant_new ("(ss)", namespace, key),
+                                     g_variant_new ("(ss)", namespace_, key),
                                      NULL,
                                      G_DBUS_CALL_FLAGS_NONE,
                                      5000,
