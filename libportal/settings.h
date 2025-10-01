@@ -32,20 +32,20 @@ XDP_PUBLIC
 G_DECLARE_FINAL_TYPE (XdpSettings, xdp_settings, XDP, SETTINGS, GObject)
 
 XDP_PUBLIC
-GVariant *xdp_settings_read_value (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error);
+GVariant *xdp_settings_read_value (XdpSettings *settings, const char *namespace_, const char *key, GCancellable *cancellable, GError **error);
 
 XDP_PUBLIC
 void
-xdp_settings_read (XdpSettings *settings, const char *namespace,
+xdp_settings_read (XdpSettings *settings, const char *namespace_,
                    const gchar *key,
                    GCancellable *cancellable, GError **error,
                    const gchar *format, ...);
 
 XDP_PUBLIC
-guint xdp_settings_read_uint (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error);
+guint xdp_settings_read_uint (XdpSettings *settings, const char *namespace_, const char *key, GCancellable *cancellable, GError **error);
 
 XDP_PUBLIC
-char *xdp_settings_read_string (XdpSettings *settings, const char *namespace, const char *key, GCancellable *cancellable, GError **error);
+char *xdp_settings_read_string (XdpSettings *settings, const char *namespace_, const char *key, GCancellable *cancellable, GError **error);
 
 XDP_PUBLIC
 GVariant *xdp_settings_read_all_values (XdpSettings *settings, const char *const *namespaces, GCancellable *cancellable, GError **error);
