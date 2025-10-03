@@ -26,6 +26,7 @@
 #include <libportal/dynamic-launcher.h>
 #include <libportal/email.h>
 #include <libportal/filechooser.h>
+#include <libportal/globalshortcuts.h>
 #include <libportal/inhibit.h>
 #include <libportal/inputcapture.h>
 #include <libportal/location.h>
