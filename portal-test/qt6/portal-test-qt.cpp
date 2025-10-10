@@ -4,10 +4,10 @@
 
 #include <QStringLiteral>
 
-PortalTestQt::PortalTestQt(QWidget *parent, Qt::WindowFlags f)
+PortalTestQt::PortalTestQt(XdpPortal *portal, QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
     , m_mainWindow(new Ui_PortalTestQt)
-    , m_portal(xdp_portal_new())
+    , m_portal(portal)
 {
     m_mainWindow->setupUi(this);
 
