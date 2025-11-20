@@ -51,6 +51,8 @@ xdp_session_finalize (GObject *object)
 {
   XdpSession *session = XDP_SESSION (object);
 
+  xdp_portal_remove_session (session->portal, session);
+
   if (session->signal_id)
     g_dbus_connection_signal_unsubscribe (session->portal->bus, session->signal_id);
 
@@ -130,6 +132,9 @@ _xdp_session_new (XdpPortal *portal,
                                                            session_closed,
                                                            session,
                                                            NULL);
+
+  xdp_portal_add_session (portal, session);
+
   return session;
 }
 
