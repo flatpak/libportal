@@ -61,6 +61,10 @@ struct _XdpPortal {
 
   /* background */
   guint background_interface_version;
+
+  /* clipbord */
+  guint selection_owner_changed_signal;
+  guint selection_transfer_signal;
 };
 
 const char * portal_get_bus_name (void);

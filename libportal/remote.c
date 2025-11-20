@@ -677,6 +677,8 @@ session_started (GDBusConnection *bus,
         _xdp_session_set_devices (call->session, devices);
       if (g_variant_lookup (ret, "streams", "@a(ua{sv})", &streams))
         _xdp_session_set_streams (call->session, streams);
+      g_variant_lookup (ret, "clipboard_enabled", "b",
+                        &call->session->is_clipboard_enabled);
 
       g_task_return_boolean (call->task, TRUE);
     }
