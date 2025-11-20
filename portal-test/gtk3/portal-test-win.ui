@@ -814,9 +814,10 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="enable">
+                  <object class="GtkCheckButton" id="inputcapture_enable">
                     <property name="visible">1</property>
                     <property name="tooltip-text">Enable</property>
+                    <signal name="clicked" handler="capture_input_toggle_enable"/>
                   </object>
                 </child>
               </object>
