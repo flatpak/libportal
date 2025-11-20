@@ -736,6 +736,73 @@ update_clipboard (PortalTestWin *win)
 }
 
 static void
+inputcapture_session_started (GObject *source,
+                              GAsyncResult *result,
+                              gpointer data)
+{
+  XdpInputCaptureSession *ic = XDP_INPUT_CAPTURE_SESSION (source);
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  GList *zones;
+  g_autoptr (GString) s = NULL;
+
+  if (!xdp_input_capture_session_start_finish (ic, result, &error))
+    {
+      g_warning ("Failed to start inputcapture session: %s", error->message);
+      return;
+    }
+
+  zones = xdp_input_capture_session_get_zones (ic);
+  s = g_string_new ("");
+  for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
+    {
+      XdpInputCaptureZone *zone = elem->data;
+      guint w, h;
+      gint x, y;
+
+      g_object_get (zone,
+		    "width", &w,
+		    "height", &h,
+		    "x", &x,
+		    "y", &y,
+		    NULL);
+
+      g_string_append_printf (s, "%ux%u@%d,%d ", w, h, x, y);
+    }
+  gtk_label_set_label (GTK_LABEL (win->inputcapture_label), s->str);
+
+  update_clipboard (win);
+}
+
+static void
+inputcapture_session_created2 (GObject *source,
+                               GAsyncResult *result,
+                               gpointer data)
+{
+  XdpPortal *portal = XDP_PORTAL (source);
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  g_autoptr (GString) s = NULL;
+  XdpInputCaptureSession *ic;
+
+  ic = xdp_portal_create_input_capture_session2_finish (portal, result, &error);
+  if (ic == NULL)
+    {
+      g_warning ("Failed to create inputcapture session: %s", error->message);
+      return;
+    }
+  win->session = xdp_input_capture_session_get_session (ic);
+  win->input_capture_session = ic;
+
+  xdp_input_capture_session_start (ic,
+                                   NULL,
+                                   XDP_INPUT_CAPABILITY_POINTER | XDP_INPUT_CAPABILITY_KEYBOARD,
+                                   NULL,
+                                   inputcapture_session_started,
+                                   win);
+}
+
+static void
 inputcapture_session_created (GObject *source,
                               GAsyncResult *result,
                               gpointer data)
@@ -783,12 +850,24 @@ start_input_capture (PortalTestWin *win)
 
   update_clipboard (win);
 
-  xdp_portal_create_input_capture_session (win->portal,
-                                           NULL,
-                                           XDP_INPUT_CAPABILITY_POINTER | XDP_INPUT_CAPABILITY_KEYBOARD,
-                                           NULL,
-                                           inputcapture_session_created,
-                                           win);
+  if (xdp_portal_get_input_capture_version_sync (win->portal, NULL, NULL) > 1)
+    {
+      g_print ("Using new input capture session construction API\n");
+      xdp_portal_create_input_capture_session2 (win->portal,
+                                                NULL,
+                                                inputcapture_session_created2,
+                                                win);
+    }
+  else
+    {
+      g_print ("Using legacy input capture session construction API\n");
+      xdp_portal_create_input_capture_session (win->portal,
+                                               NULL,
+                                               XDP_INPUT_CAPABILITY_POINTER | XDP_INPUT_CAPABILITY_KEYBOARD,
+                                               NULL,
+                                               inputcapture_session_created,
+                                               win);
+    }
 }
 
 static void
