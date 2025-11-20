@@ -521,6 +521,54 @@ _xdp_input_capture_session_new (XdpPortal *portal, const char *session_path)
   g_object_weak_ref (G_OBJECT (parent_session), parent_session_destroy, session);
   session->parent_session = g_object_ref(parent_session); /* strong ref */
 
+  session->signal_ids[SIGNAL_ZONES_CHANGED] =
+    g_dbus_connection_signal_subscribe (portal->bus,
+                                        PORTAL_BUS_NAME,
+                                        "org.freedesktop.portal.InputCapture",
+                                        "ZonesChanged",
+                                        PORTAL_OBJECT_PATH,
+                                        NULL,
+                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                        zones_changed,
+                                        session,
+                                        NULL);
+
+  session->signal_ids[SIGNAL_ACTIVATED] =
+    g_dbus_connection_signal_subscribe (portal->bus,
+                                        PORTAL_BUS_NAME,
+                                        "org.freedesktop.portal.InputCapture",
+                                        "Activated",
+                                        PORTAL_OBJECT_PATH,
+                                        NULL,
+                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                        activated,
+                                        session,
+                                        NULL);
+
+  session->signal_ids[SIGNAL_DEACTIVATED] =
+    g_dbus_connection_signal_subscribe (portal->bus,
+                                        PORTAL_BUS_NAME,
+                                        "org.freedesktop.portal.InputCapture",
+                                        "Deactivated",
+                                        PORTAL_OBJECT_PATH,
+                                        NULL,
+                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                        deactivated,
+                                        session,
+                                        NULL);
+
+  session->signal_ids[SIGNAL_DISABLED] =
+    g_dbus_connection_signal_subscribe (portal->bus,
+                                        PORTAL_BUS_NAME,
+                                        "org.freedesktop.portal.InputCapture",
+                                        "Disabled",
+                                        PORTAL_OBJECT_PATH,
+                                        NULL,
+                                        G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
+                                        disabled,
+                                        session,
+                                        NULL);
+
   return g_object_ref(session);
 }
 
@@ -556,60 +604,9 @@ get_zones_done (GDBusConnection *bus,
       call->signal_id = 0;
 
       if (session != NULL)
-        {
-          g_object_ref (session);
-        }
+        g_object_ref (session);
       else
-        {
-          session = _xdp_input_capture_session_new (call->portal, call->session_path);
-          session->signal_ids[SIGNAL_ZONES_CHANGED] =
-            g_dbus_connection_signal_subscribe (bus,
-                                                PORTAL_BUS_NAME,
-                                                "org.freedesktop.portal.InputCapture",
-                                                "ZonesChanged",
-                                                PORTAL_OBJECT_PATH,
-                                                NULL,
-                                                G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                zones_changed,
-                                                session,
-                                                NULL);
-
-          session->signal_ids[SIGNAL_ACTIVATED] =
-            g_dbus_connection_signal_subscribe (bus,
-                                                PORTAL_BUS_NAME,
-                                                "org.freedesktop.portal.InputCapture",
-                                                "Activated",
-                                                PORTAL_OBJECT_PATH,
-                                                NULL,
-                                                G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                activated,
-                                                session,
-                                                NULL);
-
-          session->signal_ids[SIGNAL_DEACTIVATED] =
-            g_dbus_connection_signal_subscribe (bus,
-                                                PORTAL_BUS_NAME,
-                                                "org.freedesktop.portal.InputCapture",
-                                                "Deactivated",
-                                                PORTAL_OBJECT_PATH,
-                                                NULL,
-                                                G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                deactivated,
-                                                session,
-                                                NULL);
-
-          session->signal_ids[SIGNAL_DISABLED] =
-            g_dbus_connection_signal_subscribe (bus,
-                                                PORTAL_BUS_NAME,
-                                                "org.freedesktop.portal.InputCapture",
-                                                "Disabled",
-                                                PORTAL_OBJECT_PATH,
-                                                NULL,
-                                                G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE,
-                                                disabled,
-                                                session,
-                                                NULL);
-        }
+        session = _xdp_input_capture_session_new (call->portal, call->session_path);
 
       if (g_variant_lookup (ret, "zone_set", "u", &zone_set) &&
           g_variant_lookup (ret, "zones", "@a(uuii)", &zones))
