@@ -26,6 +26,8 @@
 
 #include <gtk/gtk.h>
 #include <gio/gdesktopappinfo.h>
+#include <gio/gunixinputstream.h>
+#include <gio/gunixoutputstream.h>
 #include <gio/gunixfdlist.h>
 
 #include <gst/gst.h>
@@ -103,6 +105,14 @@ struct _PortalTestWin
   GtkWidget *update_progressbar;
   GtkWidget *update_label;
   GtkWidget *ok2;
+
+  GtkWidget *clipboard_label;
+  GtkWidget *clipboard_copy;
+  GtkWidget *clipboard_paste;
+  GtkWidget *clipboard_entry;
+
+  gulong selection_owner_changed;
+  gulong selection_transfer_handler_id;
 };
 
 struct _PortalTestWinClass
@@ -113,6 +123,8 @@ struct _PortalTestWinClass
 G_DEFINE_TYPE (PortalTestWin, portal_test_win, GTK_TYPE_APPLICATION_WINDOW);
 
 #define TEST_FILE_PATH APPDATADIR ".Gtk3/test.txt"
+
+static void update_clipboard (PortalTestWin *win);
 
 static char *
 file_path_in_source_dir (const char *file)
@@ -638,6 +650,90 @@ take_screenshot (GtkButton *button,
 }
 
 static void
+on_selection_owner_changed (XdpSession *session,
+                           GStrv *mime_types,
+                           gboolean session_is_owner,
+                           PortalTestWin *win)
+{
+  update_clipboard (win);
+}
+
+static void
+on_selection_transfer (XdpSession *session,
+                       const char *mime_type,
+                       unsigned int serial,
+                       PortalTestWin *win)
+{
+  int fd;
+  g_autoptr(GOutputStream) output_stream = NULL;
+  g_autoptr(GError) error = NULL;
+  const char *text;
+
+  fd = xdp_session_selection_write (session, serial);
+  if (fd < 0)
+    return;
+
+  text = gtk_entry_get_text (GTK_ENTRY (win->clipboard_entry));
+
+  output_stream = g_unix_output_stream_new (g_steal_fd (&fd), TRUE);
+  if (!g_output_stream_write_all (output_stream,
+                                  text,
+                                  strlen (text),
+                                  NULL, NULL, &error))
+    g_warning ("Failed to write clipboard content: %s", error->message);
+
+  g_clear_object (&output_stream);
+  xdp_session_selection_write_done (session, serial, !error);
+}
+
+static void
+update_clipboard (PortalTestWin *win)
+{
+  if (win->session &&
+      xdp_session_is_clipboard_enabled (win->session))
+    {
+      const char **mime_types;
+
+      mime_types = xdp_session_get_selection_mime_types (win->session);
+      if (!xdp_session_is_selection_owned_by_session (win->session) &&
+          mime_types &&
+          g_strv_contains (mime_types, "text/plain"))
+        gtk_widget_set_sensitive (win->clipboard_paste, TRUE);
+      else
+        gtk_widget_set_sensitive (win->clipboard_paste, FALSE);
+
+      gtk_widget_set_sensitive (win->clipboard_copy, TRUE);
+
+      if (!win->selection_owner_changed)
+        {
+          win->selection_owner_changed =
+            g_signal_connect (win->session, "selection-owner-changed",
+                              G_CALLBACK (on_selection_owner_changed), win);
+          win->selection_transfer_handler_id =
+            g_signal_connect (win->session, "selection-transfer",
+                              G_CALLBACK (on_selection_transfer), win);
+        }
+    }
+  else
+    {
+      gtk_widget_set_sensitive (win->clipboard_copy, FALSE);
+      gtk_widget_set_sensitive (win->clipboard_paste, FALSE);
+      if (win->session)
+        {
+          g_clear_signal_handler (&win->selection_owner_changed,
+                                  win->session);
+          g_clear_signal_handler (&win->selection_transfer_handler_id,
+                                  win->session);
+        }
+      else
+        {
+          win->selection_transfer_handler_id = 0;
+          win->selection_owner_changed = 0;
+        }
+    }
+}
+
+static void
 inputcapture_session_created (GObject *source,
                               GAsyncResult *result,
                               gpointer data)
@@ -682,6 +778,8 @@ start_input_capture (PortalTestWin *win)
 {
   g_clear_object (&win->session);
 
+  update_clipboard (win);
+
   xdp_portal_create_input_capture_session (win->portal,
                                            NULL,
                                            XDP_INPUT_CAPABILITY_POINTER | XDP_INPUT_CAPABILITY_KEYBOARD,
@@ -697,6 +795,9 @@ stop_input_capture (PortalTestWin *win)
     {
       xdp_session_close (win->session);
       g_clear_object (&win->session);
+
+      update_clipboard (win);
+
       gtk_label_set_label (GTK_LABEL (win->inputcapture_label), "");
     }
 }
@@ -730,17 +831,31 @@ session_started (GObject *source,
   g_autoptr(GVariantIter) iter = NULL;
   GVariant *props;
   g_autoptr (GString) s = NULL;
+  XdpDeviceType device_types;
 
   if (!xdp_session_start_finish (session, result, &error))
     {
-      g_warning ("Failed to start screencast session: %s", error->message);
+      g_warning ("Failed to start session: %s", error->message);
       g_clear_object (&win->session);
-      gtk_label_set_label (GTK_LABEL (win->screencast_label), "");
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (win->screencast_toggle), FALSE);
+
+      update_clipboard (win);
+
+      if (xdp_session_get_session_type (session) == XDP_SESSION_SCREENCAST)
+        {
+          gtk_label_set_label (GTK_LABEL (win->screencast_label), "");
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (win->screencast_toggle), FALSE);
+        }
+      else if (xdp_session_get_session_type (session) == XDP_SESSION_REMOTE_DESKTOP)
+        {
+          gtk_label_set_label (GTK_LABEL (win->remotedesktop_label), "");
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (win->remotedesktop_toggle), FALSE);
+        }
       return;
     }
 
   s = g_string_new ("");
+
+  update_clipboard (win);
 
   iter = g_variant_iter_new (xdp_session_get_streams (session));
   while (g_variant_iter_next (iter, "(u@a{sv})", &id, &props))
@@ -824,6 +939,8 @@ start_screencast (PortalTestWin *win)
 {
   g_clear_object (&win->session);
 
+  update_clipboard (win);
+
   xdp_portal_create_screencast_session (win->portal,
                                         XDP_OUTPUT_MONITOR | XDP_OUTPUT_WINDOW,
                                         XDP_SCREENCAST_FLAG_NONE,
@@ -842,6 +959,7 @@ stop_screencast (PortalTestWin *win)
     {
       xdp_session_close (win->session);
       g_clear_object (&win->session);
+      update_clipboard (win);
       gtk_label_set_label (GTK_LABEL (win->screencast_label), "");
     }
 }
@@ -873,6 +991,8 @@ remotedesktop_session_created (GObject *source,
       return;
     }
 
+  xdp_session_request_clipboard (win->session);
+
   parent = xdp_parent_new_gtk (GTK_WINDOW (win));
   xdp_session_start (win->session, parent, NULL, session_started, win);
   xdp_parent_free (parent);
@@ -882,6 +1002,8 @@ static void
 start_remotedesktop (PortalTestWin *win)
 {
   g_clear_object (&win->session);
+
+  update_clipboard (win);
 
   xdp_portal_create_remote_desktop_session (win->portal,
                                             (XDP_DEVICE_KEYBOARD |
@@ -902,6 +1024,7 @@ stop_remotedesktop (PortalTestWin *win)
     {
       xdp_session_close (win->session);
       g_clear_object (&win->session);
+      update_clipboard (win);
       gtk_label_set_label (GTK_LABEL (win->remotedesktop_label), "");
     }
 }
@@ -914,6 +1037,44 @@ remotedesktop_toggled (GtkToggleButton *button,
     start_remotedesktop (win);
   else
     stop_remotedesktop (win);
+}
+
+static void
+paste_clicked (GtkButton *button,
+               PortalTestWin *win)
+{
+  int fd;
+  g_autoptr(GInputStream) input_stream = NULL;
+  g_autoptr(GError) error = NULL;
+  char clipboard_content[1024] = {};
+
+  fd = xdp_session_selection_read (win->session, "text/plain");
+  if (fd < 0)
+    return;
+
+  input_stream = g_unix_input_stream_new (g_steal_fd (&fd), TRUE);
+  if (!g_input_stream_read_all (input_stream,
+                                clipboard_content,
+                                sizeof (clipboard_content) - 1,
+                                NULL, NULL, &error))
+    {
+      g_warning ("Failed to read clipboard content: %s", error->message);
+      return;
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->clipboard_label), clipboard_content);
+}
+
+static void
+copy_clicked (GtkButton *button,
+              PortalTestWin *win)
+{
+  const char *mime_types[] = {
+    "text/plain",
+    NULL,
+  };
+
+  xdp_session_set_selection (win->session, mime_types);
 }
 
 static void
@@ -1508,6 +1669,8 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, capture_input_release);
   gtk_widget_class_bind_template_callback (widget_class, screencast_toggled);
   gtk_widget_class_bind_template_callback (widget_class, remotedesktop_toggled);
+  gtk_widget_class_bind_template_callback (widget_class, paste_clicked);
+  gtk_widget_class_bind_template_callback (widget_class, copy_clicked);
   gtk_widget_class_bind_template_callback (widget_class, notify_me);
   gtk_widget_class_bind_template_callback (widget_class, print_cb);
   gtk_widget_class_bind_template_callback (widget_class, inhibit_changed);
@@ -1542,6 +1705,10 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, screencast_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, remotedesktop_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, remotedesktop_toggle);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, clipboard_label);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, clipboard_copy);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, clipboard_paste);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, clipboard_entry);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_dialog2);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, update_progressbar);
