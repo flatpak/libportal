@@ -832,6 +832,19 @@ capture_input_release (GtkButton *button,
 }
 
 static void
+capture_input_toggle_enable (GtkButton *button,
+                             PortalTestWin *win)
+{
+  if (!win->input_capture_session)
+    return;
+
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+    xdp_input_capture_session_enable (win->input_capture_session);
+  else
+    xdp_input_capture_session_disable (win->input_capture_session);
+}
+
+static void
 session_started (GObject *source,
                  GAsyncResult *result,
                  gpointer data)
@@ -1679,6 +1692,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
   gtk_widget_class_bind_template_callback (widget_class, capture_input);
   gtk_widget_class_bind_template_callback (widget_class, capture_input_release);
+  gtk_widget_class_bind_template_callback (widget_class, capture_input_toggle_enable);
   gtk_widget_class_bind_template_callback (widget_class, screencast_toggled);
   gtk_widget_class_bind_template_callback (widget_class, remotedesktop_toggled);
   gtk_widget_class_bind_template_callback (widget_class, paste_clicked);
