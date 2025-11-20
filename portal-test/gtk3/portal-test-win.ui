@@ -838,6 +838,38 @@
               </packing>
             </child>
 
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Remote Desktop</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">22</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="remotedesktop_toggle">
+                <property name="visible">1</property>
+                <property name="label">Remote Desktop</property>
+                <signal name="toggled" handler="remotedesktop_toggled"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">22</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="remotedesktop_label">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">22</property>
+              </packing>
+            </child>
 
           </object>
         </child>
