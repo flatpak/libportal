@@ -48,6 +48,29 @@ typedef enum {
   XDP_INPUT_CAPABILITY_TOUCHSCREEN  = 1 << 2
 } XdpInputCapability;
 
+XDP_PUBLIC
+void        xdp_portal_create_input_capture_session2 (XdpPortal           *portal,
+                                                      GCancellable        *cancellable,
+                                                      GAsyncReadyCallback  callback,
+                                                      gpointer             data);
+
+XDP_PUBLIC
+XdpInputCaptureSession * xdp_portal_create_input_capture_session2_finish (XdpPortal     *portal,
+                                                                          GAsyncResult  *result,
+                                                                          GError       **error);
+
+XDP_PUBLIC
+void        xdp_input_capture_session_start (XdpInputCaptureSession *session,
+                                             XdpParent              *parent,
+                                             XdpInputCapability      capabilities,
+                                             GCancellable           *cancellable,
+                                             GAsyncReadyCallback     callback,
+                                             gpointer                data);
+
+XDP_PUBLIC
+gboolean    xdp_input_capture_session_start_finish (XdpInputCaptureSession  *session,
+                                                    GAsyncResult            *result,
+                                                    GError                 **error);
 
 XDP_PUBLIC
 void        xdp_portal_create_input_capture_session (XdpPortal            *portal,
@@ -99,5 +122,21 @@ void        xdp_input_capture_session_release (XdpInputCaptureSession *session,
 XDP_PUBLIC
 int        xdp_input_capture_session_connect_to_eis (XdpInputCaptureSession  *session,
                                                      GError                 **error);
+
+XDP_PUBLIC
+void       xdp_portal_get_input_capture_version (XdpPortal              *portal,
+                                                 GCancellable           *cancellable,
+                                                 GAsyncReadyCallback     callback,
+                                                 void                   *callback_data);
+
+XDP_PUBLIC
+int        xdp_portal_get_input_capture_version_finish (XdpPortal     *portal,
+                                                        GAsyncResult  *result,
+                                                        GError       **error);
+
+XDP_PUBLIC
+int        xdp_portal_get_input_capture_version_sync (XdpPortal     *portal,
+                                                      GCancellable  *cancellable,
+                                                      GError       **error);
 
 G_END_DECLS
