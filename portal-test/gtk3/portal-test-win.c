@@ -794,6 +794,8 @@ inputcapture_session_created2 (GObject *source,
   win->session = xdp_input_capture_session_get_session (ic);
   win->input_capture_session = ic;
 
+  xdp_session_request_clipboard (win->session);
+
   xdp_input_capture_session_start (ic,
                                    NULL,
                                    XDP_INPUT_CAPABILITY_POINTER | XDP_INPUT_CAPABILITY_KEYBOARD,
