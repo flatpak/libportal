@@ -394,7 +394,7 @@
             <child>
               <object class="GtkLabel" id="screencast_label">
                 <property name="visible">1</property>
-                <property name="halign">end</property>
+                <property name="halign">start</property>
               </object>
               <packing>
                 <property name="left-attach">2</property>
