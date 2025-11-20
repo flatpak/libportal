@@ -65,6 +65,8 @@ struct _PortalTestWin
   XdpPortal *portal;
   XdpSession *session;
 
+  XdpInputCaptureSession *input_capture_session;
+
   GNetworkMonitor *monitor;
   GProxyResolver *resolver;
 
@@ -751,9 +753,10 @@ inputcapture_session_created (GObject *source,
       g_warning ("Failed to create inputcapture session: %s", error->message);
       return;
     }
-  win->session = XDP_SESSION (ic);
+  win->session = xdp_input_capture_session_get_session (ic);
+  win->input_capture_session = ic;
 
-  zones = xdp_input_capture_session_get_zones (XDP_INPUT_CAPTURE_SESSION (win->session));
+  zones = xdp_input_capture_session_get_zones (ic);
   s = g_string_new ("");
   for (GList *elem = g_list_first (zones); elem; elem = g_list_next (elem))
     {
@@ -794,7 +797,16 @@ stop_input_capture (PortalTestWin *win)
   if (win->session != NULL)
     {
       xdp_session_close (win->session);
-      g_clear_object (&win->session);
+
+      if (xdp_session_get_session_type (win->session) == XDP_SESSION_INPUT_CAPTURE)
+        {
+          g_clear_object (&win->input_capture_session);
+          win->session = NULL;
+        }
+      else
+        {
+          g_clear_object (&win->session);
+        }
 
       update_clipboard (win);
 
