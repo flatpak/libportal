@@ -222,7 +222,7 @@ typedef struct {
   char *request_path; /* object path for request */
   gulong cancelled_id; /* signal id for cancelled gobject signal */
 
-  /* CreateSession only */
+  /* CreateSession or Start only */
   XdpParent *parent;
   char *parent_handle;
   XdpInputCapability capabilities;
@@ -236,6 +236,7 @@ typedef struct {
 } Call;
 
 static void create_session (Call *call);
+static void start_session (Call *call);
 static void get_zones (Call *call);
 
 static void
@@ -612,7 +613,13 @@ get_zones_done (GDBusConnection *bus,
           g_variant_lookup (ret, "zones", "@a(uuii)", &zones))
         {
           set_zones (session, zones, zone_set);
-          g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
+
+          /* Only when zones are fetched for the legacy CreateSession() should we return
+           * the new session. */
+          if (call->session)
+            g_task_return_boolean (call->task, TRUE);
+          else
+            g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
         }
       else
         {
@@ -730,7 +737,81 @@ parent_exported (XdpParent *parent,
 {
   Call *call = data;
   call->parent_handle = g_strdup (handle);
-  create_session (call);
+
+  if (call->session)
+    start_session (call);
+  else
+    create_session (call);
+}
+
+static void
+create_session2_returned (GObject *object,
+                          GAsyncResult *result,
+                          gpointer data)
+{
+  /* This releases the ref that was taken when we called a D-Bus method */
+  g_autoptr(Call) call = data;
+  GError *error = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) results = NULL;
+  g_autoptr(XdpInputCaptureSession) session = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
+      /* Now the Call failed, we can ignore any subsequent method replies */
+      g_task_return_error (call->task, error);
+      call_dispose (call);
+      return;
+    }
+
+  g_variant_get (ret, "(@a{sv})", &results);
+
+  g_variant_lookup (results, "session_handle", "o", &call->session_path);
+  if (!call->session_path)
+    {
+      g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                               "Missing session handel");
+      call_dispose (call);
+      return;
+    }
+
+  session = _xdp_input_capture_session_new (call->portal, call->session_path);
+  g_task_return_pointer (call->task, g_steal_pointer (&session), g_object_unref);
+  call_dispose (call);
+}
+
+static void
+create_session2 (Call *call)
+{
+  GVariantBuilder options;
+  g_autofree char *session_token = NULL;
+  GCancellable *cancellable;
+
+  cancellable = g_task_get_cancellable (call->task);
+  if (cancellable)
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled",
+                                           G_CALLBACK (call_cancelled_cb), call);
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+
+  session_token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
+  g_variant_builder_add (&options, "{sv}", "session_handle_token",
+                         g_variant_new_string (session_token));
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.InputCapture",
+                          "CreateSession2",
+                          g_variant_new ("(a{sv})", &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          create_session2_returned,
+                          call_ref (call));
 }
 
 static void
@@ -768,6 +849,207 @@ create_session (Call *call)
                           cancellable,
                           call_returned,
                           call_ref (call));
+}
+
+/**
+ * xdp_portal_create_input_capture_session2:
+ * @portal: a [class@Portal]
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: data to pass to @callback
+ *
+ * Creates an inactive session for input capture.
+ *
+ * When the request is done, @callback will be called. You can then
+ * call [method@Portal.create_input_capture_session2_finish] to get the results.
+ */
+void
+xdp_portal_create_input_capture_session2 (XdpPortal *portal,
+                                          GCancellable *cancellable,
+                                          GAsyncReadyCallback callback,
+                                          gpointer data)
+{
+  g_autofree char *session_token = NULL;
+  g_autoptr(Call) call = NULL;
+
+  g_return_if_fail (XDP_IS_PORTAL (portal));
+
+  call = call_new (portal, NULL, portal, cancellable, callback, data);
+
+  create_session2 (call);
+}
+
+/**
+ * xdp_portal_create_input_capture_session2_finish:
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes the InputCapture CreateSession2 method call, and returns a
+ * [class@InputCaptureSession]. To get to the [class@Session] within use
+ * xdp_input_capture_session_get_session().
+ *
+ * The created session is inactive, and must be started with
+ * [method.InputCaptureSession.start].
+ *
+ * Returns: (transfer full): a [class@InputCaptureSession]
+ */
+XdpInputCaptureSession *
+xdp_portal_create_input_capture_session2_finish (XdpPortal *portal,
+                                                 GAsyncResult *result,
+                                                 GError **error)
+{
+  XdpInputCaptureSession *session;
+
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), NULL);
+  g_return_val_if_fail (g_task_is_valid (result, portal), NULL);
+
+  session = g_task_propagate_pointer (G_TASK (result), error);
+
+  if (session)
+    return session;
+  else
+    return NULL;
+}
+
+static void
+session_started (GDBusConnection *bus,
+                 const char *sender_name,
+                 const char *object_path,
+                 const char *interface_name,
+                 const char *signal_name,
+                 GVariant *parameters,
+                 gpointer data)
+{
+  Call *call = data;
+  guint32 response;
+  g_autoptr(GVariant) ret = NULL;
+
+  /* If the Call has already been disposed, we should have unsubscribed
+   * from the Response signal at that time, so we shouldn't get here */
+  g_return_if_fail (G_IS_TASK (call->task));
+
+  g_variant_get (parameters, "(u@a{sv})", &response, &ret);
+
+  if (response != 0)
+    g_clear_signal_handler (&call->cancelled_id, g_task_get_cancellable (call->task));
+
+  if (response == 0)
+    {
+      g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
+      call->signal_id = 0;
+
+      g_variant_lookup (ret, "clipboard_enabled", "b",
+                        &call->session->parent_session->is_clipboard_enabled);
+
+      get_zones (call);
+    }
+  else if (response == 1)
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Start canceled");
+  else if (response == 2)
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "Start failed");
+  else if (response != 0)
+    g_task_return_new_error (call->task, G_IO_ERROR, G_IO_ERROR_FAILED, "InputCapture Start() unknown response code %d", response);
+
+  /* If the Call failed, we can ignore any subsequent method replies */
+  if (g_task_get_completed (call->task))
+    call_dispose (call);
+}
+
+static void
+start_session (Call *call)
+{
+  GVariantBuilder options;
+  g_autoptr(GVariantType) vtype = NULL;
+
+  if (call->parent_handle == NULL)
+    {
+      call->parent->parent_export (call->parent, parent_exported, call);
+      return;
+    }
+
+  prep_call (call, session_started, &options);
+
+  g_variant_builder_add (&options, "{sv}", "capabilities",
+                         g_variant_new_uint32 (call->capabilities));
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.InputCapture",
+                          "Start",
+                          g_variant_new ("(osa{sv})",
+                                         call->session->parent_session->id,
+                                         call->parent_handle,
+                                         &options),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (call->task),
+                          call_returned,
+                          call_ref (call));
+}
+
+/**
+ * xdp_input_capture_session_start:
+ * @session: a [class@XdpInputCaptureSession]
+ * @parent: (nullable): parent window information
+ * @capabilities: which kinds of capabilities to request
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: data to pass to @callback
+ *
+ * Start the input capture session.
+ *
+ * When the request is done, @callback will be called. You can then
+ * call [method@InputCaptureSession.start_finish] to get the results.
+ */
+void
+xdp_input_capture_session_start (XdpInputCaptureSession *session,
+                                 XdpParent              *parent,
+                                 XdpInputCapability      capabilities,
+                                 GCancellable           *cancellable,
+                                 GAsyncReadyCallback     callback,
+                                 gpointer                data)
+{
+  g_autoptr(Call) call = NULL;
+  XdpPortal *portal;
+
+  g_return_if_fail (_xdp_input_capture_session_is_valid (session));
+
+  portal = session->parent_session->portal;
+
+  call = call_new (portal, session, session, cancellable, callback, data);
+  call->capabilities = capabilities;
+
+  if (parent)
+    call->parent = xdp_parent_copy (parent);
+  else
+    call->parent_handle = g_strdup ("");
+
+  start_session (call);
+}
+
+/**
+ * xdp_input_capture_session_start_finish:
+ * @session: a [class@InputCaptureSession]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes the InputCapture Start request, and returns TRUE if it was
+ * successful.
+ *
+ * Returns: TRUE on success.
+ */
+gboolean
+xdp_input_capture_session_start_finish (XdpInputCaptureSession  *session,
+                                        GAsyncResult            *result,
+                                        GError                 **error)
+{
+  g_return_val_if_fail (XDP_IS_INPUT_CAPTURE_SESSION (session), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, session), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 /**
@@ -1255,4 +1537,134 @@ xdp_input_capture_session_release_at (XdpInputCaptureSession *session,
   g_return_if_fail (_xdp_input_capture_session_is_valid (session));
 
   release_session (session, activation_id, TRUE, cursor_x_position, cursor_y_position);
+}
+
+static void
+get_input_capture_interface_version_returned (GObject *object,
+                                              GAsyncResult *result,
+                                              gpointer data)
+{
+  g_autoptr(GTask) task = G_TASK (data);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) version_variant = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  XdpPortal *portal;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  portal = g_task_get_source_object (task);
+
+  g_variant_get_child (ret, 0, "v", &version_variant);
+  portal->input_capture_interface_version = g_variant_get_uint32 (version_variant);
+
+  g_task_return_int (task, portal->input_capture_interface_version);
+}
+
+
+/**
+ * xdp_portal_get_input_capture_version:
+ * @portal: a [class@Portal]
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @callback_data: data to pass to @callback
+ *
+ * Retrieving the input portal API version.
+ *
+ * When the request is done, @callback will be called. You can then
+ * call [method@Portal.get_input_capture_version_finish] to get the results.
+ */
+void
+xdp_portal_get_input_capture_version (XdpPortal              *portal,
+                                      GCancellable           *cancellable,
+                                      GAsyncReadyCallback     callback,
+                                      void                   *callback_data)
+{
+  g_autoptr(GTask) task = NULL;
+
+  task = g_task_new (G_OBJECT (portal), cancellable, callback, callback_data);
+
+  if (portal->input_capture_interface_version)
+    {
+      g_task_return_int (task, portal->input_capture_interface_version);
+      return;
+    }
+
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.DBus.Properties",
+                          "Get",
+                          g_variant_new ("(ss)", "org.freedesktop.portal.InputCapture", "version"),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (task),
+                          get_input_capture_interface_version_returned,
+                          g_object_ref (task));
+}
+
+/**
+ * xdp_portal_get_input_capture_version_finish:
+ * @portal: a [class@Portal]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes retrieving the input portal API version.
+ *
+ * Returns: the API version of the input capture portal, or -1 on error
+ */
+int
+xdp_portal_get_input_capture_version_finish (XdpPortal     *portal,
+                                             GAsyncResult  *result,
+                                             GError       **error)
+{
+  g_return_val_if_fail (XDP_IS_PORTAL (portal), -1);
+  g_return_val_if_fail (g_task_is_valid (result, portal), -1);
+
+  return g_task_propagate_int (G_TASK (result), error);
+}
+
+/**
+ * xdp_portal_get_input_capture_version_sync:
+ * @portal: a [class@Portal]
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @error: return location for an error
+ *
+ * Retrieving the input portal API version.
+ *
+ * Returns: the API version of the input capture portal, or -1 on error
+ */
+int
+xdp_portal_get_input_capture_version_sync (XdpPortal     *portal,
+                                           GCancellable  *cancellable,
+                                           GError       **error)
+{
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) version_variant = NULL;
+
+  if (portal->input_capture_interface_version)
+    return portal->input_capture_interface_version;
+
+  ret = g_dbus_connection_call_sync (portal->bus,
+                                     PORTAL_BUS_NAME,
+                                     PORTAL_OBJECT_PATH,
+                                     "org.freedesktop.DBus.Properties",
+                                     "Get",
+                                     g_variant_new ("(ss)", "org.freedesktop.portal.InputCapture", "version"),
+                                     NULL,
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     cancellable,
+                                     error);
+  if (!ret)
+    return -1;
+
+  g_variant_get_child (ret, 0, "v", &version_variant);
+  portal->input_capture_interface_version = g_variant_get_uint32 (version_variant);
+  return portal->input_capture_interface_version;
 }
