@@ -27,12 +27,14 @@ G_BEGIN_DECLS
  * XdpOpenFileFlags:
  * @XDP_OPEN_FILE_FLAG_NONE: No options
  * @XDP_OPEN_FILE_FLAG_MULTIPLE: Allow selecting multiple files
+ * @XDP_OPEN_FILE_FLAG_DIRECTORY: Select folders instead of files
  *
  * Options for opening files.
  */
 typedef enum {
-  XDP_OPEN_FILE_FLAG_NONE     = 0,
-  XDP_OPEN_FILE_FLAG_MULTIPLE = 1 << 0,
+  XDP_OPEN_FILE_FLAG_NONE      = 0,
+  XDP_OPEN_FILE_FLAG_MULTIPLE  = 1 << 0,
+  XDP_OPEN_FILE_FLAG_DIRECTORY = 1 << 1,
 } XdpOpenFileFlags;
 
 XDP_PUBLIC
