@@ -29,6 +29,7 @@ typedef struct {
   char *method;
   char *title;
   gboolean multiple;
+  gboolean directory;
   char *current_name;
   char *current_folder;
   char *current_file;
@@ -191,6 +192,8 @@ open_file (FileCall *call)
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   if (call->multiple)
     g_variant_builder_add (&options, "{sv}", "multiple", g_variant_new_boolean (call->multiple));
+  if (call->directory)
+    g_variant_builder_add (&options, "{sv}", "directory", g_variant_new_boolean (call->directory));
   if (call->files)
     g_variant_builder_add (&options, "{sv}", "files", call->files);
   if (call->filters)
@@ -275,7 +278,7 @@ xdp_portal_open_file (XdpPortal *portal,
   FileCall *call;
 
   g_return_if_fail (XDP_IS_PORTAL (portal));
-  g_return_if_fail ((flags & ~(XDP_OPEN_FILE_FLAG_MULTIPLE)) == 0);
+  g_return_if_fail ((flags & ~(XDP_OPEN_FILE_FLAG_MULTIPLE | XDP_OPEN_FILE_FLAG_DIRECTORY)) == 0);
 
   call = g_new0 (FileCall, 1);
   call->portal = g_object_ref (portal);
@@ -286,6 +289,7 @@ xdp_portal_open_file (XdpPortal *portal,
   call->method = "OpenFile";
   call->title = g_strdup (title);
   call->multiple = (flags & XDP_OPEN_FILE_FLAG_MULTIPLE) != 0;
+  call->directory = (flags & XDP_OPEN_FILE_FLAG_DIRECTORY) != 0;
   call->filters = filters ? g_variant_ref (filters) : NULL;
   call->current_filter = current_filter ? g_variant_ref (current_filter) : NULL;
   call->choices = choices ? g_variant_ref (choices) : NULL;
