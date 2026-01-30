@@ -63,6 +63,9 @@ struct _XdpInputCaptureSession
   GObject parent_instance;
   XdpSession *parent_session; /* strong ref */
 
+  char *restore_token;
+  XdpInputCaptureSessionPersistence persistence;
+
   GList *zones;
 
   guint signal_ids[SIGNAL_LAST_SIGNAL];
@@ -113,6 +116,8 @@ xdp_input_capture_session_finalize (GObject *object)
     }
 
   g_list_free_full (g_steal_pointer (&session->zones), g_object_unref);
+
+  g_clear_pointer (&session->restore_token, g_free);
 
   G_OBJECT_CLASS (xdp_input_capture_session_parent_class)->finalize (object);
 }
@@ -941,7 +946,9 @@ session_started (GDBusConnection *bus,
 
       g_variant_lookup (ret, "clipboard_enabled", "b",
                         &call->session->parent_session->is_clipboard_enabled);
-
+      g_clear_pointer (&call->session->restore_token, g_free);
+      g_variant_lookup (ret, "restore_token", "s",
+                        &call->session->restore_token);
       get_zones (call);
     }
   else if (response == 1)
@@ -972,6 +979,14 @@ start_session (Call *call)
 
   g_variant_builder_add (&options, "{sv}", "capabilities",
                          g_variant_new_uint32 (call->capabilities));
+
+  if (call->session->persistence != XDP_INPUT_CAPTURE_SESSION_PERSISTENCE_NONE)
+    g_variant_builder_add (&options, "{sv}", "persist_mode",
+                           g_variant_new_uint32 (call->session->persistence));
+
+  if (call->session->restore_token)
+    g_variant_builder_add (&options, "{sv}", "restore_token",
+                           g_variant_new_string (call->session->restore_token));
 
   g_dbus_connection_call (call->portal->bus,
                           PORTAL_BUS_NAME,
@@ -1565,6 +1580,79 @@ get_input_capture_interface_version_returned (GObject *object,
   g_task_return_int (task, portal->input_capture_interface_version);
 }
 
+/**
+ * xdp_input_capture_session_get_restore_token:
+ * @session: a [class@InputCaptureSession]
+ *
+ * Returns the restore token for this session or NULL if none exists. This token
+ * can be passed to [method@InputCaptureSession.set_restore_token] for a future
+ * session to restore this session, possibly skipping interactive permission
+ * dialogs.
+ *
+ * This method only returns a token for a session created with
+ * [method@Portal.create_input_capture_session2] and only once
+ * [method@InputCaptureSession.start_finish] has completed.
+ *
+ * The token may change with every session.
+ *
+ * Returns: the restore token or NULL
+ */
+const char *
+xdp_input_capture_session_get_restore_token (XdpInputCaptureSession *session)
+{
+  return session->restore_token;
+}
+
+/**
+ * xdp_input_capture_session_set_restore_token:
+ * @session: a [class@InputCaptureSession]
+ * @restore_token: a restore token from a previous session
+ *
+ * Sets the restore token for the session about to be started. This instructs
+ * the portal to restore the previous session identified by this token.
+ *
+ * This method can only be called for a session created with
+ * [method@Portal.create_input_capture_session2] and only before
+ * [method@InputCaptureSession.start] has been called. It has no effect
+ * otherwise.
+ *
+ * The restore token for the current session can be obtained with
+ * [method@InputCaptureSession.get_restore_token].
+ */
+void
+xdp_input_capture_session_set_restore_token (XdpInputCaptureSession *session,
+                                             const char             *restore_token)
+{
+  g_warn_if_fail (restore_token != NULL);
+
+  g_clear_pointer (&session->restore_token, g_free);
+  session->restore_token = g_strdup (restore_token);
+}
+
+/**
+ * xdp_input_capture_session_set_session_persistence:
+ * @session: a [class@InputCaptureSession]
+ * @persistence: the session persistence for this session
+ *
+ * Requests session persistence from the portal. A persistent session can
+ * be restored using the restore token, see
+ * [method@InputCaptureSession.set_restore_token].
+ *
+ * This method can only be called for a session created with
+ * [method@Portal.create_input_capture_session2] and only before
+ * [method@InputCaptureSession.start] has been called. It has no effect
+ * otherwise.
+ *
+ * The default persistence is none.
+ */
+void
+xdp_input_capture_session_set_session_persistence (XdpInputCaptureSession            *session,
+                                                   XdpInputCaptureSessionPersistence  persistence)
+{
+  g_return_if_fail(persistence >= XDP_INPUT_CAPTURE_SESSION_PERSISTENCE_NONE &&
+                   persistence <= XDP_INPUT_CAPTURE_SESSION_PERSISTENCE_PERSISTENT);
+  session->persistence = persistence;
+}
 
 /**
  * xdp_portal_get_input_capture_version:

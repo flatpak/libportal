@@ -48,6 +48,12 @@ typedef enum {
   XDP_INPUT_CAPABILITY_TOUCHSCREEN  = 1 << 2
 } XdpInputCapability;
 
+typedef enum {
+  XDP_INPUT_CAPTURE_SESSION_PERSISTENCE_NONE       = 0,
+  XDP_INPUT_CAPTURE_SESSION_PERSISTENCE_TRANSIENT  = 1,
+  XDP_INPUT_CAPTURE_SESSION_PERSISTENCE_PERSISTENT = 2,
+} XdpInputCaptureSessionPersistence;
+
 XDP_PUBLIC
 void        xdp_portal_create_input_capture_session2 (XdpPortal           *portal,
                                                       GCancellable        *cancellable,
@@ -71,6 +77,17 @@ XDP_PUBLIC
 gboolean    xdp_input_capture_session_start_finish (XdpInputCaptureSession  *session,
                                                     GAsyncResult            *result,
                                                     GError                 **error);
+
+XDP_PUBLIC
+void xdp_input_capture_session_set_session_persistence (XdpInputCaptureSession            *session,
+                                                        XdpInputCaptureSessionPersistence  persistence);
+
+XDP_PUBLIC
+const char *xdp_input_capture_session_get_restore_token (XdpInputCaptureSession *session);
+
+XDP_PUBLIC
+void xdp_input_capture_session_set_restore_token (XdpInputCaptureSession *session,
+                                                  const char             *restore_token);
 
 XDP_PUBLIC
 void        xdp_portal_create_input_capture_session (XdpPortal            *portal,
