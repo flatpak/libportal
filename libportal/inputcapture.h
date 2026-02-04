@@ -66,6 +66,11 @@ XdpInputCaptureSession * xdp_portal_create_input_capture_session2_finish (XdpPor
                                                                           GError       **error);
 
 XDP_PUBLIC
+XdpInputCaptureSession * xdp_portal_create_input_capture_session2_sync (XdpPortal     *portal,
+                                                                        GCancellable  *cancellable,
+                                                                        GError       **error);
+
+XDP_PUBLIC
 void        xdp_input_capture_session_start (XdpInputCaptureSession *session,
                                              XdpParent              *parent,
                                              XdpInputCapability      capabilities,

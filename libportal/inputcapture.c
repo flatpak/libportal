@@ -908,6 +908,57 @@ xdp_portal_create_input_capture_session2_finish (XdpPortal *portal,
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
+/**
+ * xdp_portal_create_input_capture_session2_sync:
+ * @portal: a [class@Portal]
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @error: return location for an error
+ *
+ * Creates an inactive session for input capture.
+ *
+ * Returns: (transfer full): a [class@InputCaptureSession]
+ */
+XdpInputCaptureSession *
+xdp_portal_create_input_capture_session2_sync (XdpPortal     *portal,
+                                               GCancellable  *cancellable,
+                                               GError       **error)
+{
+  GVariantBuilder options;
+  g_autofree char *session_token = NULL;
+  g_autofree char *session_path = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GVariant) results = NULL;
+
+  session_token = g_strdup_printf ("portal%d", g_random_int_range (0, G_MAXINT));
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+  g_variant_builder_add (&options, "{sv}", "session_handle_token", g_variant_new_string (session_token));
+
+  ret = g_dbus_connection_call_sync (portal->bus,
+                                     PORTAL_BUS_NAME,
+                                     PORTAL_OBJECT_PATH,
+                                     "org.freedesktop.portal.InputCapture",
+                                     "CreateSession2",
+                                     g_variant_new ("(a{sv})", &options),
+                                     NULL,
+                                     G_DBUS_CALL_FLAGS_NONE,
+                                     -1,
+                                     cancellable,
+                                     error);
+  if (!ret)
+    return NULL;
+
+  g_variant_get (ret, "(@a{sv})", &results);
+  g_variant_lookup (results, "session_handle", "o", &session_path);
+  if (!session_path)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "Missing session handle");
+      return NULL;
+    }
+
+  return _xdp_input_capture_session_new (portal, session_path);
+}
+
 static void
 session_started (GDBusConnection *bus,
                  const char *sender_name,
