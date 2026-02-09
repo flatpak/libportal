@@ -39,6 +39,8 @@
  */
 enum {
   CLOSED,
+  SELECTION_OWNER_CHANGED,
+  SELECTION_TRANSFER,
   LAST_SIGNAL
 };
 
@@ -51,6 +53,8 @@ xdp_session_finalize (GObject *object)
 {
   XdpSession *session = XDP_SESSION (object);
 
+  xdp_portal_remove_session (session->portal, session);
+
   if (session->signal_id)
     g_dbus_connection_signal_unsubscribe (session->portal->bus, session->signal_id);
 
@@ -61,6 +65,7 @@ xdp_session_finalize (GObject *object)
   if (session->input_capture_session != NULL)
     g_critical ("XdpSession destroyed before XdpInputCaptureSesssion, you lost count of your session refs");
   session->input_capture_session = NULL;
+  g_clear_pointer (&session->selection_mime_types, g_strfreev);
 
   G_OBJECT_CLASS (xdp_session_parent_class)->finalize (object);
 }
@@ -85,6 +90,42 @@ xdp_session_class_init (XdpSessionClass *klass)
                   NULL, NULL,
                   NULL,
                   G_TYPE_NONE, 0);
+  /**
+   * XdpSession:selection-owner-changed:
+   * @mime_types: A list of mime type strings
+   * @session_is_owner: TRUE if the session is the owner
+   *
+   * Emitted when a clipboard selection owner changed.
+   */
+  signals[SELECTION_OWNER_CHANGED] =
+    g_signal_new ("selection-owner-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+                  0,
+                  NULL, NULL,
+                  NULL,
+                  G_TYPE_NONE, 2,
+                  G_TYPE_STRV,
+                  G_TYPE_BOOLEAN);
+  /**
+   * XdpSession:selection-transfer:
+   * @mime_type: The mime type to transfer
+   * @serial: Serial number of the request
+   *
+   * Emitted when a clipboard selection transfer is requested. A listener should in
+   * response to this signal call xdp_session_selection_write with the corresponding
+   * serial number to initiate data transfer.
+   */
+  signals[SELECTION_TRANSFER] =
+    g_signal_new ("selection-transfer",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+                  0,
+                  NULL, NULL,
+                  NULL,
+                  G_TYPE_NONE, 2,
+                  G_TYPE_STRING,
+                  G_TYPE_UINT);
 }
 
 static void
@@ -130,6 +171,9 @@ _xdp_session_new (XdpPortal *portal,
                                                            session_closed,
                                                            session,
                                                            NULL);
+
+  xdp_portal_add_session (portal, session);
+
   return session;
 }
 
