@@ -33,6 +33,7 @@ G_DECLARE_FINAL_TYPE (XdpSession, xdp_session, XDP, SESSION, GObject)
  * @XDP_SESSION_SCREENCAST: a screencast session.
  * @XDP_SESSION_REMOTE_DESKTOP: a remote desktop session.
  * @XDP_SESSION_INPUT_CAPTURE: an input capture session.
+ * @XDP_SESSION_GLOBAL_SHORTCUTS: a global shortcuts session.
  *
  * The type of a session.
  */
@@ -40,6 +41,7 @@ typedef enum {
   XDP_SESSION_SCREENCAST,
   XDP_SESSION_REMOTE_DESKTOP,
   XDP_SESSION_INPUT_CAPTURE,
+  XDP_SESSION_GLOBAL_SHORTCUTS,
 } XdpSessionType;
 
 XDP_PUBLIC
