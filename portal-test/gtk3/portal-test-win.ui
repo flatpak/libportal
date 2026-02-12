@@ -394,7 +394,7 @@
             <child>
               <object class="GtkLabel" id="screencast_label">
                 <property name="visible">1</property>
-                <property name="halign">end</property>
+                <property name="halign">start</property>
               </object>
               <packing>
                 <property name="left-attach">2</property>
@@ -814,9 +814,10 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="enable">
+                  <object class="GtkCheckButton" id="inputcapture_enable">
                     <property name="visible">1</property>
                     <property name="tooltip-text">Enable</property>
+                    <signal name="clicked" handler="capture_input_toggle_enable"/>
                   </object>
                 </child>
               </object>
@@ -838,6 +839,93 @@
               </packing>
             </child>
 
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Remote Desktop</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">22</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="remotedesktop_toggle">
+                <property name="visible">1</property>
+                <property name="label">Remote Desktop</property>
+                <signal name="toggled" handler="remotedesktop_toggled"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">22</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="remotedesktop_label">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">22</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="label">Clipboard</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">23</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="clipboard_copy">
+                <property name="visible">1</property>
+                <property name="sensitive">0</property>
+                <property name="label">Copy</property>
+                <signal name="clicked" handler="copy_clicked"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">23</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="clipboard_entry">
+                <property name="visible">1</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">23</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="clipboard_paste">
+                <property name="visible">1</property>
+                <property name="sensitive">0</property>
+                <property name="label">Paste</property>
+                <signal name="clicked" handler="paste_clicked"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">24</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="clipboard_label">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">24</property>
+              </packing>
+            </child>
 
           </object>
         </child>
