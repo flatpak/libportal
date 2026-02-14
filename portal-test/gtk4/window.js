@@ -37,7 +37,7 @@ var PortalTestWindow = GObject.registerClass({
         super._init({ application });
 
         this._app = application;
-        this._portal = new Xdp.Portal();
+        this._portal = application.getPortal();
 
         this._restoreToken = null;
 
