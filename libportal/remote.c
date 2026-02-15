@@ -1395,8 +1395,6 @@ void
 _xdp_session_set_session_state (XdpSession *session,
                                 XdpSessionState state)
 {
-  session->state = state;
-
   if (state == XDP_SESSION_INITIAL && session->state != XDP_SESSION_INITIAL)
     {
       g_warning ("Can't move a session back to initial state");
@@ -1408,6 +1406,7 @@ _xdp_session_set_session_state (XdpSession *session,
       return;
     }
 
+  session->state = state;
   if (state == XDP_SESSION_CLOSED)
     _xdp_session_close (session);
 }
