@@ -260,10 +260,9 @@ call_dispose (void *p)
   g_clear_pointer (&call->request_path, g_free);
 
   g_clear_object (&call->portal);
-  g_clear_object (&call->task);
   g_clear_object (&call->session);
-
   g_clear_pointer (&call->session_path, g_free);
+  g_clear_object (&call->task);
 }
 
 static inline Call *
