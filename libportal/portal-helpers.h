@@ -46,6 +46,18 @@ XDP_PUBLIC
 XdpPortal *xdp_portal_initable_new          (GError **error);
 
 XDP_PUBLIC
+void       xdp_portal_register              (XdpPortal           *portal,
+                                             const char          *app_id,
+                                             GCancellable        *cancellable,
+                                             GAsyncReadyCallback  callback,
+                                             gpointer             user_data);
+
+XDP_PUBLIC
+gboolean   xdp_portal_register_finish       (XdpPortal           *portal,
+                                             GAsyncResult        *result,
+                                             GError             **error);
+
+XDP_PUBLIC
 gboolean   xdp_portal_running_under_flatpak (void);
 
 XDP_PUBLIC
