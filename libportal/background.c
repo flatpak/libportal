@@ -349,8 +349,7 @@ xdp_portal_request_background (XdpPortal *portal,
   call->autostart = (flags & XDP_BACKGROUND_FLAG_AUTOSTART) != 0;
   call->dbus_activatable = (flags & XDP_BACKGROUND_FLAG_ACTIVATABLE) != 0;
   call->reason = g_strdup (reason);
-  if (commandline)
-    call->commandline = g_ptr_array_ref (commandline);
+  call->commandline = commandline;
 
   call->task = g_task_new (portal, cancellable, callback, user_data);
 
