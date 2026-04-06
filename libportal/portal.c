@@ -28,6 +28,7 @@
 #include "portal-private.h"
 #include "portal-enums.h"
 #include "settings-private.h"
+#include "session-private.h"
 
 #include <unistd.h>
 #include <string.h>
@@ -117,10 +118,20 @@ xdp_portal_finalize (GObject *object)
   if (portal->action_invoked_signal)
     g_dbus_connection_signal_unsubscribe (portal->bus, portal->action_invoked_signal);
 
+  /* clipboard */
+  if (portal->selection_owner_changed_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus,
+                                          portal->selection_owner_changed_signal);
+  if (portal->selection_transfer_signal)
+    g_dbus_connection_signal_unsubscribe (portal->bus,
+                                          portal->selection_transfer_signal);
+
   g_clear_pointer (&portal->supported_notification_options, g_variant_unref);
 
   g_clear_object (&portal->bus);
   g_free (portal->sender);
+
+  g_hash_table_unref (portal->sessions);
 
   G_OBJECT_CLASS (xdp_portal_parent_class)->finalize (object);
 }
@@ -311,6 +322,8 @@ xdp_portal_init (XdpPortal *portal)
 {
   int i;
 
+  portal->sessions = g_hash_table_new (g_str_hash, g_str_equal);
+
   /* g_bus_get_sync() returns a singleton. In the test suite we may restart
    * the session bus, so we have to manually connect to the new bus */
   if (getenv ("LIBPORTAL_TEST_SUITE"))
@@ -386,6 +399,27 @@ xdp_portal_new (void)
     }
 
   return portal;
+}
+
+void
+xdp_portal_add_session (XdpPortal  *portal,
+                        XdpSession *session)
+{
+  g_hash_table_insert (portal->sessions, session->id, session);
+}
+
+void
+xdp_portal_remove_session (XdpPortal  *portal,
+                           XdpSession *session)
+{
+  g_hash_table_remove (portal->sessions, session->id);
+}
+
+XdpSession *
+xdp_portal_lookup_session (XdpPortal  *portal,
+                           const char *session_id)
+{
+  return g_hash_table_lookup (portal->sessions, session_id);
 }
 
 /* This function is copied from xdg-desktop-portal */

@@ -30,6 +30,8 @@ struct _XdpPortal {
   GDBusConnection *bus;
   char *sender;
 
+  GHashTable *sessions;
+
   /* inhibit */
   int next_inhibit_id;
   GHashTable *inhibit_handles;
@@ -59,9 +61,25 @@ struct _XdpPortal {
 
   /* background */
   guint background_interface_version;
+
+  /* clipbord */
+  guint selection_owner_changed_signal;
+  guint selection_transfer_signal;
+
+  /* input capture */
+  guint input_capture_interface_version;
 };
 
 const char * portal_get_bus_name (void);
+
+void xdp_portal_add_session (XdpPortal  *portal,
+                             XdpSession *session);
+
+void xdp_portal_remove_session (XdpPortal  *portal,
+                                XdpSession *session);
+
+XdpSession * xdp_portal_lookup_session (XdpPortal  *portal,
+                                        const char *session_id);
 
 #define PORTAL_BUS_NAME (portal_get_bus_name ())
 #define PORTAL_OBJECT_PATH  "/org/freedesktop/portal/desktop"
