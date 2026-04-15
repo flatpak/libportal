@@ -23,6 +23,7 @@
 #include <libportal/account.h>
 #include <libportal/background.h>
 #include <libportal/camera.h>
+#include <libportal/clipboard.h>
 #include <libportal/dynamic-launcher.h>
 #include <libportal/email.h>
 #include <libportal/filechooser.h>

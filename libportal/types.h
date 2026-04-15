@@ -25,4 +25,5 @@
 
 typedef struct _XdpParent XdpParent;
 typedef struct _XdpPortal XdpPortal;
+typedef struct _XdpSession XdpSession;
 typedef struct _XdpSettings XdpSettings;

@@ -32,6 +32,11 @@ struct _XdpSession {
   XdpSessionType type;
   guint signal_id;
 
+  /* Clipboard portal */
+  gboolean is_clipboard_enabled;
+  gboolean is_selection_owned_by_session;
+  GStrv selection_mime_types;
+
   /* RemoteDesktop/ScreenCast */
   XdpSessionState state;
   XdpDeviceType devices;
