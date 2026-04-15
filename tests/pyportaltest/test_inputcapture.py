@@ -50,10 +50,14 @@ class TestInputCapture(PortalTest):
         barriers=None,
         allow_failed_barriers=False,
         cancellable=None,
+        legacy_session=True,
     ) -> SessionSetup:
         """
         Session creation helper. This function creates a session and sets up
         pointer barriers, with defaults for everything.
+
+        If legacy_session is True (the default), uses the legacy
+        CreateSession API. If False, uses CreateSession2 + Start.
         """
         params = params or {}
         self.setup_daemon(params)
@@ -64,26 +68,49 @@ class TestInputCapture(PortalTest):
         session, session_error = None, None
         create_session_done_invoked = False
 
-        def create_session_done(portal, task, data):
-            nonlocal session, session_error
-            nonlocal create_session_done_invoked
+        if legacy_session:
 
-            create_session_done_invoked = True
-            try:
-                session = portal.create_input_capture_session_finish(task)
-                if session is None:
-                    session_error = Exception("XdpSession is NULL")
-            except GLib.GError as e:
-                session_error = e
-            self.mainloop.quit()
+            def create_session_done(portal, task, data):
+                nonlocal session, session_error
+                nonlocal create_session_done_invoked
 
-        xdp.create_input_capture_session(
-            parent=parent,
-            capabilities=capabilities,
-            cancellable=cancellable,
-            callback=create_session_done,
-            data=None,
-        )
+                create_session_done_invoked = True
+                try:
+                    session = portal.create_input_capture_session_finish(task)
+                    if session is None:
+                        session_error = Exception("XdpSession is NULL")
+                except GLib.GError as e:
+                    session_error = e
+                self.mainloop.quit()
+
+            xdp.create_input_capture_session(
+                parent=parent,
+                capabilities=capabilities,
+                cancellable=cancellable,
+                callback=create_session_done,
+                data=None,
+            )
+
+        else:
+
+            def create_session2_done(portal, task, data):
+                nonlocal session, session_error
+                nonlocal create_session_done_invoked
+
+                create_session_done_invoked = True
+                try:
+                    session = portal.create_input_capture_session2_finish(task)
+                    if session is None:
+                        session_error = Exception("XdpInputCaptureSession is NULL")
+                except GLib.GError as e:
+                    session_error = e
+                self.mainloop.quit()
+
+            xdp.create_input_capture_session2(
+                cancellable=cancellable,
+                callback=create_session2_done,
+                data=None,
+            )
 
         self.mainloop.run()
         assert create_session_done_invoked
@@ -92,15 +119,26 @@ class TestInputCapture(PortalTest):
         assert session is not None
         assert session.get_session().get_session_type() == Xdp.SessionType.INPUT_CAPTURE
 
-        # Extract our expected session id. This isn't available from
-        # XdpSession so we need to go around it. We can't easily get the
-        # sender id so the full path is hard. Let's just extract the token and
-        # pretend that's good enough.
-        method_calls = self.mock_interface.GetMethodCalls("CreateSession")
-        assert len(method_calls) >= 1
-        _, args = method_calls.pop()  # Assume the latest has our session
-        (_, options) = args
-        session_handle = options["session_handle_token"]
+        def extract_session_handle(legacy_session: bool):
+            # Extract our expected session id. This isn't available from
+            # XdpSession so we need to go around it. We can't easily get the
+            # sender id so the full path is hard. Let's just extract the token and
+            # pretend that's good enough.
+            method_calls = self.mock_interface.GetMethodCalls(
+                "CreateSession" if legacy_session else "CreateSession2"
+            )
+            assert len(method_calls) >= 1
+            _, args = method_calls.pop()  # Assume the latest has our session
+            if legacy_session:
+                (_, options) = args
+            else:
+                (options,) = args
+            return options["session_handle_token"]
+
+        session_handle = extract_session_handle(legacy_session)
+        if not legacy_session:
+            # Start the session (this also triggers GetZones internally)
+            self.start_session(session, parent=parent, capabilities=capabilities)
 
         zones = session.get_zones()
 
@@ -151,9 +189,9 @@ class TestInputCapture(PortalTest):
         assert sorted(active_barriers + inactive_barriers) == sorted(barriers)
 
         if not allow_failed_barriers:
-            assert (
-                failed_barriers == []
-            ), "Barriers failed but allow_failed_barriers was not set"
+            assert failed_barriers == [], (
+                "Barriers failed but allow_failed_barriers was not set"
+            )
 
         return SessionSetup(
             session=session,
@@ -162,6 +200,41 @@ class TestInputCapture(PortalTest):
             failed_barriers=failed_barriers,
             session_handle_token=session_handle,
         )
+
+    def start_session(
+        self, session, parent=None, capabilities=Xdp.InputCapability.POINTER
+    ):
+        """
+        Helper to start a session created via CreateSession2. Returns True
+        on success.
+        """
+        start_done_invoked = False
+        start_result, start_error = None, None
+
+        def start_done(sess, task, data):
+            nonlocal start_done_invoked
+            nonlocal start_result, start_error
+
+            start_done_invoked = True
+            try:
+                start_result = sess.start_finish(task)
+            except GLib.GError as e:
+                start_error = e
+            self.mainloop.quit()
+
+        session.start(
+            parent=parent,
+            capabilities=capabilities,
+            cancellable=None,
+            callback=start_done,
+            data=None,
+        )
+
+        self.mainloop.run()
+        assert start_done_invoked
+        if start_error is not None:
+            raise SessionCreationFailed(start_error)
+        return start_result
 
     def test_version(self):
         """This tests the test suite setup rather than libportal"""
@@ -311,12 +384,9 @@ class TestInputCapture(PortalTest):
         # By not doing so we never ref that object and can test for the correct
         # cleanup
 
-    def test_connect_to_eis(self):
-        """
-        The basic test of retrieving the EIS handle
-        """
+    def _test_connect_to_eis(self, legacy_session):
         params = {}
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         assert setup.session is not None
 
         handle = setup.session.connect_to_eis()
@@ -334,15 +404,22 @@ class TestInputCapture(PortalTest):
         assert "handle_token" not in options  # This is not a Request
         assert list(options.keys()) == []
 
-    def test_pointer_barriers_success(self):
-        """
-        Some successful pointer barriers
-        """
+    def test_connect_to_eis(self):
+        """The basic test of retrieving the EIS handle"""
+        self._test_connect_to_eis(legacy_session=True)
+
+    def test_connect_to_eis_session2(self):
+        """The basic test of retrieving the EIS handle (session2)"""
+        self._test_connect_to_eis(legacy_session=False)
+
+    def _test_pointer_barriers_success(self, legacy_session):
         b1 = Xdp.InputCapturePointerBarrier(id=1, x1=0, x2=1920, y1=0, y2=0)
         b2 = Xdp.InputCapturePointerBarrier(id=2, x1=1920, x2=1920, y1=0, y2=1080)
 
         params = {}
-        setup = self.create_session_with_barriers(params, barriers=[b1, b2])
+        setup = self.create_session_with_barriers(
+            params, barriers=[b1, b2], legacy_session=legacy_session
+        )
         assert setup.barriers == [b1, b2]
 
         # Now verify our DBus calls were correct
@@ -361,10 +438,15 @@ class TestInputCapture(PortalTest):
             if b["barrier_id"] == 2:
                 assert (x1, y1, x2, y2) == (1920, 0, 1920, 1080)
 
-    def test_pointer_barriers_failures(self):
-        """
-        Test with some barriers failing
-        """
+    def test_pointer_barriers_success(self):
+        """Some successful pointer barriers"""
+        self._test_pointer_barriers_success(legacy_session=True)
+
+    def test_pointer_barriers_success_session2(self):
+        """Some successful pointer barriers (session2)"""
+        self._test_pointer_barriers_success(legacy_session=False)
+
+    def _test_pointer_barriers_failures(self, legacy_session):
         b1 = Xdp.InputCapturePointerBarrier(id=1, x1=0, x2=1920, y1=0, y2=0)
         b2 = Xdp.InputCapturePointerBarrier(id=2, x1=1, x2=2, y1=3, y2=4)
         b3 = Xdp.InputCapturePointerBarrier(id=3, x1=1, x2=2, y1=3, y2=4)
@@ -372,7 +454,10 @@ class TestInputCapture(PortalTest):
 
         params = {"failed-barriers": [2, 3]}
         setup = self.create_session_with_barriers(
-            params, barriers=[b1, b2, b3, b4], allow_failed_barriers=True
+            params,
+            barriers=[b1, b2, b3, b4],
+            allow_failed_barriers=True,
+            legacy_session=legacy_session,
         )
         assert setup.barriers == [b1, b4]
         assert setup.failed_barriers == [b2, b3]
@@ -395,13 +480,18 @@ class TestInputCapture(PortalTest):
             if b["barrier_id"] == 4:
                 assert (x1, y1, x2, y2) == (1920, 0, 1920, 1080)
 
-    def test_enable_disable_release(self):
-        """
-        Test enable/disable calls
-        """
+    def test_pointer_barriers_failures(self):
+        """Test with some barriers failing"""
+        self._test_pointer_barriers_failures(legacy_session=True)
+
+    def test_pointer_barriers_failures_session2(self):
+        """Test with some barriers failing (session2)"""
+        self._test_pointer_barriers_failures(legacy_session=False)
+
+    def _test_enable_disable_release(self, legacy_session):
         params = {}
 
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         session = setup.session
 
         session.enable()
@@ -429,13 +519,18 @@ class TestInputCapture(PortalTest):
         session_handle, options = args
         assert list(options.keys()) == ["activation_id"]
 
-    def test_release_at(self):
-        """
-        Test the release_at call with a cursor position
-        """
+    def test_enable_disable_release(self):
+        """Test enable/disable calls"""
+        self._test_enable_disable_release(legacy_session=True)
+
+    def test_enable_disable_release_session2(self):
+        """Test enable/disable calls (session2)"""
+        self._test_enable_disable_release(legacy_session=False)
+
+    def _test_release_at(self, legacy_session):
         params = {}
 
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         session = setup.session
 
         # libportal allows us to call Release without Enable first,
@@ -454,10 +549,15 @@ class TestInputCapture(PortalTest):
         cursor_position = options["cursor_position"]
         assert cursor_position == (10.0, 10.0)
 
-    def test_activated(self):
-        """
-        Test the Activated signal
-        """
+    def test_release_at(self):
+        """Test the release_at call with a cursor position"""
+        self._test_release_at(legacy_session=True)
+
+    def test_release_at_session2(self):
+        """Test the release_at call with a cursor position (session2)"""
+        self._test_release_at(legacy_session=False)
+
+    def _test_activated(self, legacy_session):
         params = {
             "eis-serial": 123,
             "activated-after": 20,
@@ -467,7 +567,7 @@ class TestInputCapture(PortalTest):
             "deactivated-position": (20.0, 30.0),
         }
 
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         session = setup.session
 
         session_activated_signal_received = False
@@ -520,10 +620,15 @@ class TestInputCapture(PortalTest):
         assert signal_deactivated_options["cursor_position"] == (20.0, 30.0)
         assert signal_deactivated_options["activation_id"] == 123
 
-    def test_zones_changed(self):
-        """
-        Test the ZonesChanged signal
-        """
+    def test_activated(self):
+        """Test the Activated signal"""
+        self._test_activated(legacy_session=True)
+
+    def test_activated_session2(self):
+        """Test the Activated signal (session2)"""
+        self._test_activated(legacy_session=False)
+
+    def _test_zones_changed(self, legacy_session):
         params = {
             "zones": [(1920, 1080, 0, 0), (1080, 1920, 1920, 1080)],
             "changed-zones": [(1024, 768, 0, 0)],
@@ -531,7 +636,7 @@ class TestInputCapture(PortalTest):
             "zone-set": 567,
         }
 
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         session = setup.session
 
         signal_received = False
@@ -566,15 +671,20 @@ class TestInputCapture(PortalTest):
         assert all([z.props.zone_set == 568 for z in session.get_zones()])
         assert all([v == False for v in zone_props.values()])
 
-    def test_disabled(self):
-        """
-        Test the Disabled signal
-        """
+    def test_zones_changed(self):
+        """Test the ZonesChanged signal"""
+        self._test_zones_changed(legacy_session=True)
+
+    def test_zones_changed_session2(self):
+        """Test the ZonesChanged signal (session2)"""
+        self._test_zones_changed(legacy_session=False)
+
+    def _test_disabled(self, legacy_session):
         params = {
             "disabled-after": 20,
         }
 
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         session = setup.session
 
         disabled_signal_received = False
@@ -592,11 +702,16 @@ class TestInputCapture(PortalTest):
 
         assert disabled_signal_received
 
-    def test_close_session(self):
-        """
-        Ensure that closing our session explicitly closes the session on DBus.
-        """
-        setup = self.create_session_with_barriers()
+    def test_disabled(self):
+        """Test the Disabled signal"""
+        self._test_disabled(legacy_session=True)
+
+    def test_disabled_session2(self):
+        """Test the Disabled signal (session2)"""
+        self._test_disabled(legacy_session=False)
+
+    def _test_close_session(self, legacy_session):
+        setup = self.create_session_with_barriers(legacy_session=legacy_session)
         session = setup.session
         xdp_session = setup.session.get_session()
 
@@ -622,13 +737,17 @@ class TestInputCapture(PortalTest):
 
         assert was_closed is True
 
-    def test_close_session_signal(self):
-        """
-        Ensure that we get the GObject signal when our session is closed
-        externally.
-        """
+    def test_close_session(self):
+        """Ensure that closing our session explicitly closes the session on DBus."""
+        self._test_close_session(legacy_session=True)
+
+    def test_close_session_session2(self):
+        """Ensure that closing our session explicitly closes the session on DBus (session2)."""
+        self._test_close_session(legacy_session=False)
+
+    def _test_close_session_signal(self, legacy_session):
         params = {"close-after-enable": 500}
-        setup = self.create_session_with_barriers(params)
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
         session = setup.session
         xdp_session = setup.session.get_session()
 
@@ -645,3 +764,158 @@ class TestInputCapture(PortalTest):
         self.mainloop.run()
 
         assert session_closed_signal_received is True
+
+    def test_close_session_signal(self):
+        """Ensure that we get the GObject signal when our session is closed externally."""
+        self._test_close_session_signal(legacy_session=True)
+
+    def test_close_session_signal_session2(self):
+        """Ensure that we get the GObject signal when our session is closed externally (session2)."""
+        self._test_close_session_signal(legacy_session=False)
+
+    def test_create_session2(self):
+        """
+        Test basic CreateSession2 session creation and Start
+        """
+        params = {}
+        setup = self.create_session_with_barriers(params, legacy_session=False)
+        assert setup.session is not None
+
+        method_calls = self.mock_interface.GetMethodCalls("CreateSession2")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        (options,) = args
+        assert "session_handle_token" in options
+
+        method_calls = self.mock_interface.GetMethodCalls("Start")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, parent_window, options = args
+        assert parent_window == ""
+        assert "handle_token" in options
+        assert "capabilities" in options
+        assert options["capabilities"] == Xdp.InputCapability.POINTER
+
+    def test_start_with_persist_mode(self):
+        """
+        Test that persist_mode is sent in Start options when set
+        """
+        params = {"start-persist-mode": 2}
+        self.setup_daemon(params)
+
+        xdp = Xdp.Portal.new()
+        session = xdp.create_input_capture_session2_sync(cancellable=None)
+
+        session.set_session_persistence(Xdp.InputCaptureSessionPersistence.PERSISTENT)
+
+        result = self.start_session(session)
+        assert result is True
+
+        method_calls = self.mock_interface.GetMethodCalls("Start")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, parent_window, options = args
+        assert "persist_mode" in options
+        assert options["persist_mode"] == Xdp.InputCaptureSessionPersistence.PERSISTENT
+
+    def test_start_no_persist_mode_when_none(self):
+        """
+        Test that persist_mode is NOT sent in Start options when persistence
+        is NONE (the default)
+        """
+        params = {}
+        self.setup_daemon(params)
+
+        xdp = Xdp.Portal.new()
+        session = xdp.create_input_capture_session2_sync(cancellable=None)
+
+        result = self.start_session(session)
+        assert result is True
+
+        method_calls = self.mock_interface.GetMethodCalls("Start")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, parent_window, options = args
+        assert "persist_mode" not in options
+
+    def test_start_with_restore_token_v2(self):
+        """
+        Test that restore_token is sent in Start options when version >= 2
+        and a restore token is set
+        """
+        params = {"version": 2, "start-persist-mode": 2}
+        self.setup_daemon(params)
+
+        xdp = Xdp.Portal.new()
+        session = xdp.create_input_capture_session2_sync(cancellable=None)
+
+        session.set_session_persistence(Xdp.InputCaptureSessionPersistence.PERSISTENT)
+        session.set_restore_token("previous-session-token")
+
+        result = self.start_session(session)
+        assert result is True
+
+        method_calls = self.mock_interface.GetMethodCalls("Start")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, parent_window, options = args
+        assert "restore_token" in options
+        assert options["restore_token"] == "previous-session-token"
+
+    def test_start_no_restore_token_v1(self):
+        """
+        Test that restore_token is NOT sent in Start options when version == 1,
+        even if a restore token is set
+        """
+        params = {"version": 1}
+        self.setup_daemon(params)
+
+        xdp = Xdp.Portal.new()
+        session = xdp.create_input_capture_session2_sync(cancellable=None)
+
+        session.set_session_persistence(Xdp.InputCaptureSessionPersistence.PERSISTENT)
+        session.set_restore_token("previous-session-token")
+
+        result = self.start_session(session)
+        assert result is True
+
+        method_calls = self.mock_interface.GetMethodCalls("Start")
+        assert len(method_calls) == 1
+        _, args = method_calls.pop(0)
+        session_handle, parent_window, options = args
+        assert "restore_token" not in options
+
+    def test_start_restore_token_from_response(self):
+        """
+        Test that the restore token returned by Start is stored on the session
+        """
+        params = {"version": 2, "start-persist-mode": 2}
+        self.setup_daemon(params)
+
+        xdp = Xdp.Portal.new()
+        session = xdp.create_input_capture_session2_sync(cancellable=None)
+
+        session.set_session_persistence(Xdp.InputCaptureSessionPersistence.PERSISTENT)
+
+        result = self.start_session(session)
+        assert result is True
+
+        # The template returns "restore_tokenN"
+        restore_token = session.get_restore_token()
+        assert restore_token is not None
+        assert restore_token.startswith("restore_token")
+
+    def test_start_no_restore_token_in_response_when_no_persist(self):
+        """
+        Test that no restore token is returned when persist mode is 0
+        """
+        params = {"version": 2, "start-persist-mode": 0}
+        self.setup_daemon(params)
+
+        xdp = Xdp.Portal.new()
+        session = xdp.create_input_capture_session2_sync(cancellable=None)
+
+        result = self.start_session(session)
+        assert result is True
+
+        assert session.get_restore_token() is None
