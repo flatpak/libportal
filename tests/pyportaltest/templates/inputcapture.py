@@ -8,6 +8,8 @@ from pyportaltest.templates import Request, Response, ASVType, Session
 from typing import Callable, Dict, List, Tuple, Iterator
 from itertools import count
 
+_restore_tokens = count()
+
 import dbus
 import dbus.service
 import logging
@@ -88,6 +90,9 @@ def load(mock, parameters={}):
     # How many ms to signal Session.Closed after Start
     mock.close_after_enable = parameters.get("close-after-enable", 0)
 
+    # persist_mode returned in Start response (0 means none)
+    mock.start_persist_mode = parameters.get("start-persist-mode", 0)
+
     mock.AddProperties(
         MAIN_IFACE,
         dbus.Dictionary(
@@ -124,6 +129,56 @@ def CreateSession(self, parent_window: str, options: ASVType, sender: str):
         self.active_sessions[session.handle] = session
 
         logger.debug(f"CreateSession with response {response}")
+        request.respond(response, delay=self.delay)
+
+        return request.handle
+    except Exception as e:
+        logger.critical(e)
+
+
+@dbus.service.method(
+    MAIN_IFACE,
+    sender_keyword="sender",
+    in_signature="a{sv}",
+    out_signature="a{sv}",
+)
+def CreateSession2(self, options: ASVType, sender: str):
+    try:
+        session = Session(bus_name=self.bus_name, sender=sender, options=options)
+        self.active_sessions[session.handle] = session
+
+        results = {
+            "session_handle": dbus.ObjectPath(session.handle),
+        }
+
+        logger.debug(f"CreateSession2 with results {results}")
+        return results
+    except Exception as e:
+        logger.critical(e)
+
+
+@dbus.service.method(
+    MAIN_IFACE,
+    sender_keyword="sender",
+    in_signature="osa{sv}",
+    out_signature="o",
+)
+def Start(self, session_handle: str, parent_window: str, options: ASVType, sender: str):
+    try:
+        request = Request(bus_name=self.bus_name, sender=sender, options=options)
+
+        if session_handle not in self.active_sessions:
+            request.respond(Response(2, {}), delay=self.delay)
+            return request.handle
+
+        results = {}
+
+        if self.start_persist_mode != 0:
+            results["restore_token"] = f"restore_token{next(_restore_tokens)}"
+
+        response = Response(response=0, results=results)
+
+        logger.debug(f"Start with response {response}")
         request.respond(response, delay=self.delay)
 
         return request.handle
