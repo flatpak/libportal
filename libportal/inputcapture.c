@@ -242,6 +242,7 @@ typedef struct {
 
 static void create_session (Call *call);
 static void start_session (Call *call);
+static void fetch_version (Call *call);
 static void get_zones (Call *call);
 
 static void
@@ -1006,6 +1007,47 @@ session_started (GDBusConnection *bus,
 }
 
 static void
+fetch_version_returned (GObject *object,
+                        GAsyncResult *result,
+                        gpointer data)
+{
+  g_autoptr(Call) call = data;
+  g_autoptr(GVariant) version_variant = NULL;
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GError) error = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (call->task, g_steal_pointer (&error));
+      call_dispose (call);
+      return;
+    }
+
+  g_variant_get_child (ret, 0, "v", &version_variant);
+  call->portal->input_capture_interface_version = g_variant_get_uint32 (version_variant);
+
+  start_session (call);
+}
+
+static void
+fetch_version (Call *call)
+{
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.DBus.Properties",
+                          "Get",
+                          g_variant_new ("(ss)", "org.freedesktop.portal.InputCapture", "version"),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (call->task),
+                          fetch_version_returned,
+                          call_ref (call));
+}
+
+static void
 start_session (Call *call)
 {
   GVariantBuilder options;
@@ -1025,7 +1067,7 @@ start_session (Call *call)
     g_variant_builder_add (&options, "{sv}", "persist_mode",
                            g_variant_new_uint32 (call->session->persistence));
 
-  if (call->session->restore_token)
+  if (call->portal->input_capture_interface_version >= 2 && call->session->restore_token)
     g_variant_builder_add (&options, "{sv}", "restore_token",
                            g_variant_new_string (call->session->restore_token));
 
@@ -1083,7 +1125,10 @@ xdp_input_capture_session_start (XdpInputCaptureSession *session,
   else
     call->parent_handle = g_strdup ("");
 
-  start_session (call);
+  if (portal->input_capture_interface_version == 0)
+    fetch_version (call);
+  else
+    start_session (call);
 }
 
 /**
