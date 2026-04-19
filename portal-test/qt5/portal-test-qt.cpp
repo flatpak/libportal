@@ -4,11 +4,30 @@
 
 #include <QStringLiteral>
 
-PortalTestQt::PortalTestQt(QWidget *parent, Qt::WindowFlags f)
+PortalTestQt::PortalTestQt(QApplication *app, QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
     , m_mainWindow(new Ui_PortalTestQt)
+    , m_app(app)
     , m_portal(xdp_portal_new())
 {
+    QString app_id = app->desktopFileName();
+    xdp_portal_register(m_portal, app_id.toLocal8Bit().constData(), nullptr /*cancellable*/,
+                        [](GObject *source_object, GAsyncResult *result, gpointer user_data)
+                        {
+                            Q_UNUSED(user_data)
+
+                            XdpPortal *portal = XDP_PORTAL (source_object);
+                            g_autoptr(GError) error = NULL;
+                            if (!xdp_portal_register_finish (portal, result, &error))
+                            {
+                                if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+                                    qWarning ("Failed to register application ID: %s", error->message);
+                                return;
+                            }
+                            qInfo ("Registered application ID");
+                        },
+                        nullptr);
+
     m_mainWindow->setupUi(this);
 
     connect(m_mainWindow->openFileButton, &QPushButton::clicked, [=] (G_GNUC_UNUSED bool clicked) {
