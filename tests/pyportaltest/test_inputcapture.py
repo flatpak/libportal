@@ -5,6 +5,7 @@
 from . import PortalTest
 from typing import List, Optional
 
+import gc
 import gi
 import logging
 import pytest
@@ -772,6 +773,55 @@ class TestInputCapture(PortalTest):
     def test_close_session_signal_session2(self):
         """Ensure that we get the GObject signal when our session is closed externally (session2)."""
         self._test_close_session_signal(legacy_session=False)
+
+    def _test_close_session_signal_after_unref(self, legacy_session):
+        """
+        Ensure that the portal's internal session reference keeps the session
+        alive even after the caller drops their reference.
+        """
+        params = {"close-after-enable": 500}
+        setup = self.create_session_with_barriers(params, legacy_session=legacy_session)
+        session = setup.session
+        xdp_session = session.get_session()
+
+        session_closed_signal_received = False
+
+        def session_closed(session):
+            nonlocal session_closed_signal_received
+            session_closed_signal_received = True
+            self.mainloop.quit()
+
+        xdp_session.connect("closed", session_closed)
+
+        session.enable()
+
+        # Drop our session reference
+        del setup, session, xdp_session
+        gc.collect()
+
+        # Make GLib critical warnings fatal so that a double-unref
+        # (g_object_unref on an already-finalized object) aborts the process
+        # rather than being silently ignored. This must be set after the del
+        # above: the XdpInputCaptureSession uses a weak ref to XdpSession and
+        # finalization order may trigger unrelated g_critical messages.
+        old_flags = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_WARNING
+        )
+
+        try:
+            self.mainloop.run()
+        finally:
+            GLib.log_set_always_fatal(old_flags)
+
+        assert session_closed_signal_received is True
+
+    def test_close_session_signal_after_unref(self):
+        """Ensure session survives caller unref and receives the D-Bus Closed signal."""
+        self._test_close_session_signal_after_unref(legacy_session=True)
+
+    def test_close_session_signal_after_unref_session2(self):
+        """Ensure session survives caller unref and receives the D-Bus Closed signal (session2)."""
+        self._test_close_session_signal_after_unref(legacy_session=False)
 
     def test_create_session2(self):
         """
