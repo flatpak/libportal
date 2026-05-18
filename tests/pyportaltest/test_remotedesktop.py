@@ -4,6 +4,7 @@
 
 from . import PortalTest
 
+import gc
 import gi
 import logging
 import os
@@ -598,5 +599,39 @@ class TestRemoteDesktop(PortalTest):
             params=params, cb_closed_signal=session_closed
         )  # keep SessionResult alive
         self.mainloop.run()
+
+        assert session_closed_signal_received is True
+
+    def test_close_session_signal_after_unref(self):
+        """
+        Ensure that the portal's internal session reference keeps the session
+        alive even after the caller drops their reference.
+        """
+
+        session_closed_signal_received = False
+
+        def session_closed(session):
+            nonlocal session_closed_signal_received
+            session_closed_signal_received = True
+            self.mainloop.quit()
+
+        params = {"close-after-start": 500}
+        setup = self.create_session(params=params, cb_closed_signal=session_closed)
+
+        # Make GLib critical warnings fatal so that a double-unref
+        # (g_object_unref on an already-finalized object) aborts the process
+        # rather than being silently ignored.
+        old_flags = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_WARNING
+        )
+
+        try:
+            # Drop our session reference
+            del setup
+            gc.collect()
+
+            self.mainloop.run()
+        finally:
+            GLib.log_set_always_fatal(old_flags)
 
         assert session_closed_signal_received is True
