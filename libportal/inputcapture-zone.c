@@ -197,7 +197,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
    * recently returned set).
    */
   zone_properties[PROP_ZONE_SET] =
-        g_param_spec_uint ("zone_set",
+        g_param_spec_uint ("zone-set",
                            "zone set number",
                            "The zone_set number when this zone was retrieved",
                            0, UINT_MAX, 0,
