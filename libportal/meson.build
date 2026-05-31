@@ -98,6 +98,12 @@ libportal_dep = declare_dependency(
 )
 
 if introspection
+  libportal_gir_extra_args = []
+  if gi_scanner.version().version_compare('>=1.83.2')
+    libportal_gir_extra_args += [
+      '--doc-format=gi-docgen',
+    ]
+  endif
   libportal_gir = gnome.generate_gir(libportal,
     sources: generated_files + public_headers + src,
     nsversion: gir_version,
@@ -109,6 +115,7 @@ if introspection
     includes: ['Gio-2.0'],
     install: true,
     export_packages: ['libportal'],
+    extra_args: libportal_gir_extra_args,
    )
   if vapi
     libportal_vapi = gnome.generate_vapi(
