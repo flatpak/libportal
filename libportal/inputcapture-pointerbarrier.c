@@ -159,7 +159,7 @@ xdp_input_capture_pointer_barrier_class_init (XdpInputCapturePointerBarrierClass
                       "Pointer barrier x offset",
                       "The pointer barrier x offset in logical pixels",
                       INT_MIN, INT_MAX, 0,
-                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
    * XdpInputCapturePointerBarrier:y1:
@@ -171,7 +171,7 @@ xdp_input_capture_pointer_barrier_class_init (XdpInputCapturePointerBarrierClass
                       "Pointer barrier y offset",
                       "The pointer barrier y offset in logical pixels",
                       INT_MIN, INT_MAX, 0,
-                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   /**
    * XdpInputCapturePointerBarrier:x2:
    *
@@ -182,7 +182,7 @@ xdp_input_capture_pointer_barrier_class_init (XdpInputCapturePointerBarrierClass
                       "Pointer barrier x offset",
                       "The pointer barrier x offset in logical pixels",
                       INT_MIN, INT_MAX, 0,
-                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   /**
    * XdpInputCapturePointerBarrier:y2:
    *
@@ -193,7 +193,7 @@ xdp_input_capture_pointer_barrier_class_init (XdpInputCapturePointerBarrierClass
                       "Pointer barrier y offset",
                       "The pointer barrier y offset in logical pixels",
                       INT_MIN, INT_MAX, 0,
-                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   /**
    * XdpInputCapturePointerBarrier:id:
    *
@@ -204,7 +204,7 @@ xdp_input_capture_pointer_barrier_class_init (XdpInputCapturePointerBarrierClass
                        "Pointer barrier unique id",
                        "The id assigned to this barrier by the caller",
                        0, UINT_MAX, 0,
-                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   /**
    * XdpInputCapturePointerBarrier:is-active:
    *
@@ -217,7 +217,7 @@ xdp_input_capture_pointer_barrier_class_init (XdpInputCapturePointerBarrierClass
                           "true if active, false otherwise",
                           "true if active, false otherwise",
                           FALSE,
-                          G_PARAM_READABLE);
+                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 }
