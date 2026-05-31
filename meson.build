@@ -1,7 +1,7 @@
 project('libportal','c',
         version: '0.9.2',
         default_options: ['warning_level=2'],
-        meson_version: '>= 0.55.0')
+        meson_version: '>= 0.62.0')
 
 cc = meson.get_compiler('c')
 cflags = [
@@ -47,6 +47,8 @@ vapi = get_option('vapi')
 
 top_inc = include_directories('.')
 libportal_inc = include_directories('libportal')
+
+gi_scanner = find_program('g-ir-scanner', required: get_option('introspection'))
 
 subdir('libportal')
 
