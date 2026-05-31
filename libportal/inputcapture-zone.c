@@ -151,7 +151,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
                            "zone width",
                            "The zone width in logical pixels",
                            0, UINT_MAX, 0,
-                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
    * XdpInputCaptureZone:height:
@@ -163,7 +163,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
                            "zone height",
                            "The zone height in logical pixels",
                            0, UINT_MAX, 0,
-                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
    * XdpInputCaptureZone:x:
@@ -175,7 +175,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
                           "zone x offset",
                           "The zone x offset in logical pixels",
                           INT_MIN, INT_MAX, 0,
-                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   /**
    * XdpInputCaptureZone:y:
    *
@@ -186,7 +186,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
                           "zone y offset",
                           "The zone y offset in logical pixels",
                           INT_MIN, INT_MAX, 0,
-                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
    * XdpInputCaptureZone:zone_set:
@@ -201,7 +201,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
                            "zone set number",
                            "The zone_set number when this zone was retrieved",
                            0, UINT_MAX, 0,
-                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+                           G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
    * XdpInputCaptureZone:is-valid:
@@ -218,7 +218,7 @@ xdp_input_capture_zone_class_init (XdpInputCaptureZoneClass *klass)
                               "validity check",
                               "True if this zone is currently valid",
                               TRUE,
-                              G_PARAM_READWRITE);
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class,
                                      N_PROPERTIES,
