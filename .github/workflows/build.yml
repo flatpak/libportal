@@ -18,7 +18,7 @@ jobs:
     container: ubuntu:${{ matrix.ubuntu-version }}
     strategy:
       matrix:
-        ubuntu-version: ['22.04', '24.04']
+        ubuntu-version: ['24.04', '26.04']
         compiler: ['gcc', 'clang']
 
     env:
@@ -82,7 +82,7 @@ jobs:
     container: fedora:${{ matrix.fedora-version }}
     strategy:
       matrix:
-        fedora-version: ['39', '40']
+        fedora-version: ['43', '44']
         compiler: ['gcc', 'clang']
 
     env:
