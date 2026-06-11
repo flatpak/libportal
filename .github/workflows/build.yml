@@ -48,7 +48,7 @@ jobs:
             qt6-base-private-dev \
             valac
       - name: Check out libportal
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Fix Git ownership
         run: |
           echo $GITHUB_WORKSPACE
@@ -65,7 +65,7 @@ jobs:
         working-directory: _build
         run: meson dist
       - name: Upload test logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: success() || failure()
         with:
           name: test logs (ubuntu ${{ matrix.ubuntu-version }} ${{ matrix.compiler }})
@@ -124,7 +124,7 @@ jobs:
         working-directory: _build
         run: meson dist
       - name: Upload test logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: success() || failure()
         with:
           name: test logs (fedora ${{ matrix.fedora-version }} ${{ matrix.compiler }})
@@ -151,7 +151,7 @@ jobs:
           curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
           rm -rf check-abi/
       - name: Check out libportal
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Work around git safe directory check
