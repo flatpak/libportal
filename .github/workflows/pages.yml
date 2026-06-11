@@ -30,7 +30,7 @@ jobs:
             python3-dbusmock
 
       - name: Check out libportal
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configure libportal
         run: meson setup --prefix=/usr builddir -Dtests=false -Dvapi=false
@@ -44,7 +44,7 @@ jobs:
           mv ./libportal-1 ../../_site
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
 
   # Deployment job
   deploy:
@@ -58,4 +58,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
