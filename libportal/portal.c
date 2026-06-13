@@ -405,7 +405,7 @@ void
 xdp_portal_add_session (XdpPortal  *portal,
                         XdpSession *session)
 {
-  g_hash_table_insert (portal->sessions, session->id, session);
+  g_hash_table_insert (portal->sessions, session->id, g_object_ref (session));
 }
 
 void
