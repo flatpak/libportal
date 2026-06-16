@@ -44,6 +44,11 @@ gboolean xdp_portal_access_camera_finish (XdpPortal           *portal,
                                           GError             **error);
 
 XDP_PUBLIC
+GVariant * xdp_portal_access_camera_finish_streams (XdpPortal     *portal,
+                                                    GAsyncResult  *result,
+                                                    GError       **error);
+
+XDP_PUBLIC
 int      xdp_portal_open_pipewire_remote_for_camera (XdpPortal *portal);
 
 G_END_DECLS
