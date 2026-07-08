@@ -1090,6 +1090,46 @@ global_shortcuts_request (GtkButton     *button,
 }
 
 static void
+globalshortcuts_configure_done (GObject      *source,
+                                GAsyncResult *result,
+                                gpointer      data)
+{
+  PortalTestWin *win = data;
+  XdpGlobalShortcutsSession *session = XDP_GLOBAL_SHORTCUTS_SESSION (source);
+  g_autoptr(GError) error = NULL;
+
+  if (session != win->gs_session)
+    return;
+
+  if (!xdp_global_shortcuts_session_configure_shortcuts_finish (session, result, &error))
+    {
+      g_warning ("Failed to configure GlobalShortcuts: %s", error->message);
+      gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "failed to configure");
+      return;
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "configure opened");
+}
+
+static void
+global_shortcuts_configure (GtkButton     *button,
+                            PortalTestWin *win)
+{
+  if (win->gs_session == NULL)
+    {
+      gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "not created");
+      return;
+    }
+
+  xdp_global_shortcuts_session_configure_shortcuts (win->gs_session,
+                                                    NULL,
+                                                    NULL,
+                                                    NULL,
+                                                    globalshortcuts_configure_done,
+                                                    win);
+}
+
+static void
 capture_input_toggle_enable (GtkButton *button,
                              PortalTestWin *win)
 {
@@ -1937,6 +1977,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, open_local);
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
   gtk_widget_class_bind_template_callback (widget_class, global_shortcuts_request);
+  gtk_widget_class_bind_template_callback (widget_class, global_shortcuts_configure);
   gtk_widget_class_bind_template_callback (widget_class, capture_input);
   gtk_widget_class_bind_template_callback (widget_class, capture_input_release);
   gtk_widget_class_bind_template_callback (widget_class, capture_input_toggle_enable);

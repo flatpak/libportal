@@ -1099,3 +1099,105 @@ xdp_global_shortcuts_session_list_shortcuts_finish (XdpGlobalShortcutsSession *s
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
+
+static void
+configure_shortcuts_done (GObject      *object,
+                          GAsyncResult *result,
+                          gpointer      data)
+{
+  g_autoptr(GTask) task = data;
+  g_autoptr(GVariant) ret = NULL;
+  GError *error = NULL;
+
+  ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
+  if (error)
+    {
+      g_task_return_error (task, error);
+      return;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+/**
+ * xdp_global_shortcuts_session_configure_shortcuts:
+ * @session: a [class@GlobalShortcutsSession]
+ * @parent_window: (nullable): parent window identifier
+ * @activation_token: (nullable): token used to activate the configuration window
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): callback called when the method call is done
+ * @data: data to pass to @callback
+ *
+ * Requests that the portal show configuration UI for all shortcuts of this
+ * session.
+ */
+
+void
+xdp_global_shortcuts_session_configure_shortcuts (XdpGlobalShortcutsSession *session,
+                                                  const char                *parent_window,
+                                                  const char                *activation_token,
+                                                  GCancellable              *cancellable,
+                                                  GAsyncReadyCallback        callback,
+                                                  gpointer                   data)
+{
+  XdpPortal *portal;
+  GVariantBuilder options;
+  g_autoptr(GTask) task = NULL;
+
+  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
+
+  portal = session->parent_session->portal;
+
+  if (parent_window == NULL)
+    parent_window = "";
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+
+  if (activation_token != NULL && *activation_token != '\0')
+    {
+      g_variant_builder_add (&options,
+                             "{sv}",
+                             "activation_token",
+                             g_variant_new_string (activation_token));
+    }
+
+  task = g_task_new (session, cancellable, callback, data);
+
+  g_dbus_connection_call (portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.GlobalShortcuts",
+                          "ConfigureShortcuts",
+                          g_variant_new ("(os@a{sv})",
+                                         session->parent_session->id,
+                                         parent_window,
+                                         g_variant_builder_end (&options)),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          configure_shortcuts_done,
+                          g_object_ref (task));
+}
+
+/**
+ * xdp_global_shortcuts_session_configure_shortcuts_finish:
+ * @session: a [class@GlobalShortcutsSession]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes the ConfigureShortcuts method call.
+ *
+ * Returns: %TRUE if the call succeeded, %FALSE otherwise.
+ */
+
+gboolean
+xdp_global_shortcuts_session_configure_shortcuts_finish (XdpGlobalShortcutsSession *session,
+                                                         GAsyncResult              *result,
+                                                         GError                   **error)
+{
+  g_return_val_if_fail (_xdp_global_shortcuts_session_is_valid (session), FALSE);
+  g_return_val_if_fail (g_task_is_valid (result, session), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}

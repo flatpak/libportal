@@ -130,5 +130,17 @@ GPtrArray                   *xdp_global_shortcuts_session_list_shortcuts_finish 
                                                                                       GAsyncResult                    *result,
                                                                                       GError                         **error);
 
+XDP_PUBLIC
+void                         xdp_global_shortcuts_session_configure_shortcuts        (XdpGlobalShortcutsSession       *session,
+                                                                                      const char                      *parent_window,
+                                                                                      const char                      *activation_token,
+                                                                                      GCancellable                    *cancellable,
+                                                                                      GAsyncReadyCallback              callback,
+                                                                                      gpointer                         data);
+
+XDP_PUBLIC
+gboolean                     xdp_global_shortcuts_session_configure_shortcuts_finish (XdpGlobalShortcutsSession       *session,
+                                                                                      GAsyncResult                    *result,
+                                                                                      GError                         **error);
 
 G_END_DECLS
