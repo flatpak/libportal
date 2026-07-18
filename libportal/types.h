@@ -23,7 +23,11 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
+G_BEGIN_DECLS
+
 typedef struct _XdpParent XdpParent;
 typedef struct _XdpPortal XdpPortal;
 typedef struct _XdpSession XdpSession;
 typedef struct _XdpSettings XdpSettings;
+
+G_END_DECLS
