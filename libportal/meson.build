@@ -322,6 +322,4 @@ if meson.version().version_compare('>= 0.63.0')
    endif
 endif
 
-if meson.version().version_compare('>= 0.54.0')
-  summary({'enabled backends': enabled_backends}, section: 'Backends', list_sep: ',')
-endif
+summary({'enabled backends': enabled_backends}, section: 'Backends', list_sep: ',')
