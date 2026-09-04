@@ -96,6 +96,7 @@ libportal_dep = declare_dependency(
   dependencies: [gio_dep, gio_unix_dep],
   link_with: libportal,
 )
+meson.override_dependency('libportal', libportal_dep)
 
 if introspection
   libportal_gir_extra_args = []
@@ -159,6 +160,7 @@ if gtk3_dep.found()
     dependencies: [libportal_dep, gtk3_dep],
     link_with: libportal_gtk3,
   )
+  meson.override_dependency('libportal-gtk3', libportal_gtk3_dep)
 
   if introspection
     libportal_gtk3_gir = gnome.generate_gir(libportal_gtk3,
@@ -217,6 +219,7 @@ if gtk4_dep.found()
     dependencies: [libportal_dep, gtk4_dep],
     link_with: libportal_gtk4,
   )
+  meson.override_dependency('libportal-gtk4', libportal_gtk4_dep)
 
   if introspection
     libportal_gtk4_gir = gnome.generate_gir(
@@ -279,6 +282,7 @@ if have_cpp and qt5_dep.found()
     dependencies: [libportal_dep, qt5_dep],
     link_with: libportal_qt5,
   )
+  meson.override_dependency('libportal-qt5', libportal_qt5_dep)
   enabled_backends += ['qt5']
 endif
 
@@ -316,6 +320,7 @@ if meson.version().version_compare('>= 0.63.0')
        dependencies: [libportal_dep, qt6_dep],
        link_with: libportal_qt6,
      )
+     meson.override_dependency('libportal-qt6', libportal_qt6_dep)
      enabled_backends += ['qt6']
    endif
 endif
