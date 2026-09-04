@@ -18,6 +18,7 @@ exe = executable('qt5-test',
   include_directories: [top_inc, libportal_inc],
   dependencies: [qt5_dep, libportal_qt5_dep],
   cpp_args : '-std=c++11',
+  build_by_default: false,
 )
 
 test('Qt 5 unit test', exe)
