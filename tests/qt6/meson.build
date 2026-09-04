@@ -18,6 +18,7 @@ exe = executable('qt6-test',
   include_directories: [top_inc, libportal_inc],
   dependencies: [qt6_dep, libportal_qt6_dep],
   cpp_args : '-std=c++17',
+  build_by_default: false,
 )
 
 test('Qt 6 unit test', exe)
