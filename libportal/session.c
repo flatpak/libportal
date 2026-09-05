@@ -65,6 +65,9 @@ xdp_session_finalize (GObject *object)
   if (session->input_capture_session != NULL)
     g_critical ("XdpSession destroyed before XdpInputCaptureSesssion, you lost count of your session refs");
   session->input_capture_session = NULL;
+  if (session->global_shortcuts_session != NULL)
+    g_critical ("XdpSession destroyed before XdpGlobalShortcutsSession, you lost count of your session refs");
+  session->global_shortcuts_session = NULL;
   g_clear_pointer (&session->selection_mime_types, g_strfreev);
 
   G_OBJECT_CLASS (xdp_session_parent_class)->finalize (object);
@@ -160,6 +163,7 @@ _xdp_session_new (XdpPortal *portal,
   session->type = type;
   session->state = XDP_SESSION_INITIAL;
   session->input_capture_session = NULL;
+  session->global_shortcuts_session = NULL;
 
   session->signal_id = g_dbus_connection_signal_subscribe (portal->bus,
                                                            PORTAL_BUS_NAME,

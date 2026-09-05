@@ -21,6 +21,7 @@
 
 #include <libportal/remote.h>
 #include <libportal/inputcapture.h>
+#include <libportal/globalshortcuts.h>
 
 struct _XdpSession {
   GObject parent_instance;
@@ -49,6 +50,7 @@ struct _XdpSession {
 
   /* InputCapture */
   XdpInputCaptureSession *input_capture_session; /* weak ref */
+  XdpGlobalShortcutsSession *global_shortcuts_session; /* weak ref */
 };
 
 XdpSession * _xdp_session_new (XdpPortal *portal,

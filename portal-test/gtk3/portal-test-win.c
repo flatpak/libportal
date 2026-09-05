@@ -64,6 +64,8 @@ struct _PortalTestWin
 
   XdpPortal *portal;
   XdpSession *session;
+  XdpGlobalShortcutsSession *gs_session;
+  guint globalshortcuts_changes;
 
   XdpInputCaptureSession *input_capture_session;
 
@@ -97,6 +99,7 @@ struct _PortalTestWin
 
   GtkWidget *remotedesktop_label;
   GtkWidget *remotedesktop_toggle;
+  GtkWidget *globalshortcuts_activations;
 
   GtkWidget *inputcapture_label;
   GtkWidget *inputcapture_toggle;
@@ -908,6 +911,222 @@ capture_input_release (GtkButton *button,
                        PortalTestWin *win)
 {
   /* FIXME */
+}
+
+static void
+globalshortcuts_activated (XdpGlobalShortcutsSession *session,
+                           const char                *shortcut_id,
+                           guint64                    timestamp,
+                           GVariant                  *options,
+                           gpointer                   user_data)
+{
+  GtkLabel *label = GTK_LABEL (user_data);
+
+  gtk_label_set_text (label, shortcut_id);
+}
+
+static void
+globalshortcuts_changed (XdpGlobalShortcutsSession *session,
+                         GPtrArray                 *shortcuts,
+                         gpointer                   user_data)
+{
+  PortalTestWin *win = user_data;
+  g_autoptr(GString) s = NULL;
+
+  if (session != win->gs_session)
+    return;
+
+  win->globalshortcuts_changes++;
+
+  s = g_string_new (NULL);
+  g_string_append_printf (s,
+                          "shortcuts changed %u time%s",
+                          win->globalshortcuts_changes,
+                          win->globalshortcuts_changes == 1 ? "" : "s");
+
+  for (guint i = 0; i < shortcuts->len; i++)
+    {
+      XdpGlobalShortcutAssigned *shortcut;
+
+      shortcut = g_ptr_array_index (shortcuts, i);
+
+      g_string_append_printf (s,
+                              "\n%s: %s",
+                              xdp_global_shortcut_assigned_get_shortcut_id (shortcut),
+                              xdp_global_shortcut_assigned_get_trigger_description (shortcut));
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), s->str);
+}
+
+static void
+globalshortcuts_bind_done (GObject      *source,
+                           GAsyncResult *result,
+                           gpointer      data)
+{
+  PortalTestWin *win = data;
+  XdpGlobalShortcutsSession *session = XDP_GLOBAL_SHORTCUTS_SESSION (source);
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GString) s = NULL;
+  g_autoptr(GPtrArray) shortcuts = NULL;
+
+  if (session != win->gs_session)
+    return;
+
+  shortcuts = xdp_global_shortcuts_session_bind_shortcuts_finish (session, result, &error);
+  if (shortcuts == NULL)
+    {
+      g_warning ("Failed to bind GlobalShortcuts: %s", error->message);
+      gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "failed to bind");
+      return;
+    }
+
+  s = g_string_new ("");
+  for (guint i = 0; i < shortcuts->len; i++)
+    {
+      XdpGlobalShortcutAssigned *shortcut;
+
+      shortcut = g_ptr_array_index (shortcuts, i);
+      g_string_append_printf (s, "%s: %s ",
+                              xdp_global_shortcut_assigned_get_shortcut_id (shortcut),
+                              xdp_global_shortcut_assigned_get_trigger_description (shortcut));
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), s->str);
+
+  g_signal_connect (session,
+                    "activated",
+                    G_CALLBACK (globalshortcuts_activated),
+                    win->globalshortcuts_activations);
+
+  g_signal_connect (session,
+                    "shortcuts-changed",
+                    G_CALLBACK (globalshortcuts_changed),
+                    win);
+}
+
+static void
+globalshortcuts_bind (PortalTestWin *win)
+{
+  g_autoptr(GPtrArray) shortcuts = NULL;
+
+  shortcuts = g_ptr_array_new_with_free_func ((GDestroyNotify) xdp_global_shortcut_free);
+
+  g_ptr_array_add (shortcuts,
+                   xdp_global_shortcut_new ("foo",
+                                                 "Do Foo",
+                                                 "CTRL+F"));
+
+  g_ptr_array_add (shortcuts,
+                   xdp_global_shortcut_new ("bar",
+                                                 "Do Bar",
+                                                 NULL));
+
+  xdp_global_shortcuts_session_bind_shortcuts (win->gs_session,
+                                               shortcuts,
+                                               NULL,
+                                               NULL,
+                                               globalshortcuts_bind_done,
+                                               win);
+}
+
+static void
+globalshortcuts_session_created (GObject      *source,
+                                 GAsyncResult *result,
+                                 gpointer      data)
+{
+  XdpPortal *portal = XDP_PORTAL (source);
+  PortalTestWin *win = data;
+  g_autoptr(GError) error = NULL;
+  XdpGlobalShortcutsSession *session;
+
+  session = xdp_portal_create_global_shortcuts_session_finish (portal, result, &error);
+  if (session == NULL)
+    {
+      g_warning ("Failed to create GlobalShortcuts session: %s", error->message);
+      gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "failed to create");
+      return;
+    }
+
+  win->gs_session = session;
+
+  gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "created");
+  globalshortcuts_bind (win);
+}
+
+static void
+globalshortcuts_session_start (PortalTestWin *win)
+{
+  g_clear_object (&win->gs_session);
+  win->globalshortcuts_changes = 0;
+
+  xdp_portal_create_global_shortcuts_session (win->portal,
+                                              NULL,
+                                              globalshortcuts_session_created,
+                                              win);
+}
+
+static void
+globalshortcuts_session_stop (PortalTestWin *win)
+{
+  if (win->gs_session != NULL)
+    {
+      xdp_global_shortcuts_session_close (win->gs_session);
+      g_clear_object (&win->gs_session);
+    }
+
+  win->globalshortcuts_changes = 0;
+  gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "Not requested");
+}
+
+static void
+global_shortcuts_request (GtkButton     *button,
+                          PortalTestWin *win)
+{
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+    globalshortcuts_session_start (win);
+  else
+    globalshortcuts_session_stop (win);
+}
+
+static void
+globalshortcuts_configure_done (GObject      *source,
+                                GAsyncResult *result,
+                                gpointer      data)
+{
+  PortalTestWin *win = data;
+  XdpGlobalShortcutsSession *session = XDP_GLOBAL_SHORTCUTS_SESSION (source);
+  g_autoptr(GError) error = NULL;
+
+  if (session != win->gs_session)
+    return;
+
+  if (!xdp_global_shortcuts_session_configure_shortcuts_finish (session, result, &error))
+    {
+      g_warning ("Failed to configure GlobalShortcuts: %s", error->message);
+      gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "failed to configure");
+      return;
+    }
+
+  gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "configure opened");
+}
+
+static void
+global_shortcuts_configure (GtkButton     *button,
+                            PortalTestWin *win)
+{
+  if (win->gs_session == NULL)
+    {
+      gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "not created");
+      return;
+    }
+
+  xdp_global_shortcuts_session_configure_shortcuts (win->gs_session,
+                                                    NULL,
+                                                    NULL,
+                                                    NULL,
+                                                    globalshortcuts_configure_done,
+                                                    win);
 }
 
 static void
@@ -1757,6 +1976,8 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_callback (widget_class, open_directory);
   gtk_widget_class_bind_template_callback (widget_class, open_local);
   gtk_widget_class_bind_template_callback (widget_class, take_screenshot);
+  gtk_widget_class_bind_template_callback (widget_class, global_shortcuts_request);
+  gtk_widget_class_bind_template_callback (widget_class, global_shortcuts_configure);
   gtk_widget_class_bind_template_callback (widget_class, capture_input);
   gtk_widget_class_bind_template_callback (widget_class, capture_input_release);
   gtk_widget_class_bind_template_callback (widget_class, capture_input_toggle_enable);
@@ -1786,6 +2007,7 @@ portal_test_win_class_init (PortalTestWinClass *class)
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_logout);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_suspend);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inhibit_switch);
+  gtk_widget_class_bind_template_child (widget_class, PortalTestWin, globalshortcuts_activations);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inputcapture_label);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, inputcapture_toggle);
   gtk_widget_class_bind_template_child (widget_class, PortalTestWin, username);
