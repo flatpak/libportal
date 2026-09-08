@@ -1,7 +1,17 @@
-Changes in 0.10.1, YYYY-MM-DD
+Changes in 0.11.0, 2026-09-12
 =============================
 
-TBD
+Features:
+
+- Support globalshortcuts (#226)
+
+Bug fixes:
+
+- Various Meson cleanups (#232)
+- Document XDP_OPEN_FILE_FLAG_DIRECTORY flag separately so that since annotation lands in the introspection (#230)
+- Remove erroneous CLOSED signal from inputcapture (#229)
+- Add G_{BEGIN,END}_DECLS macros (#228)
+- Remove CONST annotation from get_type methods (#227)
 
 Changes in 0.10.0, 2026-06-17
 =============================
