@@ -51,6 +51,7 @@ xdp_parent_copy (XdpParent *source)
 
   parent->parent_export = source->parent_export;
   parent->parent_unexport = source->parent_unexport;
+  parent->parent_activation_token = source->parent_activation_token;
   g_set_object (&parent->object, source->object);
   parent->data = source->data;
   parent->exported_handle = g_strdup (source->exported_handle);

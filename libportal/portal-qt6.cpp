@@ -28,8 +28,12 @@
 #include <QBuffer>
 #include <QGuiApplication>
 
+#include <memory>
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
 #include <qpa/qplatformintegration.h>
+#include <qpa/qplatformwindow.h>
+#include <qpa/qplatformwindow_p.h>
 #include <private/qguiapplication_p.h>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
 #include <private/qdesktopunixservices_p.h>
@@ -85,12 +89,61 @@ static inline void _xdp_parent_unexport_qt (G_GNUC_UNUSED XdpParent *parent)
 {
 }
 
+/* Qt can request an activation token for a Wayland window since 6.5, and
+ * declares the interface for it only when built with Wayland since 6.9. */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#if QT_CONFIG(wayland)
+#define HAVE_XDG_ACTIVATION_TOKEN
+#endif
+#elif QT_VERSION >= QT_VERSION_CHECK(6, 5, 0) && defined(Q_OS_UNIX)
+#define HAVE_XDG_ACTIVATION_TOKEN
+#endif
+
+static void
+_xdp_parent_activation_token_qt (XdpParent                     *parent,
+                                 XdpParentActivationTokenReady  callback,
+                                 gpointer                       data)
+{
+#ifdef HAVE_XDG_ACTIVATION_TOKEN
+  QWindow *w = (QWindow *) parent->data;
+  auto waylandApp = qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication> ();
+  auto waylandWindow = w ? dynamic_cast<QNativeInterface::Private::QWaylandWindow *> (w->handle ()) : nullptr;
+
+  if (waylandApp && waylandWindow)
+    {
+      /* Qt passes the token to a signal once the compositor created it, an
+       * empty one when the compositor cannot create one, as Qt's own OpenURI
+       * portal client receives it. The callback is called once, also when
+       * the window is destroyed before. */
+      auto called = std::make_shared<bool> (false);
+      auto finish = [parent, callback, data, called] (const QString &token)
+        {
+          if (*called)
+            return;
+          *called = true;
+
+          QByteArray token_utf8 = token.toUtf8 ();
+          callback (parent, token_utf8.isEmpty () ? NULL : token_utf8.constData (), data);
+        };
+
+      QObject::connect (waylandWindow, &QNativeInterface::Private::QWaylandWindow::xdgActivationTokenCreated,
+                        waylandWindow, finish, Qt::SingleShotConnection);
+      QObject::connect (waylandWindow, &QObject::destroyed, [finish] () { finish (QString ()); });
+      waylandWindow->requestXdgActivationToken (waylandApp->lastInputSerial ());
+      return;
+    }
+#endif
+
+  callback (parent, NULL, data);
+}
+
 XdpParent *
 xdp_parent_new_qt (QWindow *window)
 {
   XdpParent *parent = g_new0 (XdpParent, 1);
   parent->parent_export = _xdp_parent_export_qt;
   parent->parent_unexport = _xdp_parent_unexport_qt;
+  parent->parent_activation_token = _xdp_parent_activation_token_qt;
   parent->data = (gpointer) window;
   return parent;
 }
