@@ -30,11 +30,18 @@ typedef gboolean (* XdpParentExport)   (XdpParent         *parent,
                                         XdpParentExported  callback,
                                         gpointer           data);
 typedef void     (* XdpParentUnexport) (XdpParent         *parent);
+typedef void     (* XdpParentActivationTokenReady) (XdpParent  *parent,
+                                                    const char *token,
+                                                    gpointer    data);
+typedef void     (* XdpParentActivationToken) (XdpParent                     *parent,
+                                               XdpParentActivationTokenReady  callback,
+                                               gpointer                       data);
 
 struct _XdpParent {
   /*< private >*/
   XdpParentExport parent_export;
   XdpParentUnexport parent_unexport;
+  XdpParentActivationToken parent_activation_token;
   GObject *object;
   XdpParentExported callback;
   char *exported_handle;
