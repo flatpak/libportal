@@ -172,7 +172,8 @@ xdp_session_is_selection_owned_by_session (XdpSession *session)
  * Get the currently advertised mime types of the current clipboard selection
  * owner.
  *
- * Returns: (transfer none): A NULL terminated array of mime type strings.
+ * Returns: (transfer none) (array zero-terminated=1): A NULL terminated array of mime
+ *   type strings.
  */
 const char **
 xdp_session_get_selection_mime_types (XdpSession *session)
@@ -183,7 +184,8 @@ xdp_session_get_selection_mime_types (XdpSession *session)
 /**
  * xdp_session_set_selection:
  * @session: a [class@Session]
- * @mime_types: (transfer none): A NULL terminated array of mime type strings.
+ * @mime_types: (transfer none) (array zero-terminated=1): A NULL terminated array
+ *   of mime type strings.
  *
  * Set the clipboard selection to advertise support for the passed list of mime
  * types.
