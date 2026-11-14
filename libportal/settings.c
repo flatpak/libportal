@@ -264,8 +264,8 @@ xdp_settings_read_value (XdpSettings *settings, const char *namespace_, const ch
 /**
  * xdp_settings_read_all_values:
  * @settings: the [class@Settings] object.
- * @namespaces: List of namespaces to filter results by, supports
- * simple globbing explained below.
+ * @namespaces: (array zero-terminated=1): List of namespaces to filter results by, supports
+ *   simple globbing explained below.
  * @cancellable: a GCancellable or NULL.
  * @error: return location for error or NULL.
  *

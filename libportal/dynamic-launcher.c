@@ -495,8 +495,9 @@ xdp_portal_dynamic_launcher_get_desktop_entry (XdpPortal   *portal,
  * xdp_portal_dynamic_launcher_get_icon:
  * @portal: a [class@Portal]
  * @desktop_file_id: the .desktop file name
- * @out_icon_format: (nullable): return location for icon format string, one of "png", "jpeg", "svg"
- * @out_icon_size: (nullable): return location for icon size
+ * @out_icon_format: (out) (optional) (not nullable) (transfer full): return location for icon
+ *   format string, one of "png", "jpeg", "svg"
+ * @out_icon_size: (out) (optional): return location for icon size
  * @error: return location for a #GError
  *
  * This function gets the icon associated with a .desktop file that was previously
