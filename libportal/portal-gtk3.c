@@ -96,12 +96,38 @@ _xdp_parent_unexport_gtk (XdpParent *parent)
  *
  * Returns: (transfer full): a [struct@Parent]
  */
+static void
+_xdp_parent_activation_token_gtk (XdpParent                     *parent,
+                                  XdpParentActivationTokenReady  callback,
+                                  gpointer                       data)
+{
+  g_autofree char *token = NULL;
+
+  /* GLib accepts a launch context without an application only since 2.82, and
+   * GDK's X11 launch context requires one, so the token is requested only on
+   * Wayland. */
+#if GLIB_CHECK_VERSION (2, 82, 0) && defined (GDK_WINDOWING_WAYLAND)
+  GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (parent->object));
+
+  if (GDK_IS_WAYLAND_DISPLAY (display))
+    {
+      GdkAppLaunchContext *context = gdk_display_get_app_launch_context (display);
+
+      token = g_app_launch_context_get_startup_notify_id (G_APP_LAUNCH_CONTEXT (context), NULL, NULL);
+      g_object_unref (context);
+    }
+#endif
+
+  callback (parent, token, data);
+}
+
 XdpParent *
 xdp_parent_new_gtk (GtkWindow *window)
 {
   XdpParent *parent = g_new0 (XdpParent, 1);
   parent->parent_export = _xdp_parent_export_gtk;
   parent->parent_unexport = _xdp_parent_unexport_gtk;
+  parent->parent_activation_token = _xdp_parent_activation_token_gtk;
   parent->object = (GObject *) g_object_ref (window);
   return parent;
 }

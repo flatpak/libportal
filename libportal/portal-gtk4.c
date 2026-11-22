@@ -96,6 +96,25 @@ _xdp_parent_unexport_gtk (XdpParent *parent)
 #endif
 }
 
+static void
+_xdp_parent_activation_token_gtk (XdpParent                     *parent,
+                                  XdpParentActivationTokenReady  callback,
+                                  gpointer                       data)
+{
+  g_autofree char *token = NULL;
+
+  /* GLib accepts a launch context without an application only since 2.82 */
+#if GLIB_CHECK_VERSION (2, 82, 0)
+  GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (parent->object));
+  GdkAppLaunchContext *context = gdk_display_get_app_launch_context (display);
+
+  token = g_app_launch_context_get_startup_notify_id (G_APP_LAUNCH_CONTEXT (context), NULL, NULL);
+  g_object_unref (context);
+#endif
+
+  callback (parent, token, data);
+}
+
 /**
  * xdp_parent_new_gtk:
  * @window: a [class@Gtk.Window]
@@ -110,6 +129,7 @@ xdp_parent_new_gtk (GtkWindow *window)
   XdpParent *parent = g_new0 (XdpParent, 1);
   parent->parent_export = _xdp_parent_export_gtk;
   parent->parent_unexport = _xdp_parent_unexport_gtk;
+  parent->parent_activation_token = _xdp_parent_activation_token_gtk;
   parent->object = (GObject *) g_object_ref (window);
   return parent;
 }

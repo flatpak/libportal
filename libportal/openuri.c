@@ -36,6 +36,7 @@ typedef struct {
   XdpPortal *portal;
   XdpParent *parent;
   char *parent_handle;
+  char *activation_token;
   char *uri;
   gboolean ask;
   gboolean writable;
@@ -55,6 +56,7 @@ open_call_free (OpenCall *call)
       xdp_parent_free (call->parent);
     }
   g_free (call->parent_handle);
+  g_free (call->activation_token);
 
   if (call->signal_id)
     g_dbus_connection_signal_unsubscribe (call->portal->bus, call->signal_id);
@@ -98,6 +100,34 @@ response_received (GDBusConnection *bus,
 }
 
 static void do_open (OpenCall *call);
+
+static void
+activation_token_ready (G_GNUC_UNUSED XdpParent *parent,
+                        const char              *token,
+                        gpointer                 data)
+{
+  OpenCall *call = data;
+
+  call->activation_token = g_strdup (token);
+  do_open (call);
+}
+
+/* Requests an activation token for the application which handles the request,
+ * from the window the request is made for, and then makes the request. The
+ * token has to be requested while the user's action which made the request is
+ * the latest input to the window, so it is requested first, before the window
+ * is exported. A toolkit which cannot provide a token passes NULL. */
+static void
+open_with_activation_token (OpenCall *call)
+{
+  if (call->parent == NULL || call->parent->parent_activation_token == NULL)
+    {
+      do_open (call);
+      return;
+    }
+
+  call->parent->parent_activation_token (call->parent, activation_token_ready, call);
+}
 
 static void
 parent_exported (XdpParent *parent,
@@ -194,6 +224,8 @@ do_open (OpenCall *call)
   g_variant_builder_add (&options, "{sv}", "handle_token", g_variant_new_string (token));
   g_variant_builder_add (&options, "{sv}", "writable", g_variant_new_boolean (call->writable));
   g_variant_builder_add (&options, "{sv}", "ask", g_variant_new_boolean (call->ask));
+  if (call->activation_token)
+    g_variant_builder_add (&options, "{sv}", "activation_token", g_variant_new_string (call->activation_token));
 
   file = g_file_new_for_uri (call->uri);
 
@@ -267,6 +299,10 @@ do_open (OpenCall *call)
  * @data: data to pass to @callback
  *
  * Opens @uri with an external handler.
+ *
+ * When @parent was created from a window with one of the toolkit helpers, the
+ * request carries an activation token from that window, if the toolkit
+ * provides one, so that the compositor can focus the handler's window.
  */
 void
 xdp_portal_open_uri (XdpPortal *portal,
@@ -296,7 +332,7 @@ xdp_portal_open_uri (XdpPortal *portal,
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_open_uri);
 
-  do_open (call);
+  open_with_activation_token (call);
 }
 
 /**
@@ -337,6 +373,10 @@ xdp_portal_open_uri_finish (XdpPortal *portal,
  *
  * which must be a file: uri pointing to a file that the application has access
  * to.
+ *
+ * When @parent was created from a window with one of the toolkit helpers, the
+ * request carries an activation token from that window, if the toolkit
+ * provides one, so that the compositor can focus the file manager's window.
  */
 void
 xdp_portal_open_directory (XdpPortal *portal,
@@ -365,7 +405,7 @@ xdp_portal_open_directory (XdpPortal *portal,
   call->task = g_task_new (portal, cancellable, callback, data);
   g_task_set_source_tag (call->task, xdp_portal_open_directory);
 
-  do_open (call);
+  open_with_activation_token (call);
 }
 
 /**
