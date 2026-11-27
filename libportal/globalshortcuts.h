@@ -19,6 +19,7 @@
 
 #include <libportal/portal-helpers.h>
 #include <libportal/session.h>
+#include <libportal/parent.h>
 
 G_BEGIN_DECLS
 
@@ -120,6 +121,19 @@ GPtrArray                   *xdp_global_shortcuts_session_bind_shortcuts_finish 
                                                                                       GError                         **error);
 
 XDP_PUBLIC
+void                         xdp_global_shortcuts_session_bind_shortcuts_with_parent (XdpGlobalShortcutsSession       *session,
+                                                                                      GPtrArray                       *shortcuts,
+                                                                                      XdpParent                       *parent,
+                                                                                      GCancellable                    *cancellable,
+                                                                                      GAsyncReadyCallback              callback,
+                                                                                      gpointer                         data);
+
+XDP_PUBLIC
+GPtrArray                   *xdp_global_shortcuts_session_bind_shortcuts_with_parent_finish (XdpGlobalShortcutsSession *session,
+                                                                                           GAsyncResult              *result,
+                                                                                           GError                   **error);
+
+XDP_PUBLIC
 void                         xdp_global_shortcuts_session_list_shortcuts             (XdpGlobalShortcutsSession       *session,
                                                                                       GCancellable                    *cancellable,
                                                                                       GAsyncReadyCallback              callback,
@@ -142,5 +156,18 @@ XDP_PUBLIC
 gboolean                     xdp_global_shortcuts_session_configure_shortcuts_finish (XdpGlobalShortcutsSession       *session,
                                                                                       GAsyncResult                    *result,
                                                                                       GError                         **error);
+
+XDP_PUBLIC
+void                         xdp_global_shortcuts_session_configure_shortcuts_with_parent (XdpGlobalShortcutsSession *session,
+                                                                                           XdpParent                 *parent,
+                                                                                           const char                *activation_token,
+                                                                                           GCancellable              *cancellable,
+                                                                                           GAsyncReadyCallback        callback,
+                                                                                           gpointer                   data);
+
+XDP_PUBLIC
+gboolean                     xdp_global_shortcuts_session_configure_shortcuts_with_parent_finish (XdpGlobalShortcutsSession *session,
+                                                                                                GAsyncResult              *result,
+                                                                                                GError                   **error);
 
 G_END_DECLS

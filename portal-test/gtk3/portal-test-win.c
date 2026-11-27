@@ -973,7 +973,7 @@ globalshortcuts_bind_done (GObject      *source,
   if (session != win->gs_session)
     return;
 
-  shortcuts = xdp_global_shortcuts_session_bind_shortcuts_finish (session, result, &error);
+  shortcuts = xdp_global_shortcuts_session_bind_shortcuts_with_parent_finish (session, result, &error);
   if (shortcuts == NULL)
     {
       g_warning ("Failed to bind GlobalShortcuts: %s", error->message);
@@ -1009,6 +1009,7 @@ static void
 globalshortcuts_bind (PortalTestWin *win)
 {
   g_autoptr(GPtrArray) shortcuts = NULL;
+  g_autoptr(XdpParent) parent = NULL;
 
   shortcuts = g_ptr_array_new_with_free_func ((GDestroyNotify) xdp_global_shortcut_free);
 
@@ -1022,9 +1023,11 @@ globalshortcuts_bind (PortalTestWin *win)
                                                  "Do Bar",
                                                  NULL));
 
-  xdp_global_shortcuts_session_bind_shortcuts (win->gs_session,
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+
+  xdp_global_shortcuts_session_bind_shortcuts_with_parent (win->gs_session,
                                                shortcuts,
-                                               NULL,
+                                               parent,
                                                NULL,
                                                globalshortcuts_bind_done,
                                                win);
@@ -1101,7 +1104,7 @@ globalshortcuts_configure_done (GObject      *source,
   if (session != win->gs_session)
     return;
 
-  if (!xdp_global_shortcuts_session_configure_shortcuts_finish (session, result, &error))
+  if (!xdp_global_shortcuts_session_configure_shortcuts_with_parent_finish (session, result, &error))
     {
       g_warning ("Failed to configure GlobalShortcuts: %s", error->message);
       gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "failed to configure");
@@ -1115,14 +1118,18 @@ static void
 global_shortcuts_configure (GtkButton     *button,
                             PortalTestWin *win)
 {
+  g_autoptr(XdpParent) parent = NULL;
+
   if (win->gs_session == NULL)
     {
       gtk_label_set_label (GTK_LABEL (win->globalshortcuts_activations), "not created");
       return;
     }
 
-  xdp_global_shortcuts_session_configure_shortcuts (win->gs_session,
-                                                    NULL,
+  parent = xdp_parent_new_gtk (GTK_WINDOW (win));
+
+  xdp_global_shortcuts_session_configure_shortcuts_with_parent (win->gs_session,
+                                                    parent,
                                                     NULL,
                                                     NULL,
                                                     globalshortcuts_configure_done,

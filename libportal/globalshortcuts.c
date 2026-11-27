@@ -20,6 +20,7 @@
 #include "globalshortcuts.h"
 #include "portal-private.h"
 #include "session-private.h"
+#include "parent-private.h"
 
 struct _XdpGlobalShortcut
 {
@@ -350,7 +351,7 @@ xdp_global_shortcuts_session_init (XdpGlobalShortcutsSession *session)
 }
 
 /* A request-based method call */
-typedef struct {
+typedef struct _Call {
   XdpPortal                 *portal;
   char                      *session_path; /* object path for session */
   GTask                     *task;
@@ -358,6 +359,11 @@ typedef struct {
   char                      *request_path; /* object path for request */
   gulong                     cancelled_id; /* signal id for cancelled gobject signal */
   XdpGlobalShortcutsSession *session;
+  XdpParent                 *parent;
+  char                      *parent_handle;
+  GVariant                  *shortcuts;
+  char                      *activation_token;
+  void                     (*parent_ready) (struct _Call *call);
 
 } Call;
 
@@ -388,6 +394,16 @@ call_dispose (void *p)
   call_disconnect_cancelled (call);
 
   g_clear_pointer (&call->request_path, g_free);
+  if (call->parent)
+    {
+      if (call->parent_handle != NULL)
+        call->parent->parent_unexport (call->parent);
+      xdp_parent_free (call->parent);
+      call->parent = NULL;
+    }
+  g_clear_pointer (&call->parent_handle, g_free);
+  g_clear_pointer (&call->shortcuts, g_variant_unref);
+  g_clear_pointer (&call->activation_token, g_free);
 
   g_clear_object (&call->portal);
   g_clear_object (&call->session);
@@ -934,17 +950,142 @@ list_shortcuts (Call *call)
                           call_ref (call));
 }
 
+static void
+parent_exported (XdpParent  *parent,
+                 const char *handle,
+                 gpointer    data)
+{
+  Call *call = data;
+
+  call->parent_handle = g_strdup (handle);
+  if (g_task_return_error_if_cancelled (call->task))
+    call_dispose (call);
+  else
+    call->parent_ready (call);
+  call_unref (call);
+}
+
+static void
+call_export_parent (Call *call,
+                    XdpParent *parent,
+                    void (*parent_ready) (Call *call))
+{
+  call->parent_ready = parent_ready;
+
+  if (g_task_return_error_if_cancelled (call->task))
+    {
+      call_dispose (call);
+      return;
+    }
+
+  if (parent)
+    {
+      Call *export_call;
+
+      call->parent = xdp_parent_copy (parent);
+      export_call = call_ref (call);
+      if (!call->parent->parent_export (call->parent, parent_exported, export_call))
+        {
+          call_unref (export_call);
+          g_task_return_new_error (call->task,
+                                   G_IO_ERROR,
+                                   G_IO_ERROR_FAILED,
+                                   "Failed to export parent window handle");
+          call_dispose (call);
+        }
+    }
+  else
+    {
+      call->parent_handle = g_strdup ("");
+      call->parent_ready (call);
+    }
+}
+
+static void
+bind_shortcuts (Call *call)
+{
+  GVariantBuilder options;
+  GCancellable *cancellable;
+
+  prep_call (call, bind_shortcuts_done, &options, NULL);
+  cancellable = g_task_get_cancellable (call->task);
+  if (cancellable)
+    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (call_cancelled_cb), call);
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.GlobalShortcuts",
+                          "BindShortcuts",
+                          g_variant_new ("(o@a(sa{sv})s@a{sv})",
+                                         call->session->parent_session->id,
+                                         g_variant_ref (call->shortcuts),
+                                         call->parent_handle,
+                                         g_variant_builder_end (&options)),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          cancellable,
+                          call_returned,
+                          call_ref (call));
+}
+
+static Call *
+bind_shortcuts_call_new (XdpGlobalShortcutsSession *session,
+                         GPtrArray                 *shortcuts,
+                         GCancellable              *cancellable,
+                         GAsyncReadyCallback        callback,
+                         gpointer                   data)
+{
+  g_autoptr(Call) call = NULL;
+  GVariantBuilder shortcuts_builder;
+  guint i;
+
+  g_return_val_if_fail (_xdp_global_shortcuts_session_is_valid (session), NULL);
+  g_return_val_if_fail (shortcuts != NULL, NULL);
+
+  for (i = 0; i < shortcuts->len; i++)
+    {
+      XdpGlobalShortcut *shortcut = g_ptr_array_index (shortcuts, i);
+
+      g_return_val_if_fail (shortcut != NULL, NULL);
+      g_return_val_if_fail (shortcut->shortcut_id != NULL, NULL);
+      g_return_val_if_fail (shortcut->description != NULL, NULL);
+    }
+
+  call = call_new (session->parent_session->portal, session, session,
+                   cancellable, callback, data);
+  g_variant_builder_init (&shortcuts_builder, G_VARIANT_TYPE ("a(sa{sv})"));
+
+  for (i = 0; i < shortcuts->len; i++)
+    {
+      GVariantDict dict;
+      XdpGlobalShortcut *shortcut = g_ptr_array_index (shortcuts, i);
+
+      g_variant_dict_init (&dict, NULL);
+      if (shortcut->preferred_trigger != NULL)
+        g_variant_dict_insert (&dict, "preferred_trigger", "s", shortcut->preferred_trigger);
+      g_variant_dict_insert (&dict, "description", "s", shortcut->description);
+      g_variant_builder_add (&shortcuts_builder, "(s@a{sv})",
+                             shortcut->shortcut_id, g_variant_dict_end (&dict));
+    }
+
+  call->shortcuts = g_variant_ref_sink (g_variant_builder_end (&shortcuts_builder));
+  return g_steal_pointer (&call);
+}
+
+
 /**
  * xdp_global_shortcuts_session_bind_shortcuts:
  * @session: a [class@GlobalShortcutsSession]
- * @shortcuts: (element-type XdpGlobalShortcut) (transfer none):
- *   array of shortcuts to bind
+ * @shortcuts: (element-type XdpGlobalShortcut) (transfer none): array of shortcuts to bind
  * @parent_window: (nullable): parent window identifier, or %NULL
  * @cancellable: (nullable): optional [class@Gio.Cancellable]
  * @callback: (scope async): a callback to call when the request is done
  * @data: data to pass to @callback
  *
- * Bind shortcuts and list triggers.
+ * Bind shortcuts and list triggers using an already exported window identifier.
+ * For a toolkit window, use [method@GlobalShortcutsSession.bind_shortcuts_with_parent].
  */
 void
 xdp_global_shortcuts_session_bind_shortcuts (XdpGlobalShortcutsSession *session,
@@ -954,81 +1095,43 @@ xdp_global_shortcuts_session_bind_shortcuts (XdpGlobalShortcutsSession *session,
                                              GAsyncReadyCallback        callback,
                                              gpointer                   data)
 {
-  g_autoptr(Call) call = NULL;
-  XdpPortal *portal;
-  guint i;
-  GVariantBuilder options;
-  GVariantBuilder shortcuts_builder;
-  GVariant *v;
+  g_autoptr(Call) call = bind_shortcuts_call_new (session, shortcuts, cancellable, callback, data);
 
-  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
-  g_return_if_fail (shortcuts != NULL);
+  if (call == NULL)
+    return;
 
-  for (i = 0; i < shortcuts->len; i++)
-    {
-      XdpGlobalShortcut *shortcut;
+  call->parent_handle = g_strdup (parent_window != NULL ? parent_window : "");
+  bind_shortcuts (call);
+}
 
-      shortcut = g_ptr_array_index (shortcuts, i);
+/**
+ * xdp_global_shortcuts_session_bind_shortcuts_with_parent:
+ * @session: a [class@GlobalShortcutsSession]
+ * @shortcuts: (element-type XdpGlobalShortcut) (transfer none): array of shortcuts to bind
+ * @parent: (nullable): parent window information
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): a callback to call when the request is done
+ * @data: data to pass to @callback
+ *
+ * Bind shortcuts and list triggers, exporting @parent before making the request.
+ * The parent and shortcut descriptions are copied before this function returns.
+ *
+ * Since: 0.11.1
+ */
+void
+xdp_global_shortcuts_session_bind_shortcuts_with_parent (XdpGlobalShortcutsSession *session,
+                                                         GPtrArray                 *shortcuts,
+                                                         XdpParent                 *parent,
+                                                         GCancellable              *cancellable,
+                                                         GAsyncReadyCallback        callback,
+                                                         gpointer                   data)
+{
+  g_autoptr(Call) call = bind_shortcuts_call_new (session, shortcuts, cancellable, callback, data);
 
-      g_return_if_fail (shortcut != NULL);
-      g_return_if_fail (shortcut->shortcut_id != NULL);
-      g_return_if_fail (shortcut->description != NULL);
-    }
+  if (call == NULL)
+    return;
 
-  portal = session->parent_session->portal;
-
-  call = call_new (portal, session, session, cancellable, callback, data);
-
-  prep_call (call, bind_shortcuts_done, &options, NULL);
-  if (cancellable)
-    call->cancelled_id = g_signal_connect (cancellable, "cancelled", G_CALLBACK (call_cancelled_cb), call);
-
-  g_variant_builder_init (&shortcuts_builder, G_VARIANT_TYPE ("a(sa{sv})"));
-
-  for (i = 0; i < shortcuts->len; i++)
-    {
-      GVariantDict dict;
-      XdpGlobalShortcut *shortcut;
-
-      shortcut = g_ptr_array_index (shortcuts, i);
-      g_variant_dict_init (&dict, NULL);
-      if (shortcut->preferred_trigger != NULL)
-        g_variant_dict_insert (&dict,
-                               "preferred_trigger",
-                               "s",
-                               shortcut->preferred_trigger);
-      g_variant_dict_insert (&dict,
-                             "description",
-                             "s",
-                             shortcut->description);
-
-      g_variant_builder_add (&shortcuts_builder,
-                             "(s@a{sv})",
-                             shortcut->shortcut_id,
-                             g_variant_dict_end (&dict));
-    }
-
-  if (parent_window == NULL)
-    parent_window = "";
-
-  v = g_variant_new ("(o@a(sa{sv})s@a{sv})",
-                     session->parent_session->id,
-                     g_variant_builder_end (&shortcuts_builder),
-                     parent_window,
-                     g_variant_builder_end (&options));
-
-  g_dbus_connection_call (call->portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.GlobalShortcuts",
-                          "BindShortcuts",
-                          v,
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          g_task_get_cancellable (call->task),
-                          call_returned,
-                          call_ref (call));
+  call_export_parent (call, parent, bind_shortcuts);
 }
 
 
@@ -1052,6 +1155,26 @@ xdp_global_shortcuts_session_bind_shortcuts_finish (XdpGlobalShortcutsSession *s
   g_return_val_if_fail (g_task_is_valid (result, session), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/**
+ * xdp_global_shortcuts_session_bind_shortcuts_with_parent_finish:
+ * @session: a [class@GlobalShortcutsSession]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes a [method@GlobalShortcutsSession.bind_shortcuts_with_parent] request.
+ *
+ * Returns: (transfer full) (element-type XdpGlobalShortcutAssigned): array of assigned shortcuts
+ *
+ * Since: 0.11.1
+ */
+GPtrArray *
+xdp_global_shortcuts_session_bind_shortcuts_with_parent_finish (XdpGlobalShortcutsSession *session,
+                                                                GAsyncResult              *result,
+                                                                GError                   **error)
+{
+  return xdp_global_shortcuts_session_bind_shortcuts_finish (session, result, error);
 }
 
 /**
@@ -1105,18 +1228,44 @@ configure_shortcuts_done (GObject      *object,
                           GAsyncResult *result,
                           gpointer      data)
 {
-  g_autoptr(GTask) task = data;
+  g_autoptr(Call) call = data;
   g_autoptr(GVariant) ret = NULL;
   GError *error = NULL;
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object), result, &error);
   if (error)
-    {
-      g_task_return_error (task, error);
-      return;
-    }
+    g_task_return_error (call->task, error);
+  else
+    g_task_return_boolean (call->task, TRUE);
 
-  g_task_return_boolean (task, TRUE);
+  call_dispose (call);
+}
+
+static void
+configure_shortcuts (Call *call)
+{
+  GVariantBuilder options;
+
+  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+  if (call->activation_token != NULL && *call->activation_token != '\0')
+    g_variant_builder_add (&options, "{sv}", "activation_token",
+                           g_variant_new_string (call->activation_token));
+
+  g_dbus_connection_call (call->portal->bus,
+                          PORTAL_BUS_NAME,
+                          PORTAL_OBJECT_PATH,
+                          "org.freedesktop.portal.GlobalShortcuts",
+                          "ConfigureShortcuts",
+                          g_variant_new ("(os@a{sv})",
+                                         call->session->parent_session->id,
+                                         call->parent_handle,
+                                         g_variant_builder_end (&options)),
+                          NULL,
+                          G_DBUS_CALL_FLAGS_NONE,
+                          -1,
+                          g_task_get_cancellable (call->task),
+                          configure_shortcuts_done,
+                          call_ref (call));
 }
 
 /**
@@ -1128,10 +1277,9 @@ configure_shortcuts_done (GObject      *object,
  * @callback: (scope async): callback called when the method call is done
  * @data: data to pass to @callback
  *
- * Requests that the portal show configuration UI for all shortcuts of this
- * session.
+ * Show configuration UI using an already exported window identifier.
+ * For a toolkit window, use [method@GlobalShortcutsSession.configure_shortcuts_with_parent].
  */
-
 void
 xdp_global_shortcuts_session_configure_shortcuts (XdpGlobalShortcutsSession *session,
                                                   const char                *parent_window,
@@ -1140,44 +1288,47 @@ xdp_global_shortcuts_session_configure_shortcuts (XdpGlobalShortcutsSession *ses
                                                   GAsyncReadyCallback        callback,
                                                   gpointer                   data)
 {
-  XdpPortal *portal;
-  GVariantBuilder options;
-  g_autoptr(GTask) task = NULL;
+  g_autoptr(Call) call = NULL;
 
   g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
 
-  portal = session->parent_session->portal;
+  call = call_new (session->parent_session->portal, session, session,
+                   cancellable, callback, data);
+  call->parent_handle = g_strdup (parent_window != NULL ? parent_window : "");
+  call->activation_token = g_strdup (activation_token);
+  configure_shortcuts (call);
+}
 
-  if (parent_window == NULL)
-    parent_window = "";
+/**
+ * xdp_global_shortcuts_session_configure_shortcuts_with_parent:
+ * @session: a [class@GlobalShortcutsSession]
+ * @parent: (nullable): parent window information
+ * @activation_token: (nullable): token used to activate the configuration window
+ * @cancellable: (nullable): optional [class@Gio.Cancellable]
+ * @callback: (scope async): callback called when the method call is done
+ * @data: data to pass to @callback
+ *
+ * Requests that the portal show configuration UI for all shortcuts of this
+ * session, exporting @parent before making the call.
+ *
+ * Since: 0.11.1
+ */
+void
+xdp_global_shortcuts_session_configure_shortcuts_with_parent (XdpGlobalShortcutsSession *session,
+                                                  XdpParent                 *parent,
+                                                  const char                *activation_token,
+                                                  GCancellable              *cancellable,
+                                                  GAsyncReadyCallback        callback,
+                                                  gpointer                   data)
+{
+  g_autoptr(Call) call = NULL;
 
-  g_variant_builder_init (&options, G_VARIANT_TYPE_VARDICT);
+  g_return_if_fail (_xdp_global_shortcuts_session_is_valid (session));
 
-  if (activation_token != NULL && *activation_token != '\0')
-    {
-      g_variant_builder_add (&options,
-                             "{sv}",
-                             "activation_token",
-                             g_variant_new_string (activation_token));
-    }
-
-  task = g_task_new (session, cancellable, callback, data);
-
-  g_dbus_connection_call (portal->bus,
-                          PORTAL_BUS_NAME,
-                          PORTAL_OBJECT_PATH,
-                          "org.freedesktop.portal.GlobalShortcuts",
-                          "ConfigureShortcuts",
-                          g_variant_new ("(os@a{sv})",
-                                         session->parent_session->id,
-                                         parent_window,
-                                         g_variant_builder_end (&options)),
-                          NULL,
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          cancellable,
-                          configure_shortcuts_done,
-                          g_object_ref (task));
+  call = call_new (session->parent_session->portal, session, session,
+                   cancellable, callback, data);
+  call->activation_token = g_strdup (activation_token);
+  call_export_parent (call, parent, configure_shortcuts);
 }
 
 /**
@@ -1200,4 +1351,24 @@ xdp_global_shortcuts_session_configure_shortcuts_finish (XdpGlobalShortcutsSessi
   g_return_val_if_fail (g_task_is_valid (result, session), FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+/**
+ * xdp_global_shortcuts_session_configure_shortcuts_with_parent_finish:
+ * @session: a [class@GlobalShortcutsSession]
+ * @result: a [iface@Gio.AsyncResult]
+ * @error: return location for an error
+ *
+ * Finishes a [method@GlobalShortcutsSession.configure_shortcuts_with_parent] call.
+ *
+ * Returns: %TRUE if the call succeeded, %FALSE otherwise
+ *
+ * Since: 0.11.1
+ */
+gboolean
+xdp_global_shortcuts_session_configure_shortcuts_with_parent_finish (XdpGlobalShortcutsSession *session,
+                                                                     GAsyncResult              *result,
+                                                                     GError                   **error)
+{
+  return xdp_global_shortcuts_session_configure_shortcuts_finish (session, result, error);
 }

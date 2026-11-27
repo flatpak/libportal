@@ -1,3 +1,10 @@
+globalshortcuts_test = executable('globalshortcuts-test',
+  'globalshortcuts.c',
+  include_directories: [top_inc, libportal_inc],
+  dependencies: libportal_dep,
+)
+test('globalshortcuts', globalshortcuts_test, timeout: 60)
+
 if 'qt5' in enabled_backends
   subdir('qt5')
 endif
